@@ -1,0 +1,16 @@
+node_modules
+dist
+dist-ssr
+*.tsbuildinfo
+*.local
+.DS_Store
+.vscode
+.idea
+.claude/
+.omc/
+raw/
+output/
+test-results/
+.playwright-cli/
+.env
+.env.local

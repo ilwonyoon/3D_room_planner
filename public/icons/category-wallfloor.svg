@@ -1,0 +1,17 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 21.1499 24.5" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Group 3026">
+<g id="Rectangle 4221">
+<mask id="path-1-inside-1_0_3051" fill="white">
+<rect width="18" height="7" rx="1"/>
+</mask>
+<rect width="18" height="7" rx="1" stroke="var(--stroke-0, #2F3438)" stroke-width="3" mask="url(#path-1-inside-1_0_3051)"/>
+</g>
+<g id="Rectangle 4222">
+<mask id="path-2-inside-2_0_3051" fill="white">
+<path d="M6.3999 16.5C6.3999 15.9477 6.84762 15.5 7.3999 15.5H11.3999C11.9522 15.5 12.3999 15.9477 12.3999 16.5V21.5C12.3999 23.1569 11.0568 24.5 9.3999 24.5V24.5C7.74305 24.5 6.3999 23.1569 6.3999 21.5V16.5Z"/>
+</mask>
+<path d="M6.3999 16.5C6.3999 15.9477 6.84762 15.5 7.3999 15.5H11.3999C11.9522 15.5 12.3999 15.9477 12.3999 16.5V21.5C12.3999 23.1569 11.0568 24.5 9.3999 24.5V24.5C7.74305 24.5 6.3999 23.1569 6.3999 21.5V16.5Z" stroke="var(--stroke-0, #2F3438)" stroke-width="3" mask="url(#path-2-inside-2_0_3051)"/>
+</g>
+<path id="Vector 2" d="M17.5052 3.5H20.3999V10.2826L9.3999 13.1087V16.5" stroke="var(--stroke-0, #2F3438)" stroke-width="1.5" stroke-linejoin="round"/>
+</g>
+</svg>

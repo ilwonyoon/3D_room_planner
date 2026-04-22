@@ -1,0 +1,61 @@
+{
+  "_comment": "Figma CDN assets expire after 7 days. Download them locally after extraction.",
+  "_source": "Pocketroom-Master, node 30318:62730",
+  "_extractedAt": "2026-04-20",
+  "categoryIcons": {
+    "new":       "https://www.figma.com/api/mcp/asset/3c7d5ecf-3997-4f1f-aa9f-f48372783dac",
+    "wallfloor": "https://www.figma.com/api/mcp/asset/e82f0faa-45bd-4284-b209-11fe4c26748e",
+    "sofa":      "https://www.figma.com/api/mcp/asset/cbf7357e-d28c-420c-a3aa-b1ca5222b754",
+    "chair":     "https://www.figma.com/api/mcp/asset/12a08ffa-4bcc-43a7-be7c-175dc25077fd",
+    "table":     "https://www.figma.com/api/mcp/asset/017e919b-a34f-4c22-9669-997b320836f5",
+    "storage":   "https://www.figma.com/api/mcp/asset/ac72b169-1184-45eb-83d4-c607aeee58a4",
+    "decor":     "https://www.figma.com/api/mcp/asset/91aeca72-c2c0-4c2a-94d1-e776de696c27",
+    "lighting":  "https://www.figma.com/api/mcp/asset/afb3bdb2-f5c9-4318-9e0f-faeced08e756",
+    "appliance": "https://www.figma.com/api/mcp/asset/9ecdc166-6e10-4b4f-9f31-376ffa0f9063",
+    "bed":       "https://www.figma.com/api/mcp/asset/901f4c53-905a-4f28-bc3d-3e220a52b9ce"
+  },
+  "ui": {
+    "coin":         "https://www.figma.com/api/mcp/asset/778a97b4-dfdd-4742-8d3a-954e5150da30",
+    "chevron-down": "https://www.figma.com/api/mcp/asset/e4d8fcb4-c5c6-40a4-90e4-4e96741ea847",
+    "back-arrow":   "https://www.figma.com/api/mcp/asset/6644b446-17aa-4558-84dc-91c6ef270bd1",
+    "wallet-chevron": "https://www.figma.com/api/mcp/asset/6378c4c0-5841-4530-84cd-8f64c35adabb"
+  },
+  "handlers": {
+    "up-down-arrow":    "https://www.figma.com/api/mcp/asset/166e9d8c-c50b-4147-a5ca-9f20b04c592f",
+    "rotate-left":      "https://www.figma.com/api/mcp/asset/3f9c1558-65f5-4ce8-8b19-0168ed559c7f",
+    "rotate-right":     "https://www.figma.com/api/mcp/asset/d6ff1b7d-6ce3-488e-b4bd-e1ac349d272e",
+    "move-4way":        "https://www.figma.com/api/mcp/asset/7b587c2f-cc04-4751-a6d1-ce6b060e7d85",
+    "delete":           "https://www.figma.com/api/mcp/asset/977fc3cb-4085-4125-8806-eeece351476a",
+    "edit":             "https://www.figma.com/api/mcp/asset/33492696-770f-4a77-92b8-ef4fe3cfc06e",
+    "handler-circle-white": "https://www.figma.com/api/mcp/asset/22634c1a-d4c7-4ef5-a837-e9476f214a27"
+  },
+  "scene": {
+    "_note": "Reference only. These are replaced by the 3D Canvas implementation.",
+    "mask-group-room":   "https://www.figma.com/api/mcp/asset/0e2a0329-4c53-4e0b-91c8-412199e65913",
+    "room-shadow":       "https://www.figma.com/api/mcp/asset/d0d9e122-fa76-4495-a496-5e57fa077811",
+    "floor-grid":        "https://www.figma.com/api/mcp/asset/f769acbd-e667-4022-a633-23d6085c594f",
+    "status-bar":        "https://www.figma.com/api/mcp/asset/2ddb4046-e74e-4d13-9fa3-67f18bbbcefe"
+  },
+  "sampleProducts": {
+    "_note": "Reference editor store grid samples. The runtime catalog uses CC0 GLB assets.",
+    "chair-category-tile": "https://www.figma.com/api/mcp/asset/ca97069d-a26a-42b0-8041-16e564feb4f2",
+    "chair-1":  "https://www.figma.com/api/mcp/asset/734043e7-ffd5-41bf-a249-9c80c6a6804b",
+    "chair-2":  "https://www.figma.com/api/mcp/asset/d4507fb2-380e-44f5-977f-9a2f808a16c6",
+    "chair-3":  "https://www.figma.com/api/mcp/asset/dbd20a86-6be7-41d8-801a-50b88ebf38b7",
+    "chair-4":  "https://www.figma.com/api/mcp/asset/b31a12a5-2d08-4498-a56f-5c3d14cb9935",
+    "chair-5":  "https://www.figma.com/api/mcp/asset/7d9ee5ab-248a-4471-b962-138c7aa8f7e6",
+    "chair-6":  "https://www.figma.com/api/mcp/asset/1278d40e-668a-4b6c-8808-cb4020389945",
+    "chair-7":  "https://www.figma.com/api/mcp/asset/b6121afb-ba21-440e-831a-51d657dea2db",
+    "chair-8":  "https://www.figma.com/api/mcp/asset/0c73c16f-1ba5-4cf6-95b3-cf2da348239d",
+    "chair-9":  "https://www.figma.com/api/mcp/asset/ba950b80-cc6d-4972-85e2-885b3d628604",
+    "chair-10": "https://www.figma.com/api/mcp/asset/193443ee-9295-4bde-9a3b-47ade7db9e65",
+    "chair-11": "https://www.figma.com/api/mcp/asset/52c5ce33-e20d-4d74-b887-e12cf9b79215",
+    "chair-12": "https://www.figma.com/api/mcp/asset/a64ed2a2-6871-47f1-a902-d54be232e799",
+    "chair-13": "https://www.figma.com/api/mcp/asset/160c8536-eea4-4429-ba5e-80467af5c23e",
+    "chair-14": "https://www.figma.com/api/mcp/asset/e1267220-ac04-4bf9-8914-9d45e902d12c",
+    "chair-15": "https://www.figma.com/api/mcp/asset/659fdb8d-f1ca-40c6-87f0-43a064fa0ad6",
+    "chair-16": "https://www.figma.com/api/mcp/asset/430c6e06-bd09-4c77-b4d5-c8e1b3a99182",
+    "sample-a": "https://www.figma.com/api/mcp/asset/cadb06ca-da42-45de-8184-76b16515bc5d",
+    "sample-b": "https://www.figma.com/api/mcp/asset/c6d6d426-d0c2-469c-8527-05e3e1b7f201"
+  }
+}

@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Model Thumbnail Renderer</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: transparent;
+      }
+
+      canvas {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="module">
+      import * as THREE from '/node_modules/three/build/three.module.js'
+      import { GLTFLoader } from '/node_modules/three/examples/jsm/loaders/GLTFLoader.js'
+      import { MeshoptDecoder } from '/node_modules/three/examples/jsm/libs/meshopt_decoder.module.js'
+
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true,
+        preserveDrawingBuffer: true,
+      })
+      renderer.setClearColor(0x000000, 0)
+      renderer.setPixelRatio(2)
+      renderer.setSize(240, 240, false)
+      renderer.outputColorSpace = THREE.SRGBColorSpace
+      renderer.toneMapping = THREE.ACESFilmicToneMapping
+      renderer.toneMappingExposure = 1.05
+      document.body.appendChild(renderer.domElement)
+
+      const scene = new THREE.Scene()
+      const camera = new THREE.OrthographicCamera(-1.15, 1.15, 1.15, -1.15, 0.1, 100)
+      camera.position.set(2.45, 1.55, 2.55)
+      camera.lookAt(0, 0.55, 0)
+
+      scene.add(new THREE.AmbientLight(0xffffff, 1.15))
+
+      const hemisphere = new THREE.HemisphereLight(0xffffff, 0xd6d1c8, 1.35)
+      scene.add(hemisphere)
+
+      const key = new THREE.DirectionalLight(0xffffff, 3.2)
+      key.position.set(2.4, 4.2, 3.2)
+      scene.add(key)
+
+      const fill = new THREE.DirectionalLight(0xffffff, 1.1)
+      fill.position.set(-2.3, 1.8, 1.7)
+      scene.add(fill)
+
+      const loader = new GLTFLoader()
+      loader.setMeshoptDecoder(MeshoptDecoder)
+      let currentRoot = null
+
+      function normalizeModel(root) {
+        root.updateMatrixWorld(true)
+        const box = new THREE.Box3().setFromObject(root)
+        const size = box.getSize(new THREE.Vector3())
+        const center = box.getCenter(new THREE.Vector3())
+        const maxSpan = Math.max(size.x, size.y, size.z) || 1
+
+        root.position.sub(center)
+        root.position.y += size.y / 2
+        root.scale.setScalar(1.58 / maxSpan)
+
+        root.traverse((node) => {
+          if (!node.isMesh) return
+          node.frustumCulled = false
+          if (node.material) {
+            const materials = Array.isArray(node.material) ? node.material : [node.material]
+            materials.forEach((material) => {
+              material.needsUpdate = true
+            })
+          }
+        })
+      }
+
+      window.renderModelThumbnail = async (modelUrl) => {
+        if (currentRoot) {
+          scene.remove(currentRoot)
+          currentRoot.traverse((node) => {
+            if (node.geometry) node.geometry.dispose()
+          })
+          currentRoot = null
+        }
+
+        const gltf = await loader.loadAsync(modelUrl)
+        currentRoot = gltf.scene
+        normalizeModel(currentRoot)
+        scene.add(currentRoot)
+
+        if (renderer.compileAsync) {
+          await renderer.compileAsync(scene, camera)
+        }
+
+        await new Promise((resolve) => requestAnimationFrame(resolve))
+        renderer.render(scene, camera)
+        await new Promise((resolve) => requestAnimationFrame(resolve))
+        renderer.render(scene, camera)
+
+        return renderer.domElement.toDataURL('image/png')
+      }
+
+      window.__thumbnailRendererReady = true
+    </script>
+  </body>
+</html>

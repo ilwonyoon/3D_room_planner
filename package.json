@@ -1,0 +1,40 @@
+{
+  "name": "pocketroom",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Mobile web 3D room planner (pocketroom) — Three.js + R3F + Claude AI",
+  "scripts": {
+    "dev": "vite",
+    "assets:fetch": "node scripts/fetch-assets.mjs",
+    "assets:prepare": "node scripts/prepare-assets.mjs",
+    "assets:thumbs": "node scripts/render-model-thumbnails.mjs",
+    "assets:setup": "pnpm assets:fetch && pnpm assets:prepare && pnpm assets:thumbs",
+    "assets:inspect": "node scripts/inspect-assets.mjs",
+    "assets:audit-room-settings": "node scripts/audit-room-setting-model-bounds.mjs",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --host",
+    "typecheck": "tsc -b --noEmit"
+  },
+  "dependencies": {
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.0",
+    "@react-three/postprocessing": "^3.0.4",
+    "postprocessing": "^6.39.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "three": "^0.184.0",
+    "zustand": "^5.0.2"
+  },
+  "devDependencies": {
+    "@gltf-transform/cli": "^4.3.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/three": "^0.184.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "playwright": "^1.59.1",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0",
+    "vite-plugin-pwa": "^0.21.0"
+  }
+}
