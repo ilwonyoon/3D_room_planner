@@ -51,6 +51,21 @@
     - Storage: `GothicCabinet_01`, `GothicCommode_01`, `Shelf_01`, `chinese_cabinet`, `chinese_commode`, `drawer_cabinet`, `modern_wooden_cabinet`, `painted_wooden_cabinet`, `painted_wooden_cabinet_02`, `painted_wooden_shelves`, `steel_frame_shelves_01`, `steel_frame_shelves_02`, `steel_frame_shelves_03`, `vintage_cabinet_01`, `wooden_bookshelf_worn`, `wooden_display_shelves_01`
     - Lighting, decor, plants: `caged_hanging_light`, `desk_lamp_arm_01`, `hanging_industrial_lamp`, `industrial_pipe_lamp`, `industrial_wall_lamp`, `industrial_wall_sconce`, `modern_ceiling_lamp_01`, `ornate_mirror_01`, `potted_plant_01`, `potted_plant_02`, `potted_plant_04`
     - Environment additions: `fancy_picture_frame_01`, `fancy_picture_frame_02`, `hanging_picture_frame_01`, `hanging_picture_frame_02`, `hanging_picture_frame_03`, `standing_picture_frame_01`, `standing_picture_frame_02`, `vintage_telephone_wall_clock`, `mantel_clock_01`, `alarm_clock_01`, `book_encyclopedia_set_01`, `ceramic_vase_01`, `ceramic_vase_02`, `ceramic_vase_03`, `ceramic_vase_04`, `brass_vase_01`, `brass_vase_02`, `brass_vase_03`, `brass_vase_04`, `planter_box_01`, `planter_box_02`, `planter_box_03`, `planter_pot_clay`, `pachira_aquatica_01`, `dartboard`, `large_castle_door`, `rollershutter_door`, `rollershutter_window_01`, `rollershutter_window_02`, `rollershutter_window_03`
+  - Expansion additions: `CoffeeCart_01`, `chinese_screen_panels`
+
+- `models/kenney/furniture/*.optimized.glb`
+  - Source: Kenney Furniture Kit
+  - License: CC0 / Public Domain
+  - https://kenney.nl/assets/furniture-kit
+  - Runtime format: glTF-Transform optimized `.glb` with Meshopt
+  - Source of truth: `scripts/fetch-assets.mjs` and `scripts/prepare-assets.mjs`
+  - Included furniture expansion assets:
+    - Seating: `benchCushion`, `benchCushionLow`, `chairCushion`, `chairDesk`, `chairModernCushion`, `chairModernFrameCushion`, `chairRounded`, `loungeChair`, `loungeDesignChair`, `loungeDesignSofa`, `loungeSofa`, `loungeSofaLong`, `loungeSofaOttoman`, `stoolBar`, `stoolBarSquare`
+    - Tables and desks: `desk`, `deskCorner`, `sideTable`, `sideTableDrawers`, `tableCoffee`, `tableCoffeeGlass`, `tableCoffeeGlassSquare`, `tableCoffeeSquare`, `tableGlass`, `tableRound`
+    - Storage and kitchen: `bookcaseClosed`, `bookcaseClosedDoors`, `bookcaseClosedWide`, `bookcaseOpen`, `bookcaseOpenLow`, `cabinetTelevision`, `cabinetTelevisionDoors`, `kitchenCabinet`, `kitchenCabinetDrawer`, `kitchenCabinetUpper`, `kitchenCabinetUpperDouble`, `kitchenCabinetUpperLow`
+    - Beds: `bedBunk`, `bedDouble`, `bedSingle`
+    - Electronics and appliances: `computerScreen`, `dryer`, `hoodModern`, `kitchenFridge`, `kitchenFridgeLarge`, `kitchenMicrowave`, `kitchenStoveElectric`, `laptop`, `radio`, `speaker`, `speakerSmall`, `televisionModern`, `washer`, `washerDryerStacked`
+    - Lighting and decor: `coatRackStanding`, `lampRoundFloor`, `lampRoundTable`, `lampSquareCeiling`, `lampSquareFloor`, `lampSquareTable`, `lampWall`, `pillow`, `pillowLong`, `plantSmall1`, `plantSmall2`, `plantSmall3`, `pottedPlant`, `rugRectangle`, `rugRound`
 
 - `models/environment/windows/*.optimized.glb`
   - Source: Kenney Building Kit
