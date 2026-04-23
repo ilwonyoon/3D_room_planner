@@ -27,7 +27,8 @@ Personal portfolio mode: this project is currently intended for personal portfol
   - `pnpm typecheck`
   - `pnpm build`
 - Available converter: `node_modules/fbx2gltf/bin/Darwin/FBX2glTF`.
-- Missing local converters: Blender and Assimp. This blocks clean automation for `.blend`, `.skp`, `.max`, `.3ds`, `.dwg`, and many `.obj` packages unless the source also provides FBX or glTF/GLB.
+- Available converters: `node_modules/fbx2gltf/bin/Darwin/FBX2glTF` and `obj2gltf`.
+- Missing local converters: Blender and Assimp. This still blocks clean automation for `.blend`, `.skp`, `.max`, `.3ds`, `.dwg`, and Revit unless the source also provides FBX, OBJ, glTF, or GLB.
 
 ## Source Triage
 
@@ -39,8 +40,8 @@ Personal portfolio mode: this project is currently intended for personal portfol
 | Zeel Project | Strong brand furniture library, modern filters, many FBX/OBJ/MAX product pages | Credit/account flow; some pages show daily free credits | Manual review. License allows use within creations but raw model redistribution is risky. Treat as app-embedding candidate only after exact model terms are stored. |
 | Chocofur Free Products | Best legal fit among non-public-domain commercial-looking libraries when item is explicitly Free Chocofur Product | Free products may be Blender-native; exact formats vary | High priority if CC0 status is visible per item. Needs Blender installed if only `.blend` is supplied; otherwise use FBX/OBJ if available. |
 | Herman Miller product models | Excellent real-brand office/lounge furniture; Revit, SketchUp, AutoCAD | Official product model library with many categories and file filters | Use as brand-reference and staging source first. Do not bundle converted files until Herman Miller terms explicitly allow runtime app embedding. |
-| Vitra downloads | Excellent modern/classic design furniture; official professional download area | 2D/3D CAD data through Vitra downloads | Use as brand-reference and staging source first. Treat "Virta" request as likely "Vitra" unless a separate Virta furniture source is identified. |
-| Muuto 2D/3D/Revit files | Very strong fit for simple modern Scandinavian furniture and storage | Official 3D download site; pCon catalog can download DWG, 3DS, FBX | High-value staging source. Because Muuto is part of MillerKnoll, check terms before bundling; use FBX only when terms allow app embedding. |
+| Vitra downloads | Excellent modern/classic design furniture; official professional download area | Public GLB ZIP downloads can be requested through the Vitra downloads API after a web session is established | Implemented as personal-local intake for GLB models. Treat "Virta" request as likely "Vitra" unless a separate Virta furniture source is identified. |
+| Muuto 2D/3D/Revit files | Very strong fit for simple modern Scandinavian furniture and storage | Official digital showroom exposes ZIP packages with OBJ/SKP/DWG/3DS assets | Implemented as personal-local OBJ intake. Some official archives have missing/mismatched MTL texture references, so QA needs visual review. |
 | BIMobject / manufacturer CAD libraries | Good breadth for real branded assets | Often Revit/SKP/DWG, sometimes FBX/OBJ | Research lane, not automated shipping lane. Useful for discovering brands and exact product names. |
 | SketchUp 3D Warehouse | Huge quantity, inconsistent quality | SKP-heavy | Low priority for shipping unless model is official manufacturer content and can be exported cleanly with license. |
 | Reddit lists | Useful lead discovery | Not authoritative license sources | Keep as lead index only; always verify official source/license. |
@@ -107,7 +108,7 @@ Every candidate should enter the pipeline with a manifest row before downloading
 | --- | --- | --- |
 | GLB / glTF | Ready | Copy to raw source folder, run `assets:prepare`, run thumbnail render and audit. |
 | FBX | Ready | Convert with local `FBX2glTF`, optimize with glTF-Transform, then QA. |
-| OBJ | Partial | Use only when texture/material references are complete; install Assimp or Blender for reliable conversion. |
+| OBJ | Ready for geometry-first intake | Convert with `obj2gltf`, using the original package path so relative `.mtl`/texture references survive where the archive is valid. Visual QA is still required because some OBJ packages reference missing material files. |
 | Blend | Blocked | Install Blender CLI, export to GLB, then optimize. |
 | SKP | Blocked | Prefer official FBX/OBJ alternative; otherwise requires SketchUp/Blender import path. |
 | MAX | Blocked | Avoid unless source also provides FBX/OBJ. |
@@ -190,10 +191,12 @@ For every accepted batch:
 ## Import Status - 2026-04-23
 
 - Dimensiva: 41 free candidates downloaded, imported, converted to runtime GLB, thumbnailed, and exposed through `manualProductCatalog.generated.ts`.
-- Design Connected: login-assisted freebie flow confirmed. 82 relevant candidates were staged, 81 produced FBX/OBJ locally, and 79 converted to runtime GLB plus thumbnails.
-- App catalog: 120 manual models are now exposed under `models/manual/*.optimized.glb` with real source brand/product names.
-- Runtime category expansion: 1 sofa, 1 bed, 11 chairs, 31 tables, 4 storage pieces, 24 decor pieces, and 48 lighting pieces.
-- Blocked/failed rows: `designconnected-fuwl-cage-table-8851` did not generate a download after repeated logged-in attempts; `designconnected-rosa-rosa-rosas-wall-light-9791` and `designconnected-shaker-vases-set-9478` exceeded the FBX conversion timeout and remain in raw failure logs.
+- Design Connected: login-assisted freebie flow confirmed. 82 relevant candidates were staged, 81 produced FBX/OBJ locally, and 79 converted to runtime GLB plus thumbnails. A metadata refresh pass now replaces bad `Quick View` card labels with detail-page brand/designer/product names.
+- Muuto: 12 official digital showroom candidates attempted; 11 OBJ packages downloaded, converted through `obj2gltf`, optimized, thumbnailed, and exposed. `muuto-ambit-pendant-943052121460012` failed ZIP extraction because of filename encoding.
+- Vitra: 10 official GLB packages downloaded through the downloads API, optimized, thumbnailed, and exposed.
+- App catalog: 141 manual models are now exposed under `models/manual/*.optimized.glb` with real source brand/product names.
+- Runtime category expansion: 1 sofa, 1 bed, 19 chairs, 40 tables, 4 storage pieces, 26 decor pieces, and 50 lighting pieces.
+- Blocked/failed rows: `designconnected-fuwl-cage-table-8851` did not generate a download after repeated logged-in attempts; `designconnected-rosa-rosa-rosas-wall-light-9791` and `designconnected-shaker-vases-set-9478` exceeded the FBX conversion timeout and remain in raw failure logs; several Muuto OBJ packages converted with default materials because their official archives reference missing or mismatched `.mtl`/texture paths.
 
 ## Immediate Next Batch
 
@@ -207,11 +210,11 @@ The first practical batch should be manual but small enough to validate the pipe
 
 Recommended source order:
 
-1. Design Connected freebies: pick recent modern items with FBX/OBJ.
-2. Dimensiva freebies: pick brand-named items with neutral material direction.
-3. Chocofur free/CC0: pick any photorealistic modern furniture that is not Blender-only, or install Blender first.
-4. 3dsky free manufacturer models: use the daily limit for verified manufacturer entries.
-5. Zeel: use only if the license note supports app embedding.
+1. 3dsky free manufacturer models: requires browser login; use the daily limit for verified manufacturer entries and prefer GLB/FBX/OBJ.
+2. Zeel: currently blocked by browser verification/account flow; use only if the license note supports app embedding.
+3. Chocofur free/CC0: static store pages did not expose direct model archives; use manually after finding explicit free product downloads, or install Blender first for `.blend`.
+4. Herman Miller/MillerKnoll official libraries: strong product naming and shapes, but many files are Revit/SKP/DWG and need a converter or manual export path.
+5. Continue Muuto/Vitra in curated batches, but visually QA Muuto material quality because OBJ archives can be inconsistent.
 
 ## Source Links
 

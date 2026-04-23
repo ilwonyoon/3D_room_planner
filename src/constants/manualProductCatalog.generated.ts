@@ -113,6 +113,78 @@ export const manualModelSeedsByCategory: Partial<Record<ProductCategory, Product
         66,
         82
       ]
+    },
+    {
+      "id": "vitra-scout-meet-9746206",
+      "source": "manual",
+      "dimensionsCm": [
+        66,
+        70,
+        84
+      ]
+    },
+    {
+      "id": "vitra-scout-meet-high-9746215",
+      "source": "manual",
+      "dimensionsCm": [
+        66,
+        70,
+        84
+      ]
+    },
+    {
+      "id": "vitra-scout-sprint-9746226",
+      "source": "manual",
+      "dimensionsCm": [
+        66,
+        70,
+        84
+      ]
+    },
+    {
+      "id": "vitra-scout-sprint-high-9746235",
+      "source": "manual",
+      "dimensionsCm": [
+        66,
+        70,
+        84
+      ]
+    },
+    {
+      "id": "vitra-scout-summit-9746246",
+      "source": "manual",
+      "dimensionsCm": [
+        66,
+        70,
+        84
+      ]
+    },
+    {
+      "id": "vitra-wire-chair-dkl-2-with-seat-and-backrest-upholstery-9777324",
+      "source": "manual",
+      "dimensionsCm": [
+        66,
+        70,
+        84
+      ]
+    },
+    {
+      "id": "vitra-wire-chair-dkl-5-with-seat-cushion-9777340",
+      "source": "manual",
+      "dimensionsCm": [
+        66,
+        70,
+        84
+      ]
+    },
+    {
+      "id": "vitra-wire-chair-dkl-9777344",
+      "source": "manual",
+      "dimensionsCm": [
+        66,
+        70,
+        84
+      ]
     }
   ],
   "table": [
@@ -394,6 +466,87 @@ export const manualModelSeedsByCategory: Partial<Record<ProductCategory, Product
         70,
         46
       ]
+    },
+    {
+      "id": "muuto-70-70-outdoor-table-616704064406601",
+      "source": "manual",
+      "dimensionsCm": [
+        120,
+        80,
+        74
+      ]
+    },
+    {
+      "id": "muuto-70-70-table-474168187272003",
+      "source": "manual",
+      "dimensionsCm": [
+        120,
+        80,
+        74
+      ]
+    },
+    {
+      "id": "muuto-airy-coffee-table-641074822617958",
+      "source": "manual",
+      "dimensionsCm": [
+        120,
+        80,
+        74
+      ]
+    },
+    {
+      "id": "muuto-around-coffee-table-688940247971018",
+      "source": "manual",
+      "dimensionsCm": [
+        120,
+        80,
+        74
+      ]
+    },
+    {
+      "id": "muuto-base-high-table-425348571894211",
+      "source": "manual",
+      "dimensionsCm": [
+        120,
+        80,
+        74
+      ]
+    },
+    {
+      "id": "muuto-base-high-table-with-castors-906231481878086",
+      "source": "manual",
+      "dimensionsCm": [
+        120,
+        80,
+        74
+      ]
+    },
+    {
+      "id": "muuto-base-table-191998474970158",
+      "source": "manual",
+      "dimensionsCm": [
+        120,
+        80,
+        74
+      ]
+    },
+    {
+      "id": "vitra-scout-work-9746256",
+      "source": "manual",
+      "dimensionsCm": [
+        140,
+        80,
+        74
+      ]
+    },
+    {
+      "id": "vitra-scout-work-mobile-9746265",
+      "source": "manual",
+      "dimensionsCm": [
+        140,
+        80,
+        74
+      ]
     }
   ],
   "storage": [
@@ -434,221 +587,14 @@ export const manualModelSeedsByCategory: Partial<Record<ProductCategory, Product
       ]
     }
   ],
-  "decor": [
+  "bed": [
     {
-      "id": "designconnected-arceau-mirrors-9820",
+      "id": "dimensiva-bunky-bunk-bed-by-magis",
       "source": "manual",
       "dimensionsCm": [
-        44,
-        34,
-        54
-      ]
-    },
-    {
-      "id": "designconnected-contour-7968",
-      "source": "manual",
-      "dimensionsCm": [
-        44,
-        34,
-        54
-      ]
-    },
-    {
-      "id": "designconnected-emerald-mirror-9036",
-      "source": "manual",
-      "dimensionsCm": [
-        44,
-        34,
-        54
-      ]
-    },
-    {
-      "id": "designconnected-eric-mirror-9776",
-      "source": "manual",
-      "dimensionsCm": [
-        44,
-        34,
-        54
-      ]
-    },
-    {
-      "id": "designconnected-good-vibes-mirror-9960",
-      "source": "manual",
-      "dimensionsCm": [
-        44,
-        34,
-        54
-      ]
-    },
-    {
-      "id": "designconnected-pamukkale-mirror-9958",
-      "source": "manual",
-      "dimensionsCm": [
-        44,
-        34,
-        54
-      ]
-    },
-    {
-      "id": "designconnected-pendulum-wall-mirror-9203",
-      "source": "manual",
-      "dimensionsCm": [
-        44,
-        34,
-        54
-      ]
-    },
-    {
-      "id": "designconnected-reunion-mirror-10451",
-      "source": "manual",
-      "dimensionsCm": [
-        44,
-        34,
-        54
-      ]
-    },
-    {
-      "id": "designconnected-revolution-mirror-9044",
-      "source": "manual",
-      "dimensionsCm": [
-        44,
-        34,
-        54
-      ]
-    },
-    {
-      "id": "designconnected-t-vases-9798",
-      "source": "manual",
-      "dimensionsCm": [
-        44,
-        34,
-        54
-      ]
-    },
-    {
-      "id": "designconnected-time-hourglasses-8934",
-      "source": "manual",
-      "dimensionsCm": [
-        44,
-        34,
-        54
-      ]
-    },
-    {
-      "id": "designconnected-wonderland-mirror-9048",
-      "source": "manual",
-      "dimensionsCm": [
-        44,
-        34,
-        54
-      ]
-    },
-    {
-      "id": "dimensiva-hoop-coat-rack-by-covo",
-      "source": "manual",
-      "dimensionsCm": [
-        42,
-        34,
-        52
-      ]
-    },
-    {
-      "id": "dimensiva-iconic-alarm-clock-by-karlsson",
-      "source": "manual",
-      "dimensionsCm": [
-        42,
-        34,
-        52
-      ]
-    },
-    {
-      "id": "dimensiva-infinity-clock-by-bosa-ceramiche",
-      "source": "manual",
-      "dimensionsCm": [
-        42,
-        34,
-        52
-      ]
-    },
-    {
-      "id": "dimensiva-lotus-vase-by-101-copenhagen",
-      "source": "manual",
-      "dimensionsCm": [
-        42,
-        34,
-        52
-      ]
-    },
-    {
-      "id": "dimensiva-paradise-tree-coat-stand-by-magis",
-      "source": "manual",
-      "dimensionsCm": [
-        42,
-        34,
-        52
-      ]
-    },
-    {
-      "id": "dimensiva-parcel-pedestal-by-ferm-living",
-      "source": "manual",
-      "dimensionsCm": [
-        42,
-        34,
-        52
-      ]
-    },
-    {
-      "id": "dimensiva-plus-coat-hook-by-porventura",
-      "source": "manual",
-      "dimensionsCm": [
-        42,
-        34,
-        52
-      ]
-    },
-    {
-      "id": "dimensiva-podium-pedestal-by-101-copenhagen",
-      "source": "manual",
-      "dimensionsCm": [
-        42,
-        34,
-        52
-      ]
-    },
-    {
-      "id": "dimensiva-pov-candleholder-wall-by-menu",
-      "source": "manual",
-      "dimensionsCm": [
-        42,
-        34,
-        52
-      ]
-    },
-    {
-      "id": "dimensiva-serif-vase-by-kristina-dam-studio",
-      "source": "manual",
-      "dimensionsCm": [
-        42,
-        34,
-        52
-      ]
-    },
-    {
-      "id": "dimensiva-stop-bookend-by-e15",
-      "source": "manual",
-      "dimensionsCm": [
-        42,
-        34,
-        52
-      ]
-    },
-    {
-      "id": "dimensiva-wire-basket-by-ferm-living",
-      "source": "manual",
-      "dimensionsCm": [
-        42,
-        34,
-        52
+        210,
+        160,
+        90
       ]
     }
   ],
@@ -1084,17 +1030,259 @@ export const manualModelSeedsByCategory: Partial<Record<ProductCategory, Product
         42,
         120
       ]
-    }
-  ],
-  "appliance": [],
-  "bed": [
+    },
     {
-      "id": "dimensiva-bunky-bunk-bed-by-magis",
+      "id": "muuto-ambit-rail-lamp-745226660488457",
       "source": "manual",
       "dimensionsCm": [
-        210,
-        160,
-        90
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "muuto-ambit-wall-lamp-805225664406250",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    }
+  ],
+  "decor": [
+    {
+      "id": "designconnected-arceau-mirrors-9820",
+      "source": "manual",
+      "dimensionsCm": [
+        44,
+        34,
+        54
+      ]
+    },
+    {
+      "id": "designconnected-contour-7968",
+      "source": "manual",
+      "dimensionsCm": [
+        44,
+        34,
+        54
+      ]
+    },
+    {
+      "id": "designconnected-emerald-mirror-9036",
+      "source": "manual",
+      "dimensionsCm": [
+        44,
+        34,
+        54
+      ]
+    },
+    {
+      "id": "designconnected-eric-mirror-9776",
+      "source": "manual",
+      "dimensionsCm": [
+        44,
+        34,
+        54
+      ]
+    },
+    {
+      "id": "designconnected-good-vibes-mirror-9960",
+      "source": "manual",
+      "dimensionsCm": [
+        44,
+        34,
+        54
+      ]
+    },
+    {
+      "id": "designconnected-pamukkale-mirror-9958",
+      "source": "manual",
+      "dimensionsCm": [
+        44,
+        34,
+        54
+      ]
+    },
+    {
+      "id": "designconnected-pendulum-wall-mirror-9203",
+      "source": "manual",
+      "dimensionsCm": [
+        44,
+        34,
+        54
+      ]
+    },
+    {
+      "id": "designconnected-reunion-mirror-10451",
+      "source": "manual",
+      "dimensionsCm": [
+        44,
+        34,
+        54
+      ]
+    },
+    {
+      "id": "designconnected-revolution-mirror-9044",
+      "source": "manual",
+      "dimensionsCm": [
+        44,
+        34,
+        54
+      ]
+    },
+    {
+      "id": "designconnected-t-vases-9798",
+      "source": "manual",
+      "dimensionsCm": [
+        44,
+        34,
+        54
+      ]
+    },
+    {
+      "id": "designconnected-time-hourglasses-8934",
+      "source": "manual",
+      "dimensionsCm": [
+        44,
+        34,
+        54
+      ]
+    },
+    {
+      "id": "designconnected-wonderland-mirror-9048",
+      "source": "manual",
+      "dimensionsCm": [
+        44,
+        34,
+        54
+      ]
+    },
+    {
+      "id": "dimensiva-hoop-coat-rack-by-covo",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        34,
+        52
+      ]
+    },
+    {
+      "id": "dimensiva-iconic-alarm-clock-by-karlsson",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        34,
+        52
+      ]
+    },
+    {
+      "id": "dimensiva-infinity-clock-by-bosa-ceramiche",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        34,
+        52
+      ]
+    },
+    {
+      "id": "dimensiva-lotus-vase-by-101-copenhagen",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        34,
+        52
+      ]
+    },
+    {
+      "id": "dimensiva-paradise-tree-coat-stand-by-magis",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        34,
+        52
+      ]
+    },
+    {
+      "id": "dimensiva-parcel-pedestal-by-ferm-living",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        34,
+        52
+      ]
+    },
+    {
+      "id": "dimensiva-plus-coat-hook-by-porventura",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        34,
+        52
+      ]
+    },
+    {
+      "id": "dimensiva-podium-pedestal-by-101-copenhagen",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        34,
+        52
+      ]
+    },
+    {
+      "id": "dimensiva-pov-candleholder-wall-by-menu",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        34,
+        52
+      ]
+    },
+    {
+      "id": "dimensiva-serif-vase-by-kristina-dam-studio",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        34,
+        52
+      ]
+    },
+    {
+      "id": "dimensiva-stop-bookend-by-e15",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        34,
+        52
+      ]
+    },
+    {
+      "id": "dimensiva-wire-basket-by-ferm-living",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        34,
+        52
+      ]
+    },
+    {
+      "id": "muuto-arced-mirror-850882679996513",
+      "source": "manual",
+      "dimensionsCm": [
+        44,
+        34,
+        54
+      ]
+    },
+    {
+      "id": "muuto-arrange-dekstop-series-878326222384693",
+      "source": "manual",
+      "dimensionsCm": [
+        44,
+        34,
+        54
       ]
     }
   ],
@@ -1103,319 +1291,319 @@ export const manualModelSeedsByCategory: Partial<Record<ProductCategory, Product
 
 export const manualRetailAliasById: Record<string, ProductRetailAlias> = {
   "designconnected-02-armchair-8286": {
-    "brand": "Quick View",
+    "brand": "Burri",
     "name": "02 Armchair"
   },
   "designconnected-520-accordo-table-8210": {
-    "brand": "Quick View",
+    "brand": "Charlotte Perriand",
     "name": "520 Accordo Table"
   },
   "designconnected-alando-desk-10784": {
-    "brand": "Quick View",
+    "brand": "Ligne Roset",
     "name": "Alando Desk"
   },
   "designconnected-alessi-mia-and-tua-pitchers-9656": {
-    "brand": "Quick View",
+    "brand": "ALESSI",
     "name": "ALESSI Mia and Tua Pitchers"
   },
   "designconnected-alleluia-coffee-table-8678": {
-    "brand": "Quick View",
+    "brand": "Ligne Roset",
     "name": "Alleluia Coffee Table"
   },
   "designconnected-androgyne-side-table-9225": {
-    "brand": "Quick View",
+    "brand": "Danielle Siggerud",
     "name": "Androgyne Side Table"
   },
   "designconnected-arancini-floor-lamp-9045": {
-    "brand": "Quick View",
+    "brand": "Moda Piera",
     "name": "Arancini Floor Lamp"
   },
   "designconnected-arc-wall-sconce-9056": {
-    "brand": "Quick View",
+    "brand": "Allied Maker",
     "name": "Arc Wall Sconce"
   },
   "designconnected-arceau-mirrors-9820": {
-    "brand": "Quick View",
+    "brand": "Ligne Roset",
     "name": "Arceau Mirrors"
   },
   "designconnected-argento-l-pendant-lamp-8968": {
-    "brand": "Quick View",
+    "brand": "Eichholtz",
     "name": "Argento L Pendant Lamp"
   },
   "designconnected-atlas-01-table-lamp-9206": {
-    "brand": "Quick View",
+    "brand": "Roll & Hill",
     "name": "Atlas 01 Table Lamp"
   },
   "designconnected-beaubien-double-shade-wall-lamp-9035": {
-    "brand": "Quick View",
+    "brand": "Lambert et Fils",
     "name": "Beaubien Double Shade Wall Lamp"
   },
   "designconnected-big-kick-pendant-10509": {
-    "brand": "Quick View",
+    "brand": "Volker Haug Studio",
     "name": "Big Kick Pendant"
   },
   "designconnected-big-kick-solid-pendant-10510": {
-    "brand": "Quick View",
+    "brand": "Volker Haug Studio",
     "name": "Big Kick Solid Pendant"
   },
   "designconnected-bolt-stool-8411": {
-    "brand": "Quick View",
+    "brand": "La Chance",
     "name": "Bolt Stool"
   },
   "designconnected-boshi-table-lamp-9953": {
-    "brand": "Quick View",
+    "brand": "Ligne Roset",
     "name": "Boshi Table Lamp"
   },
   "designconnected-bower-floor-lamp-8963": {
-    "brand": "Quick View",
+    "brand": "West Elm",
     "name": "Bower Floor Lamp"
   },
   "designconnected-calee-pendants-8956": {
-    "brand": "Quick View",
+    "brand": "CVL",
     "name": "Calee Pendants"
   },
   "designconnected-cercle-et-trat-suspension-lamp-8969": {
-    "brand": "Quick View",
+    "brand": "CVL",
     "name": "Cercle et Trat Suspension Lamp"
   },
   "designconnected-cheshire-floor-lamp-9072": {
-    "brand": "Quick View",
+    "brand": "Fontana Arte",
     "name": "Cheshire Floor Lamp"
   },
   "designconnected-circuit-1-sconce-lamp-8959": {
-    "brand": "Quick View",
+    "brand": "Apparatus",
     "name": "Circuit 1 Sconce Lamp"
   },
   "designconnected-clarine-table-lamp-9984": {
-    "brand": "Quick View",
+    "brand": "Ligne Roset",
     "name": "Clarine Table Lamp"
   },
   "designconnected-collision-table-lights-9775": {
-    "brand": "Quick View",
+    "brand": "Bohinc Studio",
     "name": "Collision Table Lights"
   },
   "designconnected-colomn-base-lounge-tables-10965": {
-    "brand": "Quick View",
+    "brand": "Design Connected",
     "name": "Colomn Base Lounge Tables"
   },
   "designconnected-contour-7968": {
-    "brand": "Quick View",
+    "brand": "SkLO",
     "name": "Contour"
   },
   "designconnected-curved-neck-table-lamp-8669": {
-    "brand": "Quick View",
+    "brand": "Collected by",
     "name": "Curved Neck Table Lamp"
   },
   "designconnected-dauphine-floor-lamp-9047": {
-    "brand": "Quick View",
+    "brand": "CB2",
     "name": "Dauphine Floor Lamp"
   },
   "designconnected-dita-desk-with-drawer-10712": {
-    "brand": "Quick View",
+    "brand": "Ligne Roset",
     "name": "Dita Desk with Drawer"
   },
   "designconnected-drink-tray-9944": {
-    "brand": "Quick View",
+    "brand": "Ligne Roset",
     "name": "Drink Tray"
   },
   "designconnected-drop-dss-03-01-wall-lamp-9769": {
-    "brand": "Quick View",
+    "brand": "The Future Perfect",
     "name": "Drop DSS.03.01 Wall Lamp"
   },
   "designconnected-dyad-sconce-lamp-9054": {
-    "brand": "Quick View",
+    "brand": "Apparatus",
     "name": "Dyad Sconce Lamp"
   },
   "designconnected-eclisse-table-lamp-8834": {
-    "brand": "Quick View",
+    "brand": "Artemide",
     "name": "Eclisse Table Lamp"
   },
   "designconnected-emerald-mirror-9036": {
-    "brand": "Quick View",
+    "brand": "Baker",
     "name": "Emerald Mirror"
   },
   "designconnected-endless-knot-wall-lamp-9240": {
-    "brand": "Quick View",
+    "brand": "Mathieu Lehanneur",
     "name": "Endless Knot Wall Lamp"
   },
   "designconnected-eric-mirror-9776": {
-    "brand": "Quick View",
+    "brand": "Alberta",
     "name": "Eric Mirror"
   },
   "designconnected-good-vibes-mirror-9960": {
-    "brand": "Quick View",
+    "brand": "Ligne Roset",
     "name": "Good Vibes Mirror"
   },
   "designconnected-goods-pure-carafe-set-9145": {
-    "brand": "Quick View",
+    "brand": "GOODS",
     "name": "GOODS Pure Carafe Set"
   },
   "designconnected-grace-trolley-8825": {
-    "brand": "Quick View",
+    "brand": "Schönbuch",
     "name": "Grace Trolley"
   },
   "designconnected-hollie-table-lamp-8909": {
-    "brand": "Quick View",
+    "brand": "Care of Bankeryd",
     "name": "Hollie Table Lamp"
   },
   "designconnected-iconic-industrial-table-clock-11283": {
-    "brand": "Quick View",
+    "brand": "Design Connected",
     "name": "Iconic Industrial Table Clock"
   },
   "designconnected-jolly-roger-8903": {
-    "brand": "Quick View",
+    "brand": "Gufram",
     "name": "Jolly Roger"
   },
   "designconnected-kite-floor-lamp-8490": {
-    "brand": "Quick View",
+    "brand": "Disderot",
     "name": "Kite Floor Lamp"
   },
   "designconnected-knockout-tables-7887": {
-    "brand": "Quick View",
+    "brand": "Friends & Founders",
     "name": "Knockout tables"
   },
   "designconnected-lia-pendant-lamp-9658": {
-    "brand": "Quick View",
+    "brand": "Kaia",
     "name": "Lia Pendant Lamp"
   },
   "designconnected-link-pendant-lamp-9038": {
-    "brand": "Quick View",
+    "brand": "CVL",
     "name": "Link Pendant Lamp"
   },
   "designconnected-lythos-coffee-table-7807": {
-    "brand": "Quick View",
+    "brand": "Haymann",
     "name": "Lythos Coffee Table"
   },
   "designconnected-magnifier-lamp-9032": {
-    "brand": "Quick View",
+    "brand": "Formafantasma",
     "name": "Magnifier Lamp"
   },
   "designconnected-meta-wall-lamp-7997": {
-    "brand": "Quick View",
+    "brand": "James Dieter",
     "name": "Meta Wall Lamp"
   },
   "designconnected-mobil-wall-lamp-8957": {
-    "brand": "Quick View",
+    "brand": "Pholc",
     "name": "Mobil Wall Lamp"
   },
   "designconnected-model-2065-suspension-luminaire-8733": {
-    "brand": "Quick View",
+    "brand": "Astep",
     "name": "Model 2065 Suspension Luminaire"
   },
   "designconnected-my-lamp-floor-8961": {
-    "brand": "Quick View",
+    "brand": "Paolo Castelli",
     "name": "My Lamp Floor"
   },
   "designconnected-neat-noon-table-lamp-10748": {
-    "brand": "Quick View",
+    "brand": "Zeitraum",
     "name": "Neat Noon Table Lamp"
   },
   "designconnected-oda-pedestal-table-9925": {
-    "brand": "Quick View",
+    "brand": "Ligne Roset",
     "name": "Oda Pedestal Table"
   },
   "designconnected-orbis-vx58-pendant-lamp-9039": {
-    "brand": "Quick View",
+    "brand": "Studio Endo",
     "name": "Orbis VX58 Pendant Lamp"
   },
   "designconnected-pamukkale-mirror-9958": {
-    "brand": "Quick View",
+    "brand": "Ligne Roset",
     "name": "Pamukkale Mirror"
   },
   "designconnected-pendulum-wall-mirror-9203": {
-    "brand": "Quick View",
+    "brand": "CB2",
     "name": "Pendulum Wall Mirror"
   },
   "designconnected-perforated-metal-tea-trolley-11005": {
-    "brand": "Quick View",
+    "brand": "Design Connected",
     "name": "Perforated Metal Tea Trolley"
   },
   "designconnected-pin-floor-lamp-9743": {
-    "brand": "Quick View",
+    "brand": "Vibia",
     "name": "Pin Floor Lamp"
   },
   "designconnected-plane-coffee-table-8347": {
-    "brand": "Quick View",
+    "brand": "Living Divani",
     "name": "Plane Coffee Table"
   },
   "designconnected-projekt-pendant-9021": {
-    "brand": "Quick View",
+    "brand": "Tech Lighting",
     "name": "Projekt Pendant"
   },
   "designconnected-quille-desk-lamp-8203": {
-    "brand": "Quick View",
+    "brand": "Ligne Roset",
     "name": "Quille Desk Lamp"
   },
   "designconnected-rabbit-lamps-7779": {
-    "brand": "Quick View",
+    "brand": "Qeeboo",
     "name": "Rabbit Lamps"
   },
   "designconnected-reunion-mirror-10451": {
-    "brand": "Quick View",
+    "brand": "Ligne Roset",
     "name": "Reunion Mirror"
   },
   "designconnected-revolution-mirror-9044": {
-    "brand": "Quick View",
+    "brand": "Edizione Limitata",
     "name": "Revolution Mirror"
   },
   "designconnected-ring-wall-lamp-8952": {
-    "brand": "Quick View",
+    "brand": "CTO Lighting",
     "name": "Ring Wall Lamp"
   },
   "designconnected-roly-poly-chair-8816": {
-    "brand": "Quick View",
+    "brand": "Driade",
     "name": "Roly-Poly Chair"
   },
   "designconnected-round-side-table-with-marble-top-11326": {
-    "brand": "Quick View",
+    "brand": "Design Connected",
     "name": "Round Side Table with Marble Top"
   },
   "designconnected-sarn-7868": {
-    "brand": "Quick View",
+    "brand": "Specimen Editions",
     "name": "Sarn"
   },
   "designconnected-sellier-chair-8201": {
-    "brand": "Quick View",
+    "brand": "Ligne Roset",
     "name": "Sellier Chair"
   },
   "designconnected-shagreen-desk-box-10281": {
-    "brand": "Quick View",
+    "brand": "Design Connected",
     "name": "Shagreen desk box"
   },
   "designconnected-sospir-table-lamp-10001": {
-    "brand": "Quick View",
+    "brand": "Ligne Roset",
     "name": "Sospir Table Lamp"
   },
   "designconnected-square-scandi-coffee-table-11631": {
-    "brand": "Quick View",
+    "brand": "Design Connected",
     "name": "Square Scandi Coffee Table"
   },
   "designconnected-strike-pendant-lamp-8962": {
-    "brand": "Quick View",
+    "brand": "Current Collection",
     "name": "Strike Pendant Lamp"
   },
   "designconnected-t-vases-9798": {
-    "brand": "Quick View",
+    "brand": "Ligne Roset",
     "name": "T Vases"
   },
   "designconnected-the-globe-table-lamp-8624": {
-    "brand": "Quick View",
+    "brand": "Oluce",
     "name": "The Globe Table Lamp"
   },
   "designconnected-time-hourglasses-8934": {
-    "brand": "Quick View",
+    "brand": "Hay",
     "name": "Time Hourglasses"
   },
   "designconnected-tip-of-the-tongue-table-lamp-9197": {
-    "brand": "Quick View",
+    "brand": "Michael Anastassiades",
     "name": "Tip of the Tongue Table Lamp"
   },
   "designconnected-vulcain-table-lamp-9805": {
-    "brand": "Quick View",
+    "brand": "Ligne Roset",
     "name": "Vulcain Table Lamp"
   },
   "designconnected-wonderland-mirror-9048": {
-    "brand": "Quick View",
+    "brand": "Dante-Goods and Bads",
     "name": "Wonderland Mirror"
   },
   "dimensiva-8950-dining-table-by-rolf-benz": {
@@ -1581,5 +1769,89 @@ export const manualRetailAliasById: Record<string, ProductRetailAlias> = {
   "dimensiva-wire-basket-by-ferm-living": {
     "brand": "Ferm Living",
     "name": "Wire Basket"
+  },
+  "muuto-70-70-outdoor-table-616704064406601": {
+    "brand": "Muuto",
+    "name": "70/70 Outdoor Table"
+  },
+  "muuto-70-70-table-474168187272003": {
+    "brand": "Muuto",
+    "name": "70/70 Table"
+  },
+  "muuto-airy-coffee-table-641074822617958": {
+    "brand": "Muuto",
+    "name": "Airy Coffee Table"
+  },
+  "muuto-ambit-rail-lamp-745226660488457": {
+    "brand": "Muuto",
+    "name": "Ambit Rail Lamp"
+  },
+  "muuto-ambit-wall-lamp-805225664406250": {
+    "brand": "Muuto",
+    "name": "Ambit Wall Lamp"
+  },
+  "muuto-arced-mirror-850882679996513": {
+    "brand": "Muuto",
+    "name": "Arced Mirror"
+  },
+  "muuto-around-coffee-table-688940247971018": {
+    "brand": "Muuto",
+    "name": "Around Coffee Table"
+  },
+  "muuto-arrange-dekstop-series-878326222384693": {
+    "brand": "Muuto",
+    "name": "Arrange Dekstop Series"
+  },
+  "muuto-base-high-table-425348571894211": {
+    "brand": "Muuto",
+    "name": "Base High Table"
+  },
+  "muuto-base-high-table-with-castors-906231481878086": {
+    "brand": "Muuto",
+    "name": "Base High Table with Castors"
+  },
+  "muuto-base-table-191998474970158": {
+    "brand": "Muuto",
+    "name": "Base Table"
+  },
+  "vitra-scout-meet-9746206": {
+    "brand": "Vitra",
+    "name": "Scout Meet"
+  },
+  "vitra-scout-meet-high-9746215": {
+    "brand": "Vitra",
+    "name": "Scout Meet High"
+  },
+  "vitra-scout-sprint-9746226": {
+    "brand": "Vitra",
+    "name": "Scout Sprint"
+  },
+  "vitra-scout-sprint-high-9746235": {
+    "brand": "Vitra",
+    "name": "Scout Sprint High"
+  },
+  "vitra-scout-summit-9746246": {
+    "brand": "Vitra",
+    "name": "Scout Summit"
+  },
+  "vitra-scout-work-9746256": {
+    "brand": "Vitra",
+    "name": "Scout Work"
+  },
+  "vitra-scout-work-mobile-9746265": {
+    "brand": "Vitra",
+    "name": "Scout Work Mobile"
+  },
+  "vitra-wire-chair-dkl-2-with-seat-and-backrest-upholstery-9777324": {
+    "brand": "Vitra",
+    "name": "Wire Chair DKL 2 with seat and backrest upholstery"
+  },
+  "vitra-wire-chair-dkl-5-with-seat-cushion-9777340": {
+    "brand": "Vitra",
+    "name": "Wire Chair DKL 5 with seat cushion"
+  },
+  "vitra-wire-chair-dkl-9777344": {
+    "brand": "Vitra",
+    "name": "Wire Chair DKL"
   }
 }
