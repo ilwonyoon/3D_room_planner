@@ -589,6 +589,15 @@ export const manualModelSeedsByCategory: Partial<Record<ProductCategory, Product
   ],
   "bed": [
     {
+      "id": "3dsky-om-oficial-model-krovat-cherry-odnospalnaia-dlia-detei-i-podrostkov",
+      "source": "manual",
+      "dimensionsCm": [
+        98,
+        210,
+        108
+      ]
+    },
+    {
       "id": "dimensiva-bunky-bunk-bed-by-magis",
       "source": "manual",
       "dimensionsCm": [
@@ -1290,6 +1299,10 @@ export const manualModelSeedsByCategory: Partial<Record<ProductCategory, Product
 }
 
 export const manualRetailAliasById: Record<string, ProductRetailAlias> = {
+  "3dsky-om-oficial-model-krovat-cherry-odnospalnaia-dlia-detei-i-podrostkov": {
+    "brand": "mebelrika",
+    "name": "Cherry Single Bed for Children and Teens"
+  },
   "designconnected-02-armchair-8286": {
     "brand": "Burri",
     "name": "02 Armchair"
