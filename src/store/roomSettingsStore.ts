@@ -10,6 +10,7 @@ interface RoomSettingsState {
   floorMaterial: RoomMaterialItem
   setWallMaterial: (material: RoomMaterialItem) => void
   setFloorMaterial: (material: RoomMaterialItem) => void
+  reset: () => void
 }
 
 export const useRoomSettingsStore = create<RoomSettingsState>((set) => ({
@@ -17,4 +18,9 @@ export const useRoomSettingsStore = create<RoomSettingsState>((set) => ({
   floorMaterial: DEFAULT_FLOOR_MATERIAL,
   setWallMaterial: (wallMaterial) => set({ wallMaterial }),
   setFloorMaterial: (floorMaterial) => set({ floorMaterial }),
+  reset: () =>
+    set({
+      wallMaterial: DEFAULT_WALL_MATERIAL,
+      floorMaterial: DEFAULT_FLOOR_MATERIAL,
+    }),
 }))

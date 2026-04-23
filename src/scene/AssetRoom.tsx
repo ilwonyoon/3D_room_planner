@@ -325,7 +325,7 @@ function usePbrRoomMaterials() {
       }),
       wall: new THREE.MeshStandardMaterial({
         ...wallTextures,
-        color: '#f8f8fb',
+        color: '#faf6f1',
         roughness: 0.88,
         metalness: 0,
         normalScale: new THREE.Vector2(0.14, 0.14),
@@ -333,7 +333,7 @@ function usePbrRoomMaterials() {
         displacementScale: 0.004,
         displacementBias: -0.0015,
       }),
-      trim: new THREE.MeshStandardMaterial({ color: '#f3f1ec', roughness: 0.62 }),
+      trim: new THREE.MeshStandardMaterial({ color: '#f8f2ea', roughness: 0.62 }),
       glass: new THREE.MeshPhysicalMaterial({
         color: '#edf5fb',
         emissive: '#bfe7ff',
@@ -344,10 +344,10 @@ function usePbrRoomMaterials() {
         opacity: 0.62,
       }),
       curtain: new THREE.MeshStandardMaterial({
-        color: '#e4e5ec',
-        roughness: 0.88,
+        color: '#efe7dc',
+        roughness: 0.9,
         transparent: true,
-        opacity: 0.48,
+        opacity: 0.72,
       }),
       mattress: new THREE.MeshStandardMaterial({
         color: '#7d8299',
@@ -661,23 +661,23 @@ function RoomShell({ materials }: { materials: ReturnType<typeof usePbrRoomMater
 function WindowAndCurtains({ materials }: { materials: ReturnType<typeof usePbrRoomMaterials> }) {
   return (
     <group>
-      <mesh position={[0, 0.62, 0.012]} material={materials.glass}>
-        <planeGeometry args={[1.18, 0.58]} />
+      <mesh position={[0, 0.63, 0.012]} material={materials.glass}>
+        <planeGeometry args={[1.2, 0.62]} />
       </mesh>
-      <mesh position={[0, 0.93, 0.035]} material={materials.trim}>
-        <boxGeometry args={[1.28, 0.045, 0.05]} />
+      <mesh position={[0, 0.97, 0.035]} material={materials.trim}>
+        <boxGeometry args={[1.42, 0.05, 0.05]} />
       </mesh>
       <mesh position={[0, 0.31, 0.035]} material={materials.trim}>
-        <boxGeometry args={[1.28, 0.045, 0.05]} />
+        <boxGeometry args={[1.34, 0.045, 0.05]} />
       </mesh>
       <mesh position={[0, 0.62, 0.035]} material={materials.trim}>
         <boxGeometry args={[0.04, 0.62, 0.05]} />
       </mesh>
-      {[-0.76, 0.76].map((x) => (
-        <group key={x} position={[x, 0.57, 0.05]}>
-          {[-0.12, 0, 0.12].map((offset) => (
+      {[-0.63, 0.63].map((x) => (
+        <group key={x} position={[x, 0.58, 0.05]}>
+          {[-0.13, -0.045, 0.045, 0.13].map((offset) => (
             <mesh key={offset} position={[offset, 0, 0]} material={materials.curtain}>
-              <boxGeometry args={[0.048, 1.15, 0.026]} />
+              <boxGeometry args={[0.055, 1.16, 0.026]} />
             </mesh>
           ))}
         </group>
@@ -703,22 +703,22 @@ function WindowOpening({
   const glassMaterial = useMemo(
     () =>
       new THREE.MeshPhysicalMaterial({
-        color: isNight ? '#3c5265' : '#e9f6fb',
-        emissive: isNight ? '#101a24' : '#cbeeff',
-        emissiveIntensity: isNight ? 0.015 : 0.12,
+        color: isNight ? '#2e3e4f' : '#e9f6fb',
+        emissive: isNight ? '#0e1720' : '#cbeeff',
+        emissiveIntensity: isNight ? 0.008 : 0.1,
         roughness: 0.08,
         metalness: 0,
         transparent: true,
-        opacity: isNight ? 0.38 : 0.48,
+        opacity: isNight ? 0.24 : 0.44,
       }),
     [isNight],
   )
   const skyMaterial = useMemo(
     () =>
       new THREE.MeshBasicMaterial({
-        color: isNight ? '#18283a' : '#d3edf8',
+        color: isNight ? '#121c27' : '#d7eef7',
         transparent: true,
-        opacity: isNight ? 0.68 : 0.92,
+        opacity: isNight ? 0.46 : 0.9,
         toneMapped: false,
       }),
     [isNight],
@@ -726,9 +726,9 @@ function WindowOpening({
   const glowMaterial = useMemo(
     () =>
       new THREE.MeshBasicMaterial({
-        color: isNight ? '#5f8db6' : '#dff5ff',
+        color: isNight ? '#415a72' : '#e7f7ff',
         transparent: true,
-        opacity: isNight ? 0.018 : cameraMode === 'pov' ? 0.07 : cameraMode === 'bird' ? 0.12 : 0.18,
+        opacity: isNight ? 0.008 : cameraMode === 'pov' ? 0.05 : cameraMode === 'bird' ? 0.09 : 0.14,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
         toneMapped: false,
@@ -780,8 +780,8 @@ function AreaRug({ object }: { object: EditorObject }) {
   const rugMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: '#a99d8e',
-        roughness: 0.96,
+        color: '#e8e0d6',
+        roughness: 0.94,
         metalness: 0,
       }),
     [],
@@ -789,8 +789,8 @@ function AreaRug({ object }: { object: EditorObject }) {
   const borderMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: '#d8d0c5',
-        roughness: 0.92,
+        color: '#f7f3ee',
+        roughness: 0.88,
         metalness: 0,
       }),
     [],
@@ -833,6 +833,23 @@ function tunePbrMaterial(material: THREE.MeshStandardMaterial | THREE.MeshPhysic
 
   if (tuning.envMapIntensity !== undefined) {
     material.envMapIntensity = tuning.envMapIntensity
+  }
+
+  if (tuning.baseColor) {
+    material.color = new THREE.Color(tuning.baseColor)
+  }
+
+  if (tuning.clearColorMap) {
+    material.map = null
+    material.aoMap = null
+  }
+
+  if (tuning.clearNormalMap) {
+    material.normalMap = null
+  }
+
+  if (tuning.clearRoughnessMap) {
+    material.roughnessMap = null
   }
 
   if (tuning.roughnessMin !== undefined) {
@@ -1117,18 +1134,57 @@ function Plant({ materials }: { materials: ReturnType<typeof usePbrRoomMaterials
 }
 
 function WallArt({ variant }: { variant: 'left' | 'right' }) {
-  const frame = useMemo(() => new THREE.MeshStandardMaterial({ color: '#b2926d', roughness: 0.48 }), [])
-  const fillColor = variant === 'left' ? '#d9d0ba' : '#4b83c6'
+  const frameMaterial = useMemo(
+    () => new THREE.MeshStandardMaterial({ color: '#f4ede4', roughness: 0.56 }),
+    [],
+  )
+  const matMaterial = useMemo(
+    () => new THREE.MeshStandardMaterial({ color: '#fbf8f2', roughness: 0.74 }),
+    [],
+  )
+  const accentPrimary = variant === 'left' ? '#cbb6a5' : '#c7d0bf'
+  const accentSecondary = variant === 'left' ? '#8f6f58' : '#b79f8d'
+  const accentDark = '#4a433d'
 
   return (
     <group>
-      <mesh position={[0, 0.21, 0]} material={frame}>
-        <boxGeometry args={[0.28, 0.42, 0.035]} />
+      <mesh position={[0, 0.29, 0]} material={frameMaterial}>
+        <boxGeometry args={[0.34, 0.48, 0.035]} />
       </mesh>
-      <mesh position={[0, 0.21, 0.021]}>
-        <planeGeometry args={[0.22, 0.36]} />
-        <meshStandardMaterial color={fillColor} roughness={0.72} />
+      <mesh position={[0, 0.29, 0.02]} material={matMaterial}>
+        <planeGeometry args={[0.27, 0.41]} />
       </mesh>
+      {variant === 'left' ? (
+        <>
+          <mesh position={[-0.038, 0.32, 0.023]}>
+            <planeGeometry args={[0.14, 0.22]} />
+            <meshStandardMaterial color={accentPrimary} roughness={0.84} />
+          </mesh>
+          <mesh position={[0.042, 0.235, 0.024]} rotation={[0, 0, Math.PI / 7]}>
+            <planeGeometry args={[0.12, 0.12]} />
+            <meshStandardMaterial color={accentSecondary} roughness={0.7} />
+          </mesh>
+          <mesh position={[0.018, 0.39, 0.025]} rotation={[0, 0, -Math.PI / 10]}>
+            <planeGeometry args={[0.02, 0.16]} />
+            <meshStandardMaterial color={accentDark} roughness={0.5} />
+          </mesh>
+        </>
+      ) : (
+        <>
+          <mesh position={[0, 0.33, 0.023]}>
+            <circleGeometry args={[0.07, 32]} />
+            <meshStandardMaterial color={accentPrimary} roughness={0.82} />
+          </mesh>
+          <mesh position={[0, 0.24, 0.024]}>
+            <planeGeometry args={[0.16, 0.14]} />
+            <meshStandardMaterial color={accentSecondary} roughness={0.78} />
+          </mesh>
+          <mesh position={[0, 0.18, 0.025]}>
+            <planeGeometry args={[0.1, 0.016]} />
+            <meshStandardMaterial color={accentDark} roughness={0.56} />
+          </mesh>
+        </>
+      )}
     </group>
   )
 }
