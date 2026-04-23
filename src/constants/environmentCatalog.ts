@@ -180,8 +180,8 @@ function environmentModel(
 export const WALL_MATERIALS = wallMaterialIds.map(toWallMaterial)
 export const FLOOR_MATERIALS = floorMaterialIds.map(toFloorMaterial)
 
-export const DEFAULT_WALL_MATERIAL = WALL_MATERIALS[6]
-export const DEFAULT_FLOOR_MATERIAL = FLOOR_MATERIALS[0]
+export const DEFAULT_WALL_MATERIAL = WALL_MATERIALS[7]
+export const DEFAULT_FLOOR_MATERIAL = FLOOR_MATERIALS[6]
 
 const WINDOW_ITEMS = [
   ['modern-wide-picture-window', 'Wide Picture Window', { x: 1.58, y: 0.98, z: 0.1 }],

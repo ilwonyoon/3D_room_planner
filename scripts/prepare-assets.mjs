@@ -1,4 +1,4 @@
-import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join } from 'node:path'
 import { spawnSync } from 'node:child_process'
 
@@ -25,6 +25,9 @@ const textureCompression = process.env.ASSET_TEXTURE_FORMAT ?? 'webp'
 const modelOutputVariant = process.env.ASSET_MODEL_VARIANT ?? 'runtime'
 const forcePrepare = process.env.ASSET_PREPARE_FORCE === '1'
 const fbxConvertTimeoutMs = Number.parseInt(process.env.ASSET_FBX_CONVERT_TIMEOUT_MS ?? '240000', 10)
+const objConvertTimeoutMs = Number.parseInt(process.env.ASSET_OBJ_CONVERT_TIMEOUT_MS ?? '240000', 10)
+const objInputUpAxis = process.env.ASSET_OBJ_INPUT_UP_AXIS ?? 'Z'
+const objOutputUpAxis = process.env.ASSET_OBJ_OUTPUT_UP_AXIS ?? 'Y'
 const modelOutputRoot = join(
   ROOT,
   modelOutputVariant === 'ktx2' ? 'public/assets/models-ktx2' : 'public/assets/models',
@@ -117,6 +120,14 @@ function hasCommand(command) {
 
 function ensureDir(path) {
   mkdirSync(path, { recursive: true })
+}
+
+function readJsonIfExists(path) {
+  if (!existsSync(path)) {
+    return undefined
+  }
+
+  return JSON.parse(readFileSync(path, 'utf8'))
 }
 
 function modelOutputPath(...segments) {
@@ -234,6 +245,50 @@ function convertFbxToGlb(input, output) {
   })
 }
 
+function convertObjToGlb(input, output) {
+  if (!existsSync(input)) {
+    throw new Error(`Missing OBJ source: ${input}`)
+  }
+
+  ensureDir(dirname(output))
+
+  run(
+    'pnpm',
+    [
+      'exec',
+      'obj2gltf',
+      '--input',
+      input,
+      '--output',
+      output,
+      '--binary',
+      '--inputUpAxis',
+      objInputUpAxis,
+      '--outputUpAxis',
+      objOutputUpAxis,
+      '--doubleSidedMaterial',
+    ],
+    { timeout: objConvertTimeoutMs },
+  )
+}
+
+function manualObjSourcePath(sourceDir) {
+  const sourceJson = readJsonIfExists(join(sourceDir, 'source.json'))
+  const originalModelFile =
+    sourceJson?.canonicalModelFile === 'model.obj' && typeof sourceJson.originalModelFile === 'string'
+      ? sourceJson.originalModelFile
+      : undefined
+  const sourcePackageObj = originalModelFile
+    ? join(sourceDir, 'source-package', originalModelFile)
+    : undefined
+
+  if (sourcePackageObj && existsSync(sourcePackageObj)) {
+    return sourcePackageObj
+  }
+
+  return join(sourceDir, 'model.obj')
+}
+
 function prepareModels() {
   const standaloneModels = ['sheen-chair', 'sheen-wood-leather-sofa']
 
@@ -322,6 +377,7 @@ function prepareModels() {
       const sourceGlb = join(sourceDir, 'source.glb')
       const sourceGltf = join(sourceDir, 'source.gltf')
       const sourceFbx = join(sourceDir, 'model.fbx')
+      const sourceObj = manualObjSourcePath(sourceDir)
       const converted = join(sourceDir, `${modelId}.converted.glb`)
       const target = modelOutputPath('manual', `${modelId}.optimized.glb`)
 
@@ -337,9 +393,12 @@ function prepareModels() {
         } else if (existsSync(sourceFbx)) {
           convertFbxToGlb(sourceFbx, converted)
           optimizeModel(converted, target)
+        } else if (existsSync(sourceObj)) {
+          convertObjToGlb(sourceObj, converted)
+          optimizeModel(converted, target)
         } else {
           throw new Error(
-            `Manual asset ${modelId} has no runtime-ready source.glb, source.gltf, or model.fbx.`,
+            `Manual asset ${modelId} has no runtime-ready source.glb, source.gltf, model.fbx, or model.obj.`,
           )
         }
       } catch (error) {

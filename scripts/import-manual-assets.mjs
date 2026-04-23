@@ -34,7 +34,7 @@ const requiredFields = [
 ]
 
 const supportedExtensions = ['.glb', '.gltf', '.fbx', '.obj']
-const runtimeExtensions = ['.glb', '.gltf', '.fbx']
+const runtimeExtensions = ['.glb', '.gltf', '.fbx', '.obj']
 
 function ensureDir(path) {
   mkdirSync(path, { recursive: true })

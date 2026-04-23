@@ -85,15 +85,18 @@
 
 - `models/manual/*.optimized.glb`
   - Source: manually imported high-quality free furniture/decor model packages.
-  - Runtime format: downloaded source FBX packages converted with `fbx2gltf`, then glTF-Transform optimized with Meshopt and WebP textures.
-  - Source of truth: `raw/assets/models/manual/catalog-candidates.json`, `src/constants/manualProductCatalog.generated.ts`, `scripts/download-dimensiva-free-assets.mjs`, `scripts/download-designconnected-free-assets.mjs`, and `scripts/import-manual-assets.mjs`.
-  - Included runtime assets: 120 manual models; 41 from Dimensiva and 79 from Design Connected.
+  - Runtime format: downloaded source GLB/GLTF packages optimized directly; FBX packages converted with `fbx2gltf`; OBJ packages converted with `obj2gltf`; then glTF-Transform optimized with Meshopt and WebP textures.
+  - Source of truth: `raw/assets/models/manual/catalog-candidates.json`, `src/constants/manualProductCatalog.generated.ts`, `scripts/download-dimensiva-free-assets.mjs`, `scripts/download-designconnected-free-assets.mjs`, `scripts/download-muuto-3d-assets.mjs`, `scripts/download-vitra-glb-assets.mjs`, `scripts/update-designconnected-metadata.mjs`, `scripts/generate-manual-product-catalog.mjs`, and `scripts/import-manual-assets.mjs`.
+  - Included runtime assets: 141 manual models; 41 from Dimensiva, 79 from Design Connected, 11 from Muuto, and 10 from Vitra.
   - Dimensiva source: https://dimensiva.com/free-3d-models/
   - Dimensiva license reference: https://dimensiva.com/license/
   - Design Connected source: https://www.designconnected.com/freebies
   - Design Connected model FAQ reference: https://www.designconnected.com/faq
-  - QA exclusions: `designconnected-fuwl-cage-table-8851` did not produce a download after repeated logged-in attempts; `designconnected-rosa-rosa-rosas-wall-light-9791` and `designconnected-shaker-vases-set-9478` timed out in FBX conversion and are retained only in raw/import failure logs.
-  - Category additions exposed in product catalog: 1 sofa, 1 bed, 11 chairs, 31 tables, 4 storage pieces, 24 decor pieces, and 48 lighting pieces.
+  - Muuto source: https://download.muuto.com/digitalshowroom/#/gallery/3D-files
+  - Vitra source: https://downloads.vitra.com/#/media?media_category_media_type=root.cad.glb.
+  - QA exclusions: `designconnected-fuwl-cage-table-8851` did not produce a download after repeated logged-in attempts; `designconnected-rosa-rosa-rosas-wall-light-9791` and `designconnected-shaker-vases-set-9478` timed out in FBX conversion and are retained only in raw/import failure logs; `muuto-ambit-pendant-943052121460012` failed archive extraction because of ZIP filename encoding.
+  - QA notes: several Muuto OBJ packages reference missing or mismatched `.mtl`/texture filenames in the official archive; those models were converted as geometry-first GLBs and may use default materials.
+  - Category additions exposed in product catalog: 1 sofa, 1 bed, 19 chairs, 40 tables, 4 storage pieces, 26 decor pieces, and 50 lighting pieces.
 
 - `models-ktx2/**/*.optimized.glb`
   - Source: matching source model from `models/**`
