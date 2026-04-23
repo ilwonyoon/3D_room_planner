@@ -31,16 +31,71 @@ function readStorageState() {
   return JSON.parse(readFileSync(storageStatePath, 'utf8'))
 }
 
+function writeStorageState(storageState) {
+  writeFileSync(storageStatePath, `${JSON.stringify(storageState, null, 2)}\n`)
+}
+
+function localStorageEntry(storageState, name) {
+  return storageState.origins
+    ?.find((item) => item.origin === 'https://3dsky.org')
+    ?.localStorage?.find((item) => item.name === name)
+}
+
 function readAuthToken() {
   const storageState = readStorageState()
-  const origin = storageState.origins?.find((item) => item.origin === 'https://3dsky.org')
-  const token = origin?.localStorage?.find((item) => item.name === 'skyAuthToken')?.value
+  const token = localStorageEntry(storageState, 'skyAuthToken')?.value
 
   if (!token) {
     throw new Error(`Missing skyAuthToken in ${storageStatePath}`)
   }
 
   return token
+}
+
+function readRefreshToken() {
+  const storageState = readStorageState()
+  const token = localStorageEntry(storageState, 'skyRefreshToken')?.value
+
+  if (!token) {
+    throw new Error(`Missing skyRefreshToken in ${storageStatePath}`)
+  }
+
+  return token
+}
+
+async function refreshAuthToken() {
+  const refreshToken = readRefreshToken()
+  const response = await fetch('https://auth.3dsky.org/api/token/refresh', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json, text/plain, */*',
+    },
+    body: JSON.stringify({
+      refresh_token: refreshToken,
+    }),
+  })
+
+  const payload = await response.json()
+
+  if (!response.ok || !payload?.data?.token) {
+    throw new Error(`3dsky token refresh failed: ${response.status} ${JSON.stringify(payload).slice(0, 400)}`)
+  }
+
+  const storageState = readStorageState()
+  const authEntry = localStorageEntry(storageState, 'skyAuthToken')
+  const refreshEntry = localStorageEntry(storageState, 'skyRefreshToken')
+
+  if (authEntry) {
+    authEntry.value = payload.data.token
+  }
+
+  if (refreshEntry && payload.data.refresh_token) {
+    refreshEntry.value = payload.data.refresh_token
+  }
+
+  writeStorageState(storageState)
+  return payload.data.token
 }
 
 function ensureDir(path) {
@@ -239,25 +294,33 @@ async function readProduct(page, slug) {
 }
 
 async function resolveDownloadUrl(page, slug, authToken) {
-  const response = await page.evaluate(
-    async ({ slug: modelSlug, token }) => {
-      const result = await fetch(`/api/models/download/${modelSlug}`, {
-        credentials: 'include',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json, text/plain, */*',
-          'X-Requested-With': 'XMLHttpRequest',
-        },
-      })
+  const fetchDownloadResponse = async (token) =>
+    page.evaluate(
+      async ({ slug: modelSlug, token: bearerToken }) => {
+        const result = await fetch(`/api/models/download/${modelSlug}`, {
+          credentials: 'include',
+          headers: {
+            Authorization: `Bearer ${bearerToken}`,
+            Accept: 'application/json, text/plain, */*',
+            'X-Requested-With': 'XMLHttpRequest',
+          },
+        })
 
-      return {
-        ok: result.ok,
-        status: result.status,
-        body: await result.text(),
-      }
-    },
-    { slug, token: authToken },
-  )
+        return {
+          ok: result.ok,
+          status: result.status,
+          body: await result.text(),
+        }
+      },
+      { slug, token },
+    )
+
+  let response = await fetchDownloadResponse(authToken)
+
+  if (response.status === 401 && response.body.includes('expired')) {
+    const nextToken = await refreshAuthToken()
+    response = await fetchDownloadResponse(nextToken)
+  }
 
   if (!response.ok) {
     throw new Error(`3dsky download API failed for ${slug}: ${response.status} ${response.body.slice(0, 300)}`)
