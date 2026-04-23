@@ -17,6 +17,18 @@ const publicDir = path.join(rootDir, 'public')
 const outputDir = path.join(rootDir, 'docs')
 const reportPath = path.join(outputDir, 'room-setting-model-bounds-audit.md')
 const polyhavenModelIds = new Set(['dartboard'])
+const architecturalModelIds = new Set([
+  'modern-wide-picture-window',
+  'modern-sliding-window',
+  'modern-tall-casement-window',
+  'modern-square-awning-window',
+  'modern-transom-window',
+  'modern-flush-white-door',
+  'modern-slim-glass-door',
+  'modern-sliding-glass-door',
+  'modern-double-glass-door',
+  'modern-ribbed-oak-door',
+])
 
 const catalogSource = readFileSync(path.join(rootDir, 'src', 'constants', 'environmentCatalog.ts'), 'utf8')
 
@@ -41,8 +53,8 @@ function parseCatalogArray(name, category, placement, defaultRotationY = 0) {
 }
 
 const catalogItems = [
-  ...parseCatalogArray('WINDOW_ITEMS', 'windows', 'wall', Math.PI / 2),
-  ...parseCatalogArray('DOOR_ITEMS', 'doors', 'wall', Math.PI / 2),
+  ...parseCatalogArray('WINDOW_ITEMS', 'windows', 'wall'),
+  ...parseCatalogArray('DOOR_ITEMS', 'doors', 'wall'),
   ...parseCatalogArray('WALL_DECOR_ITEMS', 'shell', 'wall'),
   ...parseCatalogArray('DECOR_ITEMS', 'decor', 'floor'),
 ]
@@ -50,6 +62,10 @@ const catalogItems = [
 function modelPathFor(category, id) {
   if (id.includes('_') || polyhavenModelIds.has(id)) {
     return path.join(publicDir, 'assets', 'models', 'polyhaven', `${id}.optimized.glb`)
+  }
+
+  if (architecturalModelIds.has(id)) {
+    return path.join(publicDir, 'assets', 'models', 'architectural', `${id}.optimized.glb`)
   }
 
   return path.join(publicDir, 'assets', 'models', 'environment', category, `${id}.optimized.glb`)
@@ -96,7 +112,7 @@ function maxAxisError(error) {
 
 function riskLabel(error, placement, renderedSize) {
   if (maxAxisError(error) > 0.4) return 'fail'
-  if (placement === 'wall' && Math.max(renderedSize.x, renderedSize.z) < renderedSize.y * 0.55) return 'orientation-risk'
+  if (placement === 'wall' && Math.max(renderedSize.x, renderedSize.z) < renderedSize.y * 0.35) return 'orientation-risk'
   if (maxAxisError(error) > 0.2) return 'review'
   return 'ok'
 }

@@ -1,138 +1,105 @@
-import { cpSync, existsSync, mkdirSync, readdirSync, rmSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { basename, dirname, join } from 'node:path'
 import { spawnSync } from 'node:child_process'
 
 const ROOT = new URL('..', import.meta.url).pathname
+const LOCAL_KTX_BIN_DIR = join(ROOT, 'tools/ktx/bin')
+const LOCAL_KTX_LIB_DIR = join(ROOT, 'tools/ktx/lib')
 
-const kenneyEnvironmentModels = {
+const prepareScope = new Set(
+  (process.env.ASSET_PREPARE_SCOPE ?? 'all')
+    .split(',')
+    .map((scope) => scope.trim())
+    .filter(Boolean),
+)
+const modelFilter = new Set(
+  (process.env.ASSET_MODEL_FILTER ?? '')
+    .split(',')
+    .map((id) => id.trim())
+    .filter(Boolean),
+)
+
+const shouldPrepare = (scope) => prepareScope.has('all') || prepareScope.has(scope)
+const shouldPrepareModel = (id) => modelFilter.size === 0 || modelFilter.has(id)
+const textureCompression = process.env.ASSET_TEXTURE_FORMAT ?? 'webp'
+const modelOutputVariant = process.env.ASSET_MODEL_VARIANT ?? 'runtime'
+const forcePrepare = process.env.ASSET_PREPARE_FORCE === '1'
+const fbxConvertTimeoutMs = Number.parseInt(process.env.ASSET_FBX_CONVERT_TIMEOUT_MS ?? '240000', 10)
+const modelOutputRoot = join(
+  ROOT,
+  modelOutputVariant === 'ktx2' ? 'public/assets/models-ktx2' : 'public/assets/models',
+)
+
+if (!['webp', 'ktx2', 'avif', 'auto'].includes(textureCompression)) {
+  throw new Error(
+    `Unsupported ASSET_TEXTURE_FORMAT=${textureCompression}. Use webp, ktx2, avif, or auto.`,
+  )
+}
+
+if (textureCompression === 'ktx2' && !hasCommand('toktx')) {
+  throw new Error('KTX2 compression requires `toktx`. Run `pnpm assets:install-ktx` first.')
+}
+
+const shareTexturesFurnitureModels = [
+  'sharetextures-chair-25',
+  'sharetextures-chair-26',
+  'sharetextures-chair-27',
+  'sharetextures-chair-28',
+  'sharetextures-chair-29',
+  'sharetextures-bench-32',
+  'sharetextures-cabinet-3',
+  'sharetextures-stool-5',
+  'sharetextures-stool-7',
+  'sharetextures-stool-8',
+]
+
+const objaverseFurnitureModels = [
+  'objaverse-messy-bed-2',
+  'objaverse-soho-bed',
+  'objaverse-chelsea-storage-bed',
+  'objaverse-bed-0101',
+  'objaverse-king-floor-bed',
+  'objaverse-large-grantham-bed',
+]
+
+const architecturalEnvironmentModels = {
   windows: [
-    'wall-window-wide-round-detailed',
-    'wall-window-square-detailed',
-    'wall-window-wide-square-detailed',
-    'wall-window-square',
-    'wall-window-wide-round',
-    'wall-window-round-detailed',
-    'wall-window-wide-square',
-    'wall-window-round',
-    'barricade-window-a',
-    'barricade-window-b',
-    'barricade-window-c',
+    'modern-wide-picture-window',
+    'modern-sliding-window',
+    'modern-tall-casement-window',
+    'modern-square-awning-window',
+    'modern-transom-window',
   ],
   doors: [
-    'door-rotate-square-a',
-    'door-rotate-square-b',
-    'door-rotate-square-c',
-    'door-rotate-square-d',
-    'door-rotate-round-a',
-    'door-rotate-round-b',
-    'door-rotate-round-c',
-    'door-rotate-round-d',
-    'wall-doorway-square',
-    'wall-doorway-round',
-    'wall-doorway-wide-square',
-    'wall-doorway-wide-round',
-    'barricade-doorway-a',
-    'barricade-doorway-b',
-    'barricade-doorway-c',
-  ],
-  shell: [
-    'wall',
-    'wall-half',
-    'wall-low',
-    'wall-corner',
-    'wall-corner-round',
-    'floor',
-    'floor-half',
-    'floor-quarter',
-    'border',
-    'border-high',
-    'column',
-    'column-thin',
-    'column-wide',
-    'plating',
-    'plating-wide',
-    'stairs-open',
+    'modern-flush-white-door',
+    'modern-slim-glass-door',
+    'modern-sliding-glass-door',
+    'modern-double-glass-door',
+    'modern-ribbed-oak-door',
   ],
 }
 
-const kenneyFurnitureModels = [
-  'bedBunk',
-  'bedDouble',
-  'bedSingle',
-  'benchCushion',
-  'benchCushionLow',
-  'bookcaseClosed',
-  'bookcaseClosedDoors',
-  'bookcaseClosedWide',
-  'bookcaseOpen',
-  'bookcaseOpenLow',
-  'cabinetTelevision',
-  'cabinetTelevisionDoors',
-  'chairCushion',
-  'chairDesk',
-  'chairModernCushion',
-  'chairModernFrameCushion',
-  'chairRounded',
-  'coatRackStanding',
-  'computerScreen',
-  'desk',
-  'deskCorner',
-  'dryer',
-  'hoodModern',
-  'kitchenCabinet',
-  'kitchenCabinetDrawer',
-  'kitchenCabinetUpper',
-  'kitchenCabinetUpperDouble',
-  'kitchenCabinetUpperLow',
-  'kitchenFridge',
-  'kitchenFridgeLarge',
-  'kitchenMicrowave',
-  'kitchenStoveElectric',
-  'lampRoundFloor',
-  'lampRoundTable',
-  'lampSquareCeiling',
-  'lampSquareFloor',
-  'lampSquareTable',
-  'lampWall',
-  'laptop',
-  'loungeChair',
-  'loungeDesignChair',
-  'loungeDesignSofa',
-  'loungeSofa',
-  'loungeSofaLong',
-  'loungeSofaOttoman',
-  'pillow',
-  'pillowLong',
-  'plantSmall1',
-  'plantSmall2',
-  'plantSmall3',
-  'pottedPlant',
-  'radio',
-  'rugRectangle',
-  'rugRound',
-  'sideTable',
-  'sideTableDrawers',
-  'speaker',
-  'speakerSmall',
-  'stoolBar',
-  'stoolBarSquare',
-  'tableCoffee',
-  'tableCoffeeGlass',
-  'tableCoffeeGlassSquare',
-  'tableCoffeeSquare',
-  'tableGlass',
-  'tableRound',
-  'televisionModern',
-  'washer',
-  'washerDryerStacked',
-]
+function commandEnv() {
+  return {
+    ...process.env,
+    PATH: `${LOCAL_KTX_BIN_DIR}:${process.env.PATH ?? ''}`,
+    DYLD_LIBRARY_PATH: `${LOCAL_KTX_LIB_DIR}:${process.env.DYLD_LIBRARY_PATH ?? ''}`,
+    LD_LIBRARY_PATH: `${LOCAL_KTX_LIB_DIR}:${process.env.LD_LIBRARY_PATH ?? ''}`,
+  }
+}
 
-function run(command, args) {
+function run(command, args, options = {}) {
   const result = spawnSync(command, args, {
     cwd: ROOT,
+    env: commandEnv(),
     stdio: 'inherit',
     shell: false,
+    ...options,
   })
+
+  if (result.error) {
+    throw result.error
+  }
 
   if (result.status !== 0) {
     throw new Error(`${command} ${args.join(' ')} failed`)
@@ -140,12 +107,20 @@ function run(command, args) {
 }
 
 function hasCommand(command) {
-  const result = spawnSync('which', [command], { stdio: 'ignore' })
+  if (existsSync(join(LOCAL_KTX_BIN_DIR, command))) {
+    return true
+  }
+
+  const result = spawnSync('which', [command], { env: commandEnv(), stdio: 'ignore' })
   return result.status === 0
 }
 
 function ensureDir(path) {
   mkdirSync(path, { recursive: true })
+}
+
+function modelOutputPath(...segments) {
+  return join(modelOutputRoot, ...segments)
 }
 
 function prepareTextureDirectory(source, target, maxSize) {
@@ -226,65 +201,168 @@ function optimizeModel(input, output) {
     '--compress',
     'meshopt',
     '--texture-compress',
-    'webp',
+    textureCompression,
     '--texture-size',
     '1024',
   ])
 }
 
+function fbx2gltfBinaryPath() {
+  const platformDirectory =
+    process.platform === 'darwin' ? 'Darwin' : process.platform === 'linux' ? 'Linux' : 'Windows_NT'
+  const binaryName = platformDirectory === 'Windows_NT' ? 'FBX2glTF.exe' : 'FBX2glTF'
+
+  return join(ROOT, 'node_modules/fbx2gltf/bin', platformDirectory, binaryName)
+}
+
+function convertFbxToGlb(input, output) {
+  if (!existsSync(input)) {
+    throw new Error(`Missing FBX source: ${input}`)
+  }
+
+  const binary = fbx2gltfBinaryPath()
+
+  if (!existsSync(binary)) {
+    throw new Error('Missing fbx2gltf. Run `pnpm install` before preparing ShareTextures models.')
+  }
+
+  ensureDir(dirname(output))
+
+  const outputBase = output.endsWith('.glb') ? output.slice(0, -4) : output
+  run(binary, ['--input', input, '--output', outputBase, '--binary'], {
+    timeout: fbxConvertTimeoutMs,
+  })
+}
+
 function prepareModels() {
   const standaloneModels = ['sheen-chair', 'sheen-wood-leather-sofa']
 
-  for (const modelId of standaloneModels) {
-    const input = join(ROOT, `raw/assets/models/${modelId}.glb`)
-    const output = join(ROOT, `public/assets/models/${modelId}.optimized.glb`)
-    optimizeModel(input, output)
+  if (shouldPrepare('khronos')) {
+    for (const modelId of standaloneModels) {
+      if (!shouldPrepareModel(modelId)) {
+        continue
+      }
+
+      const input = join(ROOT, `raw/assets/models/${modelId}.glb`)
+      const output = modelOutputPath(`${modelId}.optimized.glb`)
+      optimizeModel(input, output)
+    }
   }
 
   const polyHavenSourceDir = join(ROOT, 'raw/assets/models/polyhaven')
-  const polyHavenOutputDir = join(ROOT, 'public/assets/models/polyhaven')
+  const polyHavenOutputDir = modelOutputPath('polyhaven')
 
-  if (!existsSync(polyHavenSourceDir)) {
-    return
-  }
+  if (shouldPrepare('polyhaven') && existsSync(polyHavenSourceDir)) {
+    ensureDir(polyHavenOutputDir)
 
-  ensureDir(polyHavenOutputDir)
+    for (const assetId of readdirSync(polyHavenSourceDir)) {
+      if (!shouldPrepareModel(assetId)) {
+        continue
+      }
 
-  for (const assetId of readdirSync(polyHavenSourceDir)) {
-    const source = join(polyHavenSourceDir, assetId, `${assetId}_1k.gltf`)
-    const target = join(polyHavenOutputDir, `${assetId}.optimized.glb`)
+      const source = join(polyHavenSourceDir, assetId, `${assetId}_1k.gltf`)
+      const target = join(polyHavenOutputDir, `${assetId}.optimized.glb`)
 
-    if (!existsSync(source)) {
-      continue
-    }
+      if (!existsSync(source)) {
+        continue
+      }
 
-    optimizeModel(source, target)
-  }
-
-  const kenneySourceDir = join(ROOT, 'raw/assets/kenney/building-kit/Models/GLB format')
-
-  if (!existsSync(kenneySourceDir)) {
-    return
-  }
-
-  for (const [category, modelIds] of Object.entries(kenneyEnvironmentModels)) {
-    for (const modelId of modelIds) {
-      const source = join(kenneySourceDir, `${modelId}.glb`)
-      const target = join(ROOT, `public/assets/models/environment/${category}/${modelId}.optimized.glb`)
       optimizeModel(source, target)
     }
   }
 
-  const kenneyFurnitureSourceDir = join(ROOT, 'raw/assets/kenney/furniture-kit/Models/GLTF format')
+  const shareTexturesSourceDir = join(ROOT, 'raw/assets/models/sharetextures')
 
-  if (!existsSync(kenneyFurnitureSourceDir)) {
-    return
+  if (shouldPrepare('sharetextures') && existsSync(shareTexturesSourceDir)) {
+    for (const modelId of shareTexturesFurnitureModels) {
+      if (!shouldPrepareModel(modelId)) {
+        continue
+      }
+
+      const source = join(shareTexturesSourceDir, modelId, 'model.fbx')
+      const converted = join(shareTexturesSourceDir, modelId, `${modelId}.converted.glb`)
+      const target = modelOutputPath('sharetextures', `${modelId}.optimized.glb`)
+
+      convertFbxToGlb(source, converted)
+      optimizeModel(converted, target)
+    }
   }
 
-  for (const modelId of kenneyFurnitureModels) {
-    const source = join(kenneyFurnitureSourceDir, `${modelId}.glb`)
-    const target = join(ROOT, `public/assets/models/kenney/furniture/${modelId}.optimized.glb`)
-    optimizeModel(source, target)
+  const objaverseSourceDir = join(ROOT, 'raw/assets/models/objaverse')
+
+  if (shouldPrepare('objaverse') && existsSync(objaverseSourceDir)) {
+    for (const modelId of objaverseFurnitureModels) {
+      if (!shouldPrepareModel(modelId)) {
+        continue
+      }
+
+      const source = join(objaverseSourceDir, modelId, 'source.glb')
+      const target = modelOutputPath('objaverse', `${modelId}.optimized.glb`)
+      optimizeModel(source, target)
+    }
+  }
+
+  const manualSourceDir = join(ROOT, 'raw/assets/models/manual')
+
+  if (shouldPrepare('manual') && existsSync(manualSourceDir)) {
+    const manualFailures = []
+
+    for (const entry of readdirSync(manualSourceDir, { withFileTypes: true })) {
+      if (!entry.isDirectory()) {
+        continue
+      }
+
+      const modelId = entry.name
+
+      if (!shouldPrepareModel(modelId)) {
+        continue
+      }
+
+      const sourceDir = join(manualSourceDir, modelId)
+      const sourceGlb = join(sourceDir, 'source.glb')
+      const sourceGltf = join(sourceDir, 'source.gltf')
+      const sourceFbx = join(sourceDir, 'model.fbx')
+      const converted = join(sourceDir, `${modelId}.converted.glb`)
+      const target = modelOutputPath('manual', `${modelId}.optimized.glb`)
+
+      try {
+        if (!forcePrepare && existsSync(target)) {
+          continue
+        }
+
+        if (existsSync(sourceGlb)) {
+          optimizeModel(sourceGlb, target)
+        } else if (existsSync(sourceGltf)) {
+          optimizeModel(sourceGltf, target)
+        } else if (existsSync(sourceFbx)) {
+          convertFbxToGlb(sourceFbx, converted)
+          optimizeModel(converted, target)
+        } else {
+          throw new Error(
+            `Manual asset ${modelId} has no runtime-ready source.glb, source.gltf, or model.fbx.`,
+          )
+        }
+      } catch (error) {
+        manualFailures.push({ modelId, error: error.message })
+      }
+    }
+
+    writeFileSync(
+      join(manualSourceDir, 'prepare-failures.json'),
+      `${JSON.stringify(manualFailures, null, 2)}\n`,
+    )
+  }
+
+  if (shouldPrepare('architectural')) {
+    run('node', ['scripts/generate-architectural-assets.mjs'])
+
+    for (const [category, modelIds] of Object.entries(architecturalEnvironmentModels)) {
+      for (const modelId of modelIds) {
+        const source = join(ROOT, `raw/assets/models/architectural/${modelId}.glb`)
+        const target = modelOutputPath('architectural', `${modelId}.optimized.glb`)
+        optimizeModel(source, target)
+      }
+    }
   }
 }
 
@@ -300,8 +378,14 @@ function prepareHdri() {
   cpSync(input, output)
 }
 
-prepareTextures()
+if (shouldPrepare('textures')) {
+  prepareTextures()
+}
 prepareModels()
-prepareHdri()
+if (shouldPrepare('hdri')) {
+  prepareHdri()
+}
 
-console.log(`Prepared runtime assets from ${basename(join(ROOT, 'raw'))}/`)
+console.log(
+  `Prepared runtime assets from ${basename(join(ROOT, 'raw'))}/ using ${textureCompression} textures into ${modelOutputVariant} model output.`,
+)

@@ -2,6 +2,7 @@ import { IsometricScene } from '@/scene/IsometricScene'
 import { EditorTopBar } from '@/ui/EditorTopBar'
 import { CatalogSheet } from '@/ui/CatalogSheet'
 import { useEditorObjectsStore, usePlacementsStore, useRoomStore, useSelectionStore } from '@/store'
+import { StoreDebugBridge } from '@/store/debugStoreBridge'
 import { color } from '@/constants'
 
 export function Editor() {
@@ -14,7 +15,7 @@ export function Editor() {
     clearPlacements()
     resetObjects()
     resetRoom()
-    select('armchair')
+    select(null)
   }
 
   const handleDone = () => {
@@ -32,6 +33,7 @@ export function Editor() {
         overflow: 'hidden',
       }}
     >
+      <StoreDebugBridge />
       <IsometricScene />
       <EditorTopBar onReset={handleReset} onDone={handleDone} />
       <CatalogSheet />

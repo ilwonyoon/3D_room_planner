@@ -42,6 +42,7 @@ export type RoomModelItem = {
   defaultPosition: { x: number; z: number }
   defaultElevationM: number
   defaultRotationY: number
+  wallSurfacePlane?: 'xy' | 'yz'
   displayLabel: string
 }
 
@@ -49,6 +50,19 @@ export type RoomSettingsItem = RoomMaterialItem | RoomModelItem
 
 const POLYHAVEN_MODEL_IDS = new Set([
   'dartboard',
+])
+
+const ARCHITECTURAL_MODEL_IDS = new Set([
+  'modern-wide-picture-window',
+  'modern-sliding-window',
+  'modern-tall-casement-window',
+  'modern-square-awning-window',
+  'modern-transom-window',
+  'modern-flush-white-door',
+  'modern-slim-glass-door',
+  'modern-sliding-glass-door',
+  'modern-double-glass-door',
+  'modern-ribbed-oak-door',
 ])
 
 const wallMaterialIds = [
@@ -134,17 +148,21 @@ function environmentModel(
   placement: 'floor' | 'wall',
   dimensionsM: { x: number; y: number; z: number },
   defaultRotationY = 0,
+  wallSurfacePlane: 'xy' | 'yz' = 'xy',
 ): RoomModelItem {
   const isPolyHaven = id.includes('_') || POLYHAVEN_MODEL_IDS.has(id)
+  const isArchitectural = ARCHITECTURAL_MODEL_IDS.has(id)
   const modelUrl = isPolyHaven
     ? `/assets/models/polyhaven/${id}.optimized.glb`
-    : `/assets/models/environment/${category === 'wall-decor' ? 'shell' : category}/${id}.optimized.glb`
+    : isArchitectural
+      ? `/assets/models/architectural/${id}.optimized.glb`
+      : `/assets/models/environment/${category === 'wall-decor' ? 'shell' : category}/${id}.optimized.glb`
 
   return {
     kind: 'model',
     id,
     name,
-    source: isPolyHaven ? 'Poly Haven' : 'Kenney',
+    source: isPolyHaven ? 'Poly Haven' : 'Pocketroom',
     category,
     modelUrl,
     thumbnailUrl: `/assets/model-thumbnails/${id}.png`,
@@ -154,6 +172,7 @@ function environmentModel(
     defaultPosition: placement === 'wall' ? { x: 0, z: -2.46 } : { x: 0.1, z: 0.45 },
     defaultElevationM: placement === 'wall' ? 1.1 : 0.02,
     defaultRotationY,
+    wallSurfacePlane: placement === 'wall' ? wallSurfacePlane : undefined,
     displayLabel,
   }
 }
@@ -165,32 +184,19 @@ export const DEFAULT_WALL_MATERIAL = WALL_MATERIALS[6]
 export const DEFAULT_FLOOR_MATERIAL = FLOOR_MATERIALS[0]
 
 const WINDOW_ITEMS = [
-  ['wall-window-wide-round-detailed', 'Wide Round Window', { x: 1.2, y: 0.72, z: 0.06 }],
-  ['wall-window-square-detailed', 'Square Window', { x: 1, y: 1.2, z: 0.1 }],
-  ['wall-window-wide-square-detailed', 'Wide Square Window', { x: 1.2, y: 0.72, z: 0.06 }],
-  ['wall-window-square', 'Plain Square Window', { x: 1, y: 1.2, z: 0.1 }],
-  ['wall-window-wide-round', 'Plain Wide Round Window', { x: 1.2, y: 0.72, z: 0.06 }],
-  ['wall-window-round-detailed', 'Round Window', { x: 1, y: 1.2, z: 0.1 }],
-  ['wall-window-wide-square', 'Plain Wide Square Window', { x: 1.2, y: 0.72, z: 0.06 }],
-  ['wall-window-round', 'Plain Round Window', { x: 1, y: 1.2, z: 0.1 }],
-  ['barricade-window-a', 'Window Cover A', { x: 1.2, y: 0.92, z: 0.07 }],
-  ['barricade-window-b', 'Window Cover B', { x: 1.2, y: 1.04, z: 0.07 }],
-  ['barricade-window-c', 'Window Cover C', { x: 1.11, y: 1.2, z: 0.09 }],
+  ['modern-wide-picture-window', 'Wide Picture Window', { x: 1.58, y: 0.98, z: 0.1 }],
+  ['modern-sliding-window', 'Two-Panel Sliding Window', { x: 1.62, y: 1.02, z: 0.11 }],
+  ['modern-tall-casement-window', 'Tall Casement Window', { x: 0.88, y: 1.54, z: 0.16 }],
+  ['modern-square-awning-window', 'Square Awning Window', { x: 1.04, y: 1, z: 0.11 }],
+  ['modern-transom-window', 'Narrow Transom Window', { x: 1.42, y: 0.5, z: 0.1 }],
 ] as const
 
 const DOOR_ITEMS = [
-  ['door-rotate-square-a', 'Square Door A', { x: 0.9, y: 2.05, z: 0.24 }],
-  ['door-rotate-square-b', 'Square Door B', { x: 0.9, y: 2.05, z: 0.24 }],
-  ['door-rotate-square-c', 'Square Door C', { x: 0.9, y: 2.05, z: 0.24 }],
-  ['door-rotate-square-d', 'Square Door D', { x: 0.9, y: 2.05, z: 0.24 }],
-  ['door-rotate-round-a', 'Round Door A', { x: 0.9, y: 2.05, z: 0.24 }],
-  ['door-rotate-round-b', 'Round Door B', { x: 0.9, y: 2.05, z: 0.24 }],
-  ['door-rotate-round-c', 'Round Door C', { x: 0.9, y: 2.05, z: 0.24 }],
-  ['door-rotate-round-d', 'Round Door D', { x: 0.9, y: 2.05, z: 0.24 }],
-  ['wall-doorway-square', 'Square Doorway', { x: 1.71, y: 2.05, z: 0.17 }],
-  ['wall-doorway-round', 'Round Doorway', { x: 1.71, y: 2.05, z: 0.17 }],
-  ['wall-doorway-wide-square', 'Wide Square Doorway', { x: 2.05, y: 1.23, z: 0.1 }],
-  ['wall-doorway-wide-round', 'Wide Round Doorway', { x: 2.05, y: 1.23, z: 0.1 }],
+  ['modern-flush-white-door', 'Flush White Door', { x: 1.02, y: 2.16, z: 0.16 }],
+  ['modern-slim-glass-door', 'Slim Glass Panel Door', { x: 1.02, y: 2.16, z: 0.16 }],
+  ['modern-sliding-glass-door', 'Sliding Glass Door', { x: 1.86, y: 2.12, z: 0.13 }],
+  ['modern-double-glass-door', 'Double Glass Door', { x: 1.5, y: 2.16, z: 0.16 }],
+  ['modern-ribbed-oak-door', 'Ribbed Oak Door', { x: 1.02, y: 2.16, z: 0.16 }],
 ] as const
 
 const WALL_DECOR_ITEMS = [
@@ -223,10 +229,10 @@ export const ROOM_SETTINGS_CATALOG: RoomSettingsItem[] = [
   ...WALL_MATERIALS,
   ...FLOOR_MATERIALS,
   ...WINDOW_ITEMS.map(([id, name, dimensionsM]) =>
-    environmentModel('windows', id, name, 'Window', 'wall', dimensionsM, Math.PI / 2),
+    environmentModel('windows', id, name, name, 'wall', dimensionsM),
   ),
   ...DOOR_ITEMS.map(([id, name, dimensionsM]) =>
-    environmentModel('doors', id, name, 'Door', 'wall', dimensionsM, Math.PI / 2),
+    environmentModel('doors', id, name, name, 'wall', dimensionsM),
   ),
   ...WALL_DECOR_ITEMS.map(([id, name, dimensionsM]) =>
     environmentModel('wall-decor', id, name, 'Wall decor', 'wall', dimensionsM),

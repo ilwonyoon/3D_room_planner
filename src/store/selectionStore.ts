@@ -6,6 +6,6 @@ interface SelectionState {
 }
 
 export const useSelectionStore = create<SelectionState>((set) => ({
-  selectedId: 'armchair',
+  selectedId: null,
   select: (id) => set({ selectedId: id }),
 }))

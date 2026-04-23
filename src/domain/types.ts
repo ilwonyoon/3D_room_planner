@@ -34,7 +34,7 @@ export interface FurnitureCatalogItem {
   placement: 'floor' | 'wall' | 'ceiling'
   snapToWall: boolean
   clearanceM: { front: number; sides: number; back?: number }
-  source: 'kenney' | 'polypizza' | 'meshy' | 'procedural' | 'ikea-ref'
+  source: 'polyhaven' | 'sharetextures' | 'khronos' | 'polypizza' | 'meshy' | 'procedural' | 'ikea-ref'
   license: 'CC0' | 'CC-BY' | 'commercial'
 }
 

@@ -82,18 +82,20 @@ export function constrainFloorMove({
   others,
   room,
   gridM = 0.05,
+  avoidCollisions = true,
 }: {
   candidate: Footprint
   others: Footprint[]
   room: Room
   gridM?: number
+  avoidCollisions?: boolean
 }) {
   const rotatedSize = rotatedFootprintSize(candidate.size, candidate.rotationY)
   const snapped = snappedPosition(candidate.position, gridM)
   const clamped = clampToRoom(snapped, rotatedSize, room)
   const constrained = { ...candidate, position: clamped }
 
-  if (hasCollision(constrained, others)) {
+  if (avoidCollisions && hasCollision(constrained, others)) {
     return null
   }
 

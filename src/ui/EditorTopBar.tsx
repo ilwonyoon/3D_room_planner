@@ -1,5 +1,6 @@
-import { useEditorObjectsStore, useUiStore } from '@/store'
+import { lightingPresetOptions, useCameraViewStore, useEditorObjectsStore, useLightingPresetStore, useUiStore } from '@/store'
 import { zIndex } from '@/constants'
+import type { CameraViewMode, LightingPresetId } from '@/store'
 
 interface Props {
   onReset?: () => void
@@ -23,15 +24,20 @@ type NavIcon = {
 export function EditorTopBar({ onReset: _onReset, onDone: _onDone }: Props) {
   const placedCount = useEditorObjectsStore((s) => s.objects.length)
   const setCatalog = useUiStore((s) => s.setCatalog)
+  const lightingPreset = useLightingPresetStore((s) => s.preset)
+  const setLightingPreset = useLightingPresetStore((s) => s.setPreset)
+  const cameraMode = useCameraViewStore((s) => s.mode)
+  const cycleCameraMode = useCameraViewStore((s) => s.cycleMode)
 
   const rightIcons: NavIcon[] = [
     {
-      label: 'View mode',
+      label: `View mode: ${cameraModeLabel(cameraMode)}`,
       src: '/icons/ui-nav-view.svg',
       glyphWidth: 18,
       glyphHeight: 18,
       glyphTop: 3,
       glyphLeft: 3,
+      onClick: cycleCameraMode,
     },
     {
       label: 'Capture',
@@ -88,6 +94,10 @@ export function EditorTopBar({ onReset: _onReset, onDone: _onDone }: Props) {
         glyphTop={2.5667}
         glyphLeft={1.75}
       />
+      <LightingPresetControl
+        value={lightingPreset}
+        onChange={setLightingPreset}
+      />
       <div
         style={{
           display: 'flex',
@@ -100,6 +110,80 @@ export function EditorTopBar({ onReset: _onReset, onDone: _onDone }: Props) {
           <NavIconButton key={icon.label} {...icon} />
         ))}
       </div>
+    </div>
+  )
+}
+
+function cameraModeLabel(mode: CameraViewMode) {
+  if (mode === 'bird') {
+    return 'Bird eye'
+  }
+
+  if (mode === 'pov') {
+    return 'POV'
+  }
+
+  return 'Isometric'
+}
+
+function LightingPresetControl({
+  value,
+  onChange,
+}: {
+  value: LightingPresetId
+  onChange: (value: LightingPresetId) => void
+}) {
+  return (
+    <div
+      role="group"
+      aria-label="Lighting preset"
+      style={{
+        position: 'absolute',
+        left: '50%',
+        top: 92,
+        transform: 'translateX(-50%)',
+        height: 30,
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, minmax(44px, 1fr))',
+        alignItems: 'center',
+        padding: 2,
+        borderRadius: 8,
+        background: 'rgba(18, 18, 18, 0.5)',
+        border: '1px solid rgba(255, 255, 255, 0.14)',
+        backdropFilter: 'blur(10px)',
+        pointerEvents: 'auto',
+      }}
+    >
+      {lightingPresetOptions.map((option) => {
+        const active = option.id === value
+
+        return (
+          <button
+            key={option.id}
+            type="button"
+            aria-label={`${option.label} lighting`}
+            aria-pressed={active}
+            onClick={() => onChange(option.id)}
+            style={{
+              height: 26,
+              minWidth: 44,
+              padding: '0 8px',
+              borderRadius: 6,
+              background: active ? '#ffffff' : 'transparent',
+              color: active ? '#202024' : '#f3f3f3',
+              fontFamily:
+                '"SF Pro Text", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", system-ui, sans-serif',
+              fontSize: 11,
+              fontWeight: 700,
+              lineHeight: '13px',
+              letterSpacing: 0,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {option.label}
+          </button>
+        )
+      })}
     </div>
   )
 }

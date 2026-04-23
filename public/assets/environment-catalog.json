@@ -9,100 +9,366 @@
   },
   "categories": {
     "wallMaterials": [
-      { "id": "Wallpaper001A", "name": "Wallpaper 001 A", "source": "ambientCG", "license": "CC0", "path": "/assets/textures-runtime/walls/Wallpaper001A" },
-      { "id": "Wallpaper002A", "name": "Wallpaper 002 A", "source": "ambientCG", "license": "CC0", "path": "/assets/textures-runtime/walls/Wallpaper002A" },
-      { "id": "Wallpaper001B", "name": "Wallpaper 001 B", "source": "ambientCG", "license": "CC0", "path": "/assets/textures-runtime/walls/Wallpaper001B" },
-      { "id": "Wallpaper001C", "name": "Wallpaper 001 C", "source": "ambientCG", "license": "CC0", "path": "/assets/textures-runtime/walls/Wallpaper001C" },
-      { "id": "Wallpaper002B", "name": "Wallpaper 002 B", "source": "ambientCG", "license": "CC0", "path": "/assets/textures-runtime/walls/Wallpaper002B" },
-      { "id": "Wallpaper002C", "name": "Wallpaper 002 C", "source": "ambientCG", "license": "CC0", "path": "/assets/textures-runtime/walls/Wallpaper002C" },
-      { "id": "Plaster001", "name": "Plaster 001", "source": "ambientCG", "license": "CC0", "path": "/assets/textures-runtime/walls/Plaster001" },
-      { "id": "Plaster002", "name": "Plaster 002", "source": "ambientCG", "license": "CC0", "path": "/assets/textures-runtime/walls/Plaster002" },
-      { "id": "Plaster003", "name": "Plaster 003", "source": "ambientCG", "license": "CC0", "path": "/assets/textures-runtime/walls/Plaster003" },
-      { "id": "Plaster007", "name": "Plaster 007", "source": "ambientCG", "license": "CC0", "path": "/assets/textures-runtime/walls/Plaster007" }
+      {
+        "id": "Wallpaper001A",
+        "name": "Wallpaper 001 A",
+        "source": "ambientCG",
+        "license": "CC0",
+        "path": "/assets/textures-runtime/walls/Wallpaper001A"
+      },
+      {
+        "id": "Wallpaper002A",
+        "name": "Wallpaper 002 A",
+        "source": "ambientCG",
+        "license": "CC0",
+        "path": "/assets/textures-runtime/walls/Wallpaper002A"
+      },
+      {
+        "id": "Wallpaper001B",
+        "name": "Wallpaper 001 B",
+        "source": "ambientCG",
+        "license": "CC0",
+        "path": "/assets/textures-runtime/walls/Wallpaper001B"
+      },
+      {
+        "id": "Wallpaper001C",
+        "name": "Wallpaper 001 C",
+        "source": "ambientCG",
+        "license": "CC0",
+        "path": "/assets/textures-runtime/walls/Wallpaper001C"
+      },
+      {
+        "id": "Wallpaper002B",
+        "name": "Wallpaper 002 B",
+        "source": "ambientCG",
+        "license": "CC0",
+        "path": "/assets/textures-runtime/walls/Wallpaper002B"
+      },
+      {
+        "id": "Wallpaper002C",
+        "name": "Wallpaper 002 C",
+        "source": "ambientCG",
+        "license": "CC0",
+        "path": "/assets/textures-runtime/walls/Wallpaper002C"
+      },
+      {
+        "id": "Plaster001",
+        "name": "Plaster 001",
+        "source": "ambientCG",
+        "license": "CC0",
+        "path": "/assets/textures-runtime/walls/Plaster001"
+      },
+      {
+        "id": "Plaster002",
+        "name": "Plaster 002",
+        "source": "ambientCG",
+        "license": "CC0",
+        "path": "/assets/textures-runtime/walls/Plaster002"
+      },
+      {
+        "id": "Plaster003",
+        "name": "Plaster 003",
+        "source": "ambientCG",
+        "license": "CC0",
+        "path": "/assets/textures-runtime/walls/Plaster003"
+      },
+      {
+        "id": "Plaster007",
+        "name": "Plaster 007",
+        "source": "ambientCG",
+        "license": "CC0",
+        "path": "/assets/textures-runtime/walls/Plaster007"
+      }
     ],
     "floorMaterials": [
-      { "id": "WoodFloor051", "name": "Wood Floor 051", "source": "ambientCG", "license": "CC0", "path": "/assets/textures-runtime/floors/WoodFloor051" },
-      { "id": "WoodFloor064", "name": "Wood Floor 064", "source": "ambientCG", "license": "CC0", "path": "/assets/textures-runtime/floors/WoodFloor064" },
-      { "id": "Concrete048", "name": "Concrete 048", "source": "ambientCG", "license": "CC0", "path": "/assets/textures-runtime/floors/Concrete048" },
-      { "id": "Concrete047A", "name": "Concrete 047 A", "source": "ambientCG", "license": "CC0", "path": "/assets/textures-runtime/floors/Concrete047A" },
-      { "id": "Carpet016", "name": "Carpet 016", "source": "ambientCG", "license": "CC0", "path": "/assets/textures-runtime/floors/Carpet016" },
-      { "id": "WoodFloor070", "name": "Wood Floor 070", "source": "ambientCG", "license": "CC0", "path": "/assets/textures-runtime/floors/WoodFloor070" },
-      { "id": "WoodFloor071", "name": "Wood Floor 071", "source": "ambientCG", "license": "CC0", "path": "/assets/textures-runtime/floors/WoodFloor071" },
-      { "id": "WoodFloor069", "name": "Wood Floor 069", "source": "ambientCG", "license": "CC0", "path": "/assets/textures-runtime/floors/WoodFloor069" },
-      { "id": "WoodFloor007", "name": "Wood Floor 007", "source": "ambientCG", "license": "CC0", "path": "/assets/textures-runtime/floors/WoodFloor007" },
-      { "id": "WoodFloor062", "name": "Wood Floor 062", "source": "ambientCG", "license": "CC0", "path": "/assets/textures-runtime/floors/WoodFloor062" }
+      {
+        "id": "WoodFloor051",
+        "name": "Wood Floor 051",
+        "source": "ambientCG",
+        "license": "CC0",
+        "path": "/assets/textures-runtime/floors/WoodFloor051"
+      },
+      {
+        "id": "WoodFloor064",
+        "name": "Wood Floor 064",
+        "source": "ambientCG",
+        "license": "CC0",
+        "path": "/assets/textures-runtime/floors/WoodFloor064"
+      },
+      {
+        "id": "Concrete048",
+        "name": "Concrete 048",
+        "source": "ambientCG",
+        "license": "CC0",
+        "path": "/assets/textures-runtime/floors/Concrete048"
+      },
+      {
+        "id": "Concrete047A",
+        "name": "Concrete 047 A",
+        "source": "ambientCG",
+        "license": "CC0",
+        "path": "/assets/textures-runtime/floors/Concrete047A"
+      },
+      {
+        "id": "Carpet016",
+        "name": "Carpet 016",
+        "source": "ambientCG",
+        "license": "CC0",
+        "path": "/assets/textures-runtime/floors/Carpet016"
+      },
+      {
+        "id": "WoodFloor070",
+        "name": "Wood Floor 070",
+        "source": "ambientCG",
+        "license": "CC0",
+        "path": "/assets/textures-runtime/floors/WoodFloor070"
+      },
+      {
+        "id": "WoodFloor071",
+        "name": "Wood Floor 071",
+        "source": "ambientCG",
+        "license": "CC0",
+        "path": "/assets/textures-runtime/floors/WoodFloor071"
+      },
+      {
+        "id": "WoodFloor069",
+        "name": "Wood Floor 069",
+        "source": "ambientCG",
+        "license": "CC0",
+        "path": "/assets/textures-runtime/floors/WoodFloor069"
+      },
+      {
+        "id": "WoodFloor007",
+        "name": "Wood Floor 007",
+        "source": "ambientCG",
+        "license": "CC0",
+        "path": "/assets/textures-runtime/floors/WoodFloor007"
+      },
+      {
+        "id": "WoodFloor062",
+        "name": "Wood Floor 062",
+        "source": "ambientCG",
+        "license": "CC0",
+        "path": "/assets/textures-runtime/floors/WoodFloor062"
+      }
     ],
     "windows": [
-      { "id": "wall-window-wide-round-detailed", "name": "Wide Round Window Detailed", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/windows/wall-window-wide-round-detailed.optimized.glb" },
-      { "id": "wall-window-square-detailed", "name": "Square Window Detailed", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/windows/wall-window-square-detailed.optimized.glb" },
-      { "id": "wall-window-wide-square-detailed", "name": "Wide Square Window Detailed", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/windows/wall-window-wide-square-detailed.optimized.glb" },
-      { "id": "wall-window-square", "name": "Square Window", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/windows/wall-window-square.optimized.glb" },
-      { "id": "wall-window-wide-round", "name": "Wide Round Window", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/windows/wall-window-wide-round.optimized.glb" },
-      { "id": "wall-window-round-detailed", "name": "Round Window Detailed", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/windows/wall-window-round-detailed.optimized.glb" },
-      { "id": "wall-window-wide-square", "name": "Wide Square Window", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/windows/wall-window-wide-square.optimized.glb" },
-      { "id": "wall-window-round", "name": "Round Window", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/windows/wall-window-round.optimized.glb" },
-      { "id": "barricade-window-a", "name": "Barricade Window A", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/windows/barricade-window-a.optimized.glb" },
-      { "id": "barricade-window-b", "name": "Barricade Window B", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/windows/barricade-window-b.optimized.glb" },
-      { "id": "barricade-window-c", "name": "Barricade Window C", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/windows/barricade-window-c.optimized.glb" }
+      {
+        "id": "modern-wide-picture-window",
+        "name": "Wide Picture Window",
+        "source": "Pocketroom",
+        "license": "Project asset",
+        "path": "/assets/models/architectural/modern-wide-picture-window.optimized.glb"
+      },
+      {
+        "id": "modern-sliding-window",
+        "name": "Two-Panel Sliding Window",
+        "source": "Pocketroom",
+        "license": "Project asset",
+        "path": "/assets/models/architectural/modern-sliding-window.optimized.glb"
+      },
+      {
+        "id": "modern-tall-casement-window",
+        "name": "Tall Casement Window",
+        "source": "Pocketroom",
+        "license": "Project asset",
+        "path": "/assets/models/architectural/modern-tall-casement-window.optimized.glb"
+      },
+      {
+        "id": "modern-square-awning-window",
+        "name": "Square Awning Window",
+        "source": "Pocketroom",
+        "license": "Project asset",
+        "path": "/assets/models/architectural/modern-square-awning-window.optimized.glb"
+      },
+      {
+        "id": "modern-transom-window",
+        "name": "Narrow Transom Window",
+        "source": "Pocketroom",
+        "license": "Project asset",
+        "path": "/assets/models/architectural/modern-transom-window.optimized.glb"
+      }
     ],
     "doors": [
-      { "id": "door-rotate-square-a", "name": "Square Door A", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/doors/door-rotate-square-a.optimized.glb" },
-      { "id": "door-rotate-square-b", "name": "Square Door B", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/doors/door-rotate-square-b.optimized.glb" },
-      { "id": "door-rotate-square-c", "name": "Square Door C", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/doors/door-rotate-square-c.optimized.glb" },
-      { "id": "door-rotate-square-d", "name": "Square Door D", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/doors/door-rotate-square-d.optimized.glb" },
-      { "id": "door-rotate-round-a", "name": "Round Door A", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/doors/door-rotate-round-a.optimized.glb" },
-      { "id": "door-rotate-round-b", "name": "Round Door B", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/doors/door-rotate-round-b.optimized.glb" },
-      { "id": "door-rotate-round-c", "name": "Round Door C", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/doors/door-rotate-round-c.optimized.glb" },
-      { "id": "door-rotate-round-d", "name": "Round Door D", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/doors/door-rotate-round-d.optimized.glb" },
-      { "id": "wall-doorway-square", "name": "Square Doorway", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/doors/wall-doorway-square.optimized.glb" },
-      { "id": "wall-doorway-round", "name": "Round Doorway", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/doors/wall-doorway-round.optimized.glb" },
-      { "id": "wall-doorway-wide-square", "name": "Wide Square Doorway", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/doors/wall-doorway-wide-square.optimized.glb" },
-      { "id": "wall-doorway-wide-round", "name": "Wide Round Doorway", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/doors/wall-doorway-wide-round.optimized.glb" },
-      { "id": "barricade-doorway-a", "name": "Barricade Doorway A", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/doors/barricade-doorway-a.optimized.glb" },
-      { "id": "barricade-doorway-b", "name": "Barricade Doorway B", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/doors/barricade-doorway-b.optimized.glb" },
-      { "id": "barricade-doorway-c", "name": "Barricade Doorway C", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/doors/barricade-doorway-c.optimized.glb" }
-    ],
-    "roomShell": [
-      { "id": "wall", "name": "Wall", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/shell/wall.optimized.glb" },
-      { "id": "wall-half", "name": "Half Wall", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/shell/wall-half.optimized.glb" },
-      { "id": "wall-low", "name": "Low Wall", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/shell/wall-low.optimized.glb" },
-      { "id": "wall-corner", "name": "Wall Corner", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/shell/wall-corner.optimized.glb" },
-      { "id": "wall-corner-round", "name": "Round Wall Corner", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/shell/wall-corner-round.optimized.glb" },
-      { "id": "floor", "name": "Floor Tile", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/shell/floor.optimized.glb" },
-      { "id": "floor-half", "name": "Half Floor Tile", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/shell/floor-half.optimized.glb" },
-      { "id": "floor-quarter", "name": "Quarter Floor Tile", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/shell/floor-quarter.optimized.glb" },
-      { "id": "border", "name": "Border", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/shell/border.optimized.glb" },
-      { "id": "border-high", "name": "High Border", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/shell/border-high.optimized.glb" },
-      { "id": "column", "name": "Column", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/shell/column.optimized.glb" },
-      { "id": "column-thin", "name": "Thin Column", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/shell/column-thin.optimized.glb" },
-      { "id": "column-wide", "name": "Wide Column", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/shell/column-wide.optimized.glb" },
-      { "id": "plating", "name": "Wall Plating", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/shell/plating.optimized.glb" },
-      { "id": "plating-wide", "name": "Wide Wall Plating", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/shell/plating-wide.optimized.glb" },
-      { "id": "stairs-open", "name": "Open Stairs", "source": "Kenney Building Kit", "license": "CC0", "path": "/assets/models/environment/shell/stairs-open.optimized.glb" }
+      {
+        "id": "modern-flush-white-door",
+        "name": "Flush White Door",
+        "source": "Pocketroom",
+        "license": "Project asset",
+        "path": "/assets/models/architectural/modern-flush-white-door.optimized.glb"
+      },
+      {
+        "id": "modern-slim-glass-door",
+        "name": "Slim Glass Panel Door",
+        "source": "Pocketroom",
+        "license": "Project asset",
+        "path": "/assets/models/architectural/modern-slim-glass-door.optimized.glb"
+      },
+      {
+        "id": "modern-sliding-glass-door",
+        "name": "Sliding Glass Door",
+        "source": "Pocketroom",
+        "license": "Project asset",
+        "path": "/assets/models/architectural/modern-sliding-glass-door.optimized.glb"
+      },
+      {
+        "id": "modern-double-glass-door",
+        "name": "Double Glass Door",
+        "source": "Pocketroom",
+        "license": "Project asset",
+        "path": "/assets/models/architectural/modern-double-glass-door.optimized.glb"
+      },
+      {
+        "id": "modern-ribbed-oak-door",
+        "name": "Ribbed Oak Door",
+        "source": "Pocketroom",
+        "license": "Project asset",
+        "path": "/assets/models/architectural/modern-ribbed-oak-door.optimized.glb"
+      }
     ],
     "wallDecor": [
-      { "id": "fancy_picture_frame_01", "name": "Fancy Picture Frame 01", "source": "Poly Haven", "license": "CC0", "path": "/assets/models/polyhaven/fancy_picture_frame_01.optimized.glb" },
-      { "id": "fancy_picture_frame_02", "name": "Fancy Picture Frame 02", "source": "Poly Haven", "license": "CC0", "path": "/assets/models/polyhaven/fancy_picture_frame_02.optimized.glb" },
-      { "id": "hanging_picture_frame_01", "name": "Hanging Picture Frame 01", "source": "Poly Haven", "license": "CC0", "path": "/assets/models/polyhaven/hanging_picture_frame_01.optimized.glb" },
-      { "id": "hanging_picture_frame_02", "name": "Hanging Picture Frame 02", "source": "Poly Haven", "license": "CC0", "path": "/assets/models/polyhaven/hanging_picture_frame_02.optimized.glb" },
-      { "id": "hanging_picture_frame_03", "name": "Hanging Picture Frame 03", "source": "Poly Haven", "license": "CC0", "path": "/assets/models/polyhaven/hanging_picture_frame_03.optimized.glb" },
-      { "id": "standing_picture_frame_01", "name": "Standing Picture Frame 01", "source": "Poly Haven", "license": "CC0", "path": "/assets/models/polyhaven/standing_picture_frame_01.optimized.glb" },
-      { "id": "standing_picture_frame_02", "name": "Standing Picture Frame 02", "source": "Poly Haven", "license": "CC0", "path": "/assets/models/polyhaven/standing_picture_frame_02.optimized.glb" },
-      { "id": "ornate_mirror_01", "name": "Ornate Mirror 01", "source": "Poly Haven", "license": "CC0", "path": "/assets/models/polyhaven/ornate_mirror_01.optimized.glb" },
-      { "id": "vintage_telephone_wall_clock", "name": "Vintage Telephone Wall Clock", "source": "Poly Haven", "license": "CC0", "path": "/assets/models/polyhaven/vintage_telephone_wall_clock.optimized.glb" },
-      { "id": "dartboard", "name": "Dartboard", "source": "Poly Haven", "license": "CC0", "path": "/assets/models/polyhaven/dartboard.optimized.glb" }
+      {
+        "id": "fancy_picture_frame_01",
+        "name": "Fancy Picture Frame 01",
+        "source": "Poly Haven",
+        "license": "CC0",
+        "path": "/assets/models/polyhaven/fancy_picture_frame_01.optimized.glb"
+      },
+      {
+        "id": "fancy_picture_frame_02",
+        "name": "Fancy Picture Frame 02",
+        "source": "Poly Haven",
+        "license": "CC0",
+        "path": "/assets/models/polyhaven/fancy_picture_frame_02.optimized.glb"
+      },
+      {
+        "id": "hanging_picture_frame_01",
+        "name": "Hanging Picture Frame 01",
+        "source": "Poly Haven",
+        "license": "CC0",
+        "path": "/assets/models/polyhaven/hanging_picture_frame_01.optimized.glb"
+      },
+      {
+        "id": "hanging_picture_frame_02",
+        "name": "Hanging Picture Frame 02",
+        "source": "Poly Haven",
+        "license": "CC0",
+        "path": "/assets/models/polyhaven/hanging_picture_frame_02.optimized.glb"
+      },
+      {
+        "id": "hanging_picture_frame_03",
+        "name": "Hanging Picture Frame 03",
+        "source": "Poly Haven",
+        "license": "CC0",
+        "path": "/assets/models/polyhaven/hanging_picture_frame_03.optimized.glb"
+      },
+      {
+        "id": "standing_picture_frame_01",
+        "name": "Standing Picture Frame 01",
+        "source": "Poly Haven",
+        "license": "CC0",
+        "path": "/assets/models/polyhaven/standing_picture_frame_01.optimized.glb"
+      },
+      {
+        "id": "standing_picture_frame_02",
+        "name": "Standing Picture Frame 02",
+        "source": "Poly Haven",
+        "license": "CC0",
+        "path": "/assets/models/polyhaven/standing_picture_frame_02.optimized.glb"
+      },
+      {
+        "id": "ornate_mirror_01",
+        "name": "Ornate Mirror 01",
+        "source": "Poly Haven",
+        "license": "CC0",
+        "path": "/assets/models/polyhaven/ornate_mirror_01.optimized.glb"
+      },
+      {
+        "id": "vintage_telephone_wall_clock",
+        "name": "Vintage Telephone Wall Clock",
+        "source": "Poly Haven",
+        "license": "CC0",
+        "path": "/assets/models/polyhaven/vintage_telephone_wall_clock.optimized.glb"
+      },
+      {
+        "id": "dartboard",
+        "name": "Dartboard",
+        "source": "Poly Haven",
+        "license": "CC0",
+        "path": "/assets/models/polyhaven/dartboard.optimized.glb"
+      }
     ],
     "decor": [
-      { "id": "ceramic_vase_01", "name": "Ceramic Vase 01", "source": "Poly Haven", "license": "CC0", "path": "/assets/models/polyhaven/ceramic_vase_01.optimized.glb" },
-      { "id": "ceramic_vase_02", "name": "Ceramic Vase 02", "source": "Poly Haven", "license": "CC0", "path": "/assets/models/polyhaven/ceramic_vase_02.optimized.glb" },
-      { "id": "ceramic_vase_03", "name": "Ceramic Vase 03", "source": "Poly Haven", "license": "CC0", "path": "/assets/models/polyhaven/ceramic_vase_03.optimized.glb" },
-      { "id": "ceramic_vase_04", "name": "Ceramic Vase 04", "source": "Poly Haven", "license": "CC0", "path": "/assets/models/polyhaven/ceramic_vase_04.optimized.glb" },
-      { "id": "brass_vase_01", "name": "Brass Vase 01", "source": "Poly Haven", "license": "CC0", "path": "/assets/models/polyhaven/brass_vase_01.optimized.glb" },
-      { "id": "brass_vase_02", "name": "Brass Vase 02", "source": "Poly Haven", "license": "CC0", "path": "/assets/models/polyhaven/brass_vase_02.optimized.glb" },
-      { "id": "planter_box_01", "name": "Planter Box 01", "source": "Poly Haven", "license": "CC0", "path": "/assets/models/polyhaven/planter_box_01.optimized.glb" },
-      { "id": "planter_box_02", "name": "Planter Box 02", "source": "Poly Haven", "license": "CC0", "path": "/assets/models/polyhaven/planter_box_02.optimized.glb" },
-      { "id": "pachira_aquatica_01", "name": "Pachira Aquatica 01", "source": "Poly Haven", "license": "CC0", "path": "/assets/models/polyhaven/pachira_aquatica_01.optimized.glb" },
-      { "id": "book_encyclopedia_set_01", "name": "Book Encyclopedia Set 01", "source": "Poly Haven", "license": "CC0", "path": "/assets/models/polyhaven/book_encyclopedia_set_01.optimized.glb" }
+      {
+        "id": "ceramic_vase_01",
+        "name": "Ceramic Vase 01",
+        "source": "Poly Haven",
+        "license": "CC0",
+        "path": "/assets/models/polyhaven/ceramic_vase_01.optimized.glb"
+      },
+      {
+        "id": "ceramic_vase_02",
+        "name": "Ceramic Vase 02",
+        "source": "Poly Haven",
+        "license": "CC0",
+        "path": "/assets/models/polyhaven/ceramic_vase_02.optimized.glb"
+      },
+      {
+        "id": "ceramic_vase_03",
+        "name": "Ceramic Vase 03",
+        "source": "Poly Haven",
+        "license": "CC0",
+        "path": "/assets/models/polyhaven/ceramic_vase_03.optimized.glb"
+      },
+      {
+        "id": "ceramic_vase_04",
+        "name": "Ceramic Vase 04",
+        "source": "Poly Haven",
+        "license": "CC0",
+        "path": "/assets/models/polyhaven/ceramic_vase_04.optimized.glb"
+      },
+      {
+        "id": "brass_vase_01",
+        "name": "Brass Vase 01",
+        "source": "Poly Haven",
+        "license": "CC0",
+        "path": "/assets/models/polyhaven/brass_vase_01.optimized.glb"
+      },
+      {
+        "id": "brass_vase_02",
+        "name": "Brass Vase 02",
+        "source": "Poly Haven",
+        "license": "CC0",
+        "path": "/assets/models/polyhaven/brass_vase_02.optimized.glb"
+      },
+      {
+        "id": "planter_box_01",
+        "name": "Planter Box 01",
+        "source": "Poly Haven",
+        "license": "CC0",
+        "path": "/assets/models/polyhaven/planter_box_01.optimized.glb"
+      },
+      {
+        "id": "planter_box_02",
+        "name": "Planter Box 02",
+        "source": "Poly Haven",
+        "license": "CC0",
+        "path": "/assets/models/polyhaven/planter_box_02.optimized.glb"
+      },
+      {
+        "id": "pachira_aquatica_01",
+        "name": "Pachira Aquatica 01",
+        "source": "Poly Haven",
+        "license": "CC0",
+        "path": "/assets/models/polyhaven/pachira_aquatica_01.optimized.glb"
+      },
+      {
+        "id": "book_encyclopedia_set_01",
+        "name": "Book Encyclopedia Set 01",
+        "source": "Poly Haven",
+        "license": "CC0",
+        "path": "/assets/models/polyhaven/book_encyclopedia_set_01.optimized.glb"
+      }
     ]
   }
 }

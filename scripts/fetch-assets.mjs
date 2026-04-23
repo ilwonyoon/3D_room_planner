@@ -4,16 +4,16 @@ import { spawnSync } from 'node:child_process'
 
 const ROOT = new URL('..', import.meta.url).pathname
 const POLY_HAVEN_USER_AGENT = 'pocketroom-asset-pipeline/0.1 (local development)'
-const KENNEY_BUILDING_KIT = {
-  url: 'https://kenney.nl/media/pages/assets/building-kit/967871cedd-1743244741/kenney_building-kit.zip',
-  archive: join(ROOT, 'raw/assets/kenney/kenney_building-kit.zip'),
-  target: join(ROOT, 'raw/assets/kenney/building-kit'),
-}
-const KENNEY_FURNITURE_KIT = {
-  url: 'https://kenney.nl/media/pages/assets/furniture-kit/e56d2a9828-1677580847/kenney_furniture-kit.zip',
-  archive: join(ROOT, 'raw/assets/kenney/kenney_furniture-kit.zip'),
-  target: join(ROOT, 'raw/assets/kenney/furniture-kit'),
-}
+const SHARE_TEXTURES_BASE_URL = 'https://files.sharetextures.com/file/Share-Textures'
+
+const fetchScope = new Set(
+  (process.env.ASSET_FETCH_SCOPE ?? 'all')
+    .split(',')
+    .map((scope) => scope.trim())
+    .filter(Boolean),
+)
+
+const shouldFetch = (scope) => fetchScope.has('all') || fetchScope.has(scope)
 
 const wallMaterialIds = [
   'Wallpaper001A',
@@ -219,6 +219,76 @@ const khronosModels = [
   },
 ]
 
+const shareTexturesModels = [
+  { id: 'sharetextures-chair-25', slug: 'chair-25', fileStem: 'chair_25' },
+  { id: 'sharetextures-chair-26', slug: 'chair-26', fileStem: 'chair_26' },
+  { id: 'sharetextures-chair-27', slug: 'chair-27', fileStem: 'chair_27' },
+  { id: 'sharetextures-chair-28', slug: 'chair-28', fileStem: 'chair_28' },
+  { id: 'sharetextures-chair-29', slug: 'chair-29', fileStem: 'chair_29' },
+  { id: 'sharetextures-bench-32', slug: 'bench-32', fileStem: 'bench_32' },
+  { id: 'sharetextures-cabinet-3', slug: 'cabinet-3', fileStem: 'cabinet_3' },
+  { id: 'sharetextures-stool-5', slug: 'stool-5', fileStem: 'stool_5' },
+  { id: 'sharetextures-stool-7', slug: 'stool-7', fileStem: 'stool_7' },
+  { id: 'sharetextures-stool-8', slug: 'stool-8', fileStem: 'stool_8' },
+]
+
+const objaverseModels = [
+  {
+    id: 'objaverse-messy-bed-2',
+    uid: 'a2b2645701c94fa49e65661806219c6b',
+    objectPath: 'glbs/000-114/a2b2645701c94fa49e65661806219c6b.glb',
+    source: 'https://sketchfab.com/3d-models/a2b2645701c94fa49e65661806219c6b',
+    title: 'Messy bed 2.0 (with wall mounted backboard)',
+    author: 'thethieme',
+    authorUrl: 'https://sketchfab.com/thethieme',
+  },
+  {
+    id: 'objaverse-soho-bed',
+    uid: '97e361e8beda4112ac5b1b5bcd388cdf',
+    objectPath: 'glbs/000-043/97e361e8beda4112ac5b1b5bcd388cdf.glb',
+    source: 'https://sketchfab.com/3d-models/97e361e8beda4112ac5b1b5bcd388cdf',
+    title: 'Soho bed - 3D Model',
+    author: 'BertO',
+    authorUrl: 'https://sketchfab.com/bertosalotti',
+  },
+  {
+    id: 'objaverse-chelsea-storage-bed',
+    uid: 'cbe6e0dcc10a414a84acc5cc08171b87',
+    objectPath: 'glbs/000-115/cbe6e0dcc10a414a84acc5cc08171b87.glb',
+    source: 'https://sketchfab.com/3d-models/cbe6e0dcc10a414a84acc5cc08171b87',
+    title: 'Chelsea bed with storage - 3D Model',
+    author: 'BertO',
+    authorUrl: 'https://sketchfab.com/bertosalotti',
+  },
+  {
+    id: 'objaverse-bed-0101',
+    uid: '5633ff2f729142bebf6b304118647f6f',
+    objectPath: 'glbs/000-113/5633ff2f729142bebf6b304118647f6f.glb',
+    source: 'https://sketchfab.com/3d-models/5633ff2f729142bebf6b304118647f6f',
+    title: 'bed.0101',
+    author: 'Elo.Q..Pereira',
+    authorUrl: 'https://sketchfab.com/Elo.Q..Pereira',
+  },
+  {
+    id: 'objaverse-king-floor-bed',
+    uid: '6ee7831cc521471384191baea365e211',
+    objectPath: 'glbs/000-114/6ee7831cc521471384191baea365e211.glb',
+    source: 'https://sketchfab.com/3d-models/6ee7831cc521471384191baea365e211',
+    title: 'King Floor Bed',
+    author: 'Jakoza',
+    authorUrl: 'https://sketchfab.com/Moe.T',
+  },
+  {
+    id: 'objaverse-large-grantham-bed',
+    uid: '203cfdb977ef4caab19d3b35fd8b3c42',
+    objectPath: 'glbs/000-037/203cfdb977ef4caab19d3b35fd8b3c42.glb',
+    source: 'https://sketchfab.com/3d-models/203cfdb977ef4caab19d3b35fd8b3c42',
+    title: 'Large Bed - Grantham Dantone Bed',
+    author: 'Lahcen.el',
+    authorUrl: 'https://sketchfab.com/Lahcen.el',
+  },
+]
+
 function run(command, args) {
   const result = spawnSync(command, args, {
     cwd: ROOT,
@@ -254,96 +324,138 @@ function download(url, target) {
   run('curl', ['-L', '-A', POLY_HAVEN_USER_AGENT, url, '-o', target])
 }
 
-function ensureKenneyBuildingKit() {
-  const sentinel = join(KENNEY_BUILDING_KIT.target, 'Models/GLB format/wall.glb')
+if (shouldFetch('textures')) {
+  for (const download of downloads) {
+    ensureDir(download.target)
+    rmSync(download.target, { recursive: true, force: true })
+    ensureDir(download.target)
 
-  if (existsSync(sentinel)) {
-    return
-  }
+    run('curl', ['-L', download.url, '-o', download.archive])
+    run('unzip', ['-o', download.archive, '-d', download.target])
 
-  ensureDir(dirname(KENNEY_BUILDING_KIT.archive))
-  download(KENNEY_BUILDING_KIT.url, KENNEY_BUILDING_KIT.archive)
-  rmSync(KENNEY_BUILDING_KIT.target, { recursive: true, force: true })
-  ensureDir(KENNEY_BUILDING_KIT.target)
-  run('unzip', ['-q', KENNEY_BUILDING_KIT.archive, '-d', KENNEY_BUILDING_KIT.target])
-}
-
-function ensureKenneyFurnitureKit() {
-  const sentinel = join(KENNEY_FURNITURE_KIT.target, 'Models/GLTF format/loungeDesignSofa.glb')
-
-  if (existsSync(sentinel)) {
-    return
-  }
-
-  ensureDir(dirname(KENNEY_FURNITURE_KIT.archive))
-  download(KENNEY_FURNITURE_KIT.url, KENNEY_FURNITURE_KIT.archive)
-  rmSync(KENNEY_FURNITURE_KIT.target, { recursive: true, force: true })
-  ensureDir(KENNEY_FURNITURE_KIT.target)
-  run('unzip', ['-q', KENNEY_FURNITURE_KIT.archive, '-d', KENNEY_FURNITURE_KIT.target])
-}
-
-ensureKenneyBuildingKit()
-ensureKenneyFurnitureKit()
-
-for (const download of downloads) {
-  ensureDir(download.target)
-  rmSync(download.target, { recursive: true, force: true })
-  ensureDir(download.target)
-
-  run('curl', ['-L', download.url, '-o', download.archive])
-  run('unzip', ['-o', download.archive, '-d', download.target])
-
-  for (const name of readdirSync(download.target)) {
-    if (!download.keep(name)) {
-      rmSync(join(download.target, name), { recursive: true, force: true })
+    for (const name of readdirSync(download.target)) {
+      if (!download.keep(name)) {
+        rmSync(join(download.target, name), { recursive: true, force: true })
+      }
     }
   }
 }
 
-for (const model of khronosModels) {
-  const modelTarget = join(ROOT, `raw/assets/models/${model.id}.glb`)
-  ensureDir(dirname(modelTarget))
+if (shouldFetch('khronos')) {
+  for (const model of khronosModels) {
+    const modelTarget = join(ROOT, `raw/assets/models/${model.id}.glb`)
+    ensureDir(dirname(modelTarget))
 
-  if (!existsSync(modelTarget)) {
-    download(model.url, modelTarget)
+    if (!existsSync(modelTarget)) {
+      download(model.url, modelTarget)
+    }
   }
 }
 
-for (const hdri of hdris) {
-  download(hdri.url, hdri.target)
+if (shouldFetch('hdri')) {
+  for (const hdri of hdris) {
+    download(hdri.url, hdri.target)
+  }
 }
 
-for (const assetId of polyHavenModels) {
-  const files = await fetchJson(`https://api.polyhaven.com/files/${assetId}`)
-  const gltf = files.gltf?.['1k']?.gltf
+if (shouldFetch('polyhaven')) {
+  for (const assetId of polyHavenModels) {
+    const files = await fetchJson(`https://api.polyhaven.com/files/${assetId}`)
+    const gltf = files.gltf?.['1k']?.gltf
 
-  if (!gltf) {
-    throw new Error(`No 1K glTF package found for ${assetId}`)
+    if (!gltf) {
+      throw new Error(`No 1K glTF package found for ${assetId}`)
+    }
+
+    const targetDir = join(ROOT, `raw/assets/models/polyhaven/${assetId}`)
+    rmSync(targetDir, { recursive: true, force: true })
+    ensureDir(targetDir)
+
+    download(gltf.url, join(targetDir, `${assetId}_1k.gltf`))
+
+    for (const [relativePath, include] of Object.entries(gltf.include)) {
+      download(include.url, join(targetDir, relativePath))
+    }
+
+    writeFileSync(
+      join(targetDir, 'source.json'),
+      JSON.stringify(
+        {
+          assetId,
+          source: `https://polyhaven.com/a/${assetId}`,
+          license: 'CC0',
+          gltf: gltf.url,
+        },
+        null,
+        2,
+      ),
+    )
   }
+}
 
-  const targetDir = join(ROOT, `raw/assets/models/polyhaven/${assetId}`)
-  rmSync(targetDir, { recursive: true, force: true })
-  ensureDir(targetDir)
+if (shouldFetch('sharetextures')) {
+  for (const model of shareTexturesModels) {
+    const targetDir = join(ROOT, `raw/assets/models/sharetextures/${model.id}`)
+    const archive = join(targetDir, 'textures-1k.zip')
+    const textureDir = join(targetDir, `3D_${model.fileStem}/1K`)
 
-  download(gltf.url, join(targetDir, `${assetId}_1k.gltf`))
+    rmSync(targetDir, { recursive: true, force: true })
+    ensureDir(targetDir)
 
-  for (const [relativePath, include] of Object.entries(gltf.include)) {
-    download(include.url, join(targetDir, relativePath))
+    download(`${SHARE_TEXTURES_BASE_URL}/3D_${model.fileStem}.fbx`, join(targetDir, 'model.fbx'))
+    download(`${SHARE_TEXTURES_BASE_URL}/3D_${model.fileStem}-1K.zip`, archive)
+
+    ensureDir(textureDir)
+    run('unzip', ['-o', archive, '-d', textureDir])
+
+    writeFileSync(
+      join(targetDir, 'source.json'),
+      JSON.stringify(
+        {
+          assetId: model.id,
+          source: `https://www.sharetextures.com/models/furniture/${model.slug}`,
+          license: 'CC0',
+          fbx: `${SHARE_TEXTURES_BASE_URL}/3D_${model.fileStem}.fbx`,
+          textures: `${SHARE_TEXTURES_BASE_URL}/3D_${model.fileStem}-1K.zip`,
+        },
+        null,
+        2,
+      ),
+    )
   }
+}
 
-  writeFileSync(
-    join(targetDir, 'source.json'),
-    JSON.stringify(
-      {
-        assetId,
-        source: `https://polyhaven.com/a/${assetId}`,
-        license: 'CC0',
-        gltf: gltf.url,
-      },
-      null,
-      2,
-    ),
-  )
+if (shouldFetch('objaverse')) {
+  for (const model of objaverseModels) {
+    const targetDir = join(ROOT, `raw/assets/models/objaverse/${model.id}`)
+    const sourceGlb = join(targetDir, 'source.glb')
+    const glbUrl = `https://huggingface.co/datasets/allenai/objaverse/resolve/main/${model.objectPath}`
+
+    rmSync(targetDir, { recursive: true, force: true })
+    ensureDir(targetDir)
+
+    download(glbUrl, sourceGlb)
+
+    writeFileSync(
+      join(targetDir, 'source.json'),
+      JSON.stringify(
+        {
+          assetId: model.id,
+          uid: model.uid,
+          title: model.title,
+          source: model.source,
+          license: 'CC-BY-4.0',
+          author: model.author,
+          authorUrl: model.authorUrl,
+          glb: glbUrl,
+          dataset: 'Objaverse 1.0',
+          datasetSource: 'https://huggingface.co/datasets/allenai/objaverse',
+        },
+        null,
+        2,
+      ),
+    )
+  }
 }
 
 console.log('Fetched raw source assets.')

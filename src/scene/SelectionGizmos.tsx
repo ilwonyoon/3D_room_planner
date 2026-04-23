@@ -141,6 +141,21 @@ function getNearestDistanceGuides({
   return candidates.sort((a, b) => a.distanceM - b.distanceM).slice(0, 2)
 }
 
+function wallBoundsRotationYFromPosition(
+  position: { x: number; z: number },
+  room: { widthM: number; depthM: number },
+) {
+  const distances = [
+    { rotationY: 0, distance: Math.abs(position.z + room.depthM / 2) },
+    { rotationY: Math.PI, distance: Math.abs(position.z - room.depthM / 2) },
+    { rotationY: Math.PI / 2, distance: Math.abs(position.x + room.widthM / 2) },
+    { rotationY: -Math.PI / 2, distance: Math.abs(position.x - room.widthM / 2) },
+  ]
+
+  distances.sort((a, b) => a.distance - b.distance)
+  return distances[0].rotationY
+}
+
 function DistanceLabel({
   children,
   position,
@@ -266,6 +281,9 @@ export function SelectionGizmos() {
   }
 
   const centerY = selected.elevationM + 0.018
+  const boundsRotationY = selected.placement === 'wall'
+    ? selected.boundsRotationY ?? wallBoundsRotationYFromPosition(selected.position, room)
+    : selected.boundsRotationY ?? selected.rotationY
   const showFloorMoveGuides = activeDragMode === 'move' && selected.placement === 'floor'
   const distanceGuides = showFloorMoveGuides
     ? getNearestDistanceGuides({
@@ -294,7 +312,7 @@ export function SelectionGizmos() {
         geometry={bounds.geometry}
         material={boundsMaterial}
         position={[selected.position.x, centerY, selected.position.z]}
-        rotation={[0, selected.boundsRotationY ?? selected.rotationY, 0]}
+        rotation={[0, boundsRotationY, 0]}
         renderOrder={6}
         onUpdate={setEditorOverlayLayer}
       />

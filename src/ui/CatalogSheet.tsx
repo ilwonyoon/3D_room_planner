@@ -16,8 +16,17 @@ import {
   type ProductCategory,
 } from '@/constants/productCatalog'
 import { color, css, radius, shadow, text, zIndex } from '@/constants'
-import { useEditorObjectsStore, useRoomSettingsStore, useSelectionStore, useUiStore } from '@/store'
+import {
+  useCameraViewStore,
+  useEditorObjectsStore,
+  useRenderQualityStore,
+  useRoomSettingsStore,
+  useRoomStore,
+  useSelectionStore,
+  useUiStore,
+} from '@/store'
 import type { EditorObject } from '@/store/editorObjectsStore'
+import type { RenderQuality } from '@/store/renderQualityStore'
 
 type SheetSegment = 'product' | 'room-settings' | 'explore'
 type FilterId = 'search' | 'in-room' | 'saved' | ProductCategory
@@ -48,6 +57,7 @@ type CardTile = {
 type ProductTile = ProductCatalogItem & {
   placedObjectId?: string
   displayDimensions: string
+  ariaLabel?: string
 }
 
 type RoomSettingsTile = CardTile & {
@@ -61,7 +71,9 @@ type SheetPointerState = {
   dragged: boolean
 }
 
-const COLLAPSED_OFFSET = 447
+const SHEET_HEIGHT = 705
+const COLLAPSED_VISIBLE_HEIGHT = 162
+const COLLAPSED_OFFSET = SHEET_HEIGHT - COLLAPSED_VISIBLE_HEIGHT
 const DRAG_THRESHOLD = 36
 
 const chips: Chip[] = [
@@ -100,7 +112,7 @@ function formatObjectDimensions(object: EditorObject) {
 }
 
 function productSourceForRoomSource(source: string): ProductAssetSource {
-  return source === 'Poly Haven' ? 'polyhaven' : 'kenney-furniture'
+  return source === 'ShareTextures' ? 'sharetextures' : 'polyhaven'
 }
 
 function objectToTile(object: EditorObject): ProductTile {
@@ -110,7 +122,8 @@ function objectToTile(object: EditorObject): ProductTile {
     return {
       ...catalogItem,
       placedObjectId: object.id,
-      displayDimensions: formatObjectDimensions(object),
+      displayDimensions: catalogItem.name,
+      ariaLabel: `${catalogItem.brand} ${catalogItem.name} ${formatObjectDimensions(object)}`,
     }
   }
 
@@ -119,9 +132,11 @@ function objectToTile(object: EditorObject): ProductTile {
   if (roomItem) {
     return {
       id: object.id,
+      name: roomItem.name,
       brand: roomItem.source,
       category: 'decor',
       source: productSourceForRoomSource(roomItem.source),
+      renderCost: 'standard',
       modelUrl: object.url,
       thumbnailUrl: roomItem.thumbnailUrl,
       dimensionsCm: [
@@ -130,33 +145,40 @@ function objectToTile(object: EditorObject): ProductTile {
         Math.round(roomItem.dimensionsM.y * 100),
       ],
       placedObjectId: object.id,
-      displayDimensions: formatObjectDimensions(object),
+      displayDimensions: roomItem.name,
+      ariaLabel: `${roomItem.name} ${roomItem.source} ${formatObjectDimensions(object)}`,
     }
   }
 
   return {
     id: object.id,
+    name: object.label,
     brand: 'Pocketroom',
     category: 'decor',
-    source: 'kenney-furniture',
+    source: 'polyhaven',
+    renderCost: 'standard',
     modelUrl: object.url,
     thumbnailUrl: '/assets/model-thumbnails/sheen-chair.png',
     dimensionsCm: [80, 80, 80],
     placedObjectId: object.id,
-    displayDimensions: formatObjectDimensions(object),
+    displayDimensions: object.label,
+    ariaLabel: `${object.label} ${formatObjectDimensions(object)}`,
   }
 }
 
-function getCatalogTiles(filter: FilterId): ProductTile[] {
+function getCatalogTiles(filter: FilterId, renderQuality: RenderQuality): ProductTile[] {
   const selected = chips.find((chip) => chip.id === filter)
 
   if (!selected?.category) {
     return []
   }
 
-  return PRODUCT_CATALOG.filter((item) => item.category === selected.category).map((item) => ({
+  return PRODUCT_CATALOG.filter(
+    (item) => item.category === selected.category && (renderQuality === 'high' || item.renderCost !== 'heavy'),
+  ).map((item) => ({
     ...item,
-    displayDimensions: formatCm(item.dimensionsCm),
+    displayDimensions: item.name,
+    ariaLabel: `${item.brand} ${item.name} ${formatCm(item.dimensionsCm)}`,
   }))
 }
 
@@ -226,13 +248,16 @@ export function CatalogSheet() {
   const floorMaterial = useRoomSettingsStore((s) => s.floorMaterial)
   const setWallMaterial = useRoomSettingsStore((s) => s.setWallMaterial)
   const setFloorMaterial = useRoomSettingsStore((s) => s.setFloorMaterial)
+  const renderQuality = useRenderQualityStore((s) => s.quality)
+  const room = useRoomStore((s) => s.room)
   const select = useSelectionStore((s) => s.select)
+  const cameraMode = useCameraViewStore((s) => s.mode)
   const catalogExpanded = useUiStore((s) => s.catalogExpanded)
   const toggleCatalog = useUiStore((s) => s.toggleCatalog)
   const setCatalog = useUiStore((s) => s.setCatalog)
 
   const inRoomTiles = useMemo(() => objects.map(objectToTile), [objects])
-  const catalogTiles = useMemo(() => getCatalogTiles(activeFilter), [activeFilter])
+  const catalogTiles = useMemo(() => getCatalogTiles(activeFilter, renderQuality), [activeFilter, renderQuality])
   const productTiles = activeFilter === 'in-room' ? inRoomTiles : catalogTiles
   const roomTiles = useMemo(
     () => getRoomSettingTiles(activeRoomFilter, wallMaterial.id, floorMaterial.id),
@@ -252,6 +277,10 @@ export function CatalogSheet() {
       : activeSegment === 'room-settings'
         ? roomTitleFor(activeRoomFilter, activeCount)
         : 'Explore 0'
+
+  if (cameraMode === 'pov') {
+    return null
+  }
 
   const expandSheet = () => setCatalog(true)
   const collapseSheet = () => setCatalog(false)
@@ -375,15 +404,23 @@ export function CatalogSheet() {
 
   const addRoomModel = (item: RoomModelItem) => {
     const id = `${item.id}-${Date.now()}`
+    const isWindow = item.category === 'windows'
+    const wallPosition = {
+      x: 0,
+      z: -room.depthM / 2 + item.dimensionsM.z / 2,
+    }
 
     addObject({
       id,
       label: item.name,
       url: item.modelUrl,
-      position: item.defaultPosition,
+      renderKind: isWindow ? 'window-opening' : 'model',
+      position: item.placement === 'wall' ? wallPosition : item.defaultPosition,
       placement: item.placement,
       elevationM: item.defaultElevationM,
-      rotationY: item.defaultRotationY,
+      rotationY: isWindow ? 0 : item.defaultRotationY,
+      boundsRotationY: item.placement === 'wall' ? 0 : undefined,
+      wallSurfacePlane: isWindow ? 'xy' : item.wallSurfacePlane,
       targetSize: item.targetSize,
       dimensionsM: item.dimensionsM,
     })
@@ -433,7 +470,7 @@ export function CatalogSheet() {
           left: 0,
           right: 0,
           bottom: 0,
-          height: 705,
+          height: SHEET_HEIGHT,
           background: color.sheet.bg,
           borderTopLeftRadius: radius.card,
           borderTopRightRadius: radius.card,
@@ -853,11 +890,16 @@ function ProductCard({ item, onClick }: { item: CardTile; onClick: () => void })
       <div
         style={{
           ...css(text.detail12_medium),
+          width: 106,
+          minHeight: 31,
           marginTop: 1,
           color: color.base[1],
-          whiteSpace: 'nowrap',
+          lineHeight: 1.3,
+          whiteSpace: 'normal',
           overflow: 'hidden',
-          textOverflow: 'ellipsis',
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
         }}
       >
         {item.displayDimensions}

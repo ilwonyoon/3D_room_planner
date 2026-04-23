@@ -1,0 +1,17 @@
+{
+  "generatedAt": "2026-04-23T07:49:33.776Z",
+  "variants": [
+    {
+      "id": "desk-lamp-night-emissive",
+      "source": "public/assets/models/polyhaven/desk_lamp_arm_01.optimized.glb",
+      "output": "/assets/generated/blender-variants/desk-lamp-night-emissive.glb",
+      "purpose": "Night/emissive material naming cleanup candidate. Source GLB is not overwritten."
+    },
+    {
+      "id": "industrial-pipe-lamp-night-emissive",
+      "source": "public/assets/models/polyhaven/industrial_pipe_lamp.optimized.glb",
+      "output": "/assets/generated/blender-variants/industrial-pipe-lamp-night-emissive.glb",
+      "purpose": "Night/emissive material naming cleanup candidate. Source GLB is not overwritten."
+    }
+  ]
+}

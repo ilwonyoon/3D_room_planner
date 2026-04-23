@@ -1,5 +1,11 @@
 # Asset Sources
 
+- `../basis/basis_transcoder.{js,wasm}`
+  - Source: Three.js r184 Basis Universal transcoder files
+  - License: MIT
+  - https://github.com/mrdoob/three.js/tree/r184/examples/jsm/libs/basis
+  - Runtime use: `KTX2Loader` transcoding for GLB files using `KHR_texture_basisu`
+
 - `textures-runtime/wood-floor-051/*`
   - Source: ambientCG WoodFloor051
   - License: CC0 / Public Domain
@@ -53,40 +59,58 @@
     - Environment additions: `fancy_picture_frame_01`, `fancy_picture_frame_02`, `hanging_picture_frame_01`, `hanging_picture_frame_02`, `hanging_picture_frame_03`, `standing_picture_frame_01`, `standing_picture_frame_02`, `vintage_telephone_wall_clock`, `mantel_clock_01`, `alarm_clock_01`, `book_encyclopedia_set_01`, `ceramic_vase_01`, `ceramic_vase_02`, `ceramic_vase_03`, `ceramic_vase_04`, `brass_vase_01`, `brass_vase_02`, `brass_vase_03`, `brass_vase_04`, `planter_box_01`, `planter_box_02`, `planter_box_03`, `planter_pot_clay`, `pachira_aquatica_01`, `dartboard`, `large_castle_door`, `rollershutter_door`, `rollershutter_window_01`, `rollershutter_window_02`, `rollershutter_window_03`
   - Expansion additions: `CoffeeCart_01`, `chinese_screen_panels`
 
-- `models/kenney/furniture/*.optimized.glb`
-  - Source: Kenney Furniture Kit
+- `models/sharetextures/*.optimized.glb`
+  - Source: ShareTextures furniture models
   - License: CC0 / Public Domain
-  - https://kenney.nl/assets/furniture-kit
-  - Runtime format: glTF-Transform optimized `.glb` with Meshopt
+  - Source URL pattern: `https://www.sharetextures.com/models/furniture/{slug}`
+  - Runtime format: 1K texture FBX converted to `.glb` with `fbx2gltf`, then glTF-Transform optimized with Meshopt and WebP textures
   - Source of truth: `scripts/fetch-assets.mjs` and `scripts/prepare-assets.mjs`
-  - Included furniture expansion assets:
-    - Seating: `benchCushion`, `benchCushionLow`, `chairCushion`, `chairDesk`, `chairModernCushion`, `chairModernFrameCushion`, `chairRounded`, `loungeChair`, `loungeDesignChair`, `loungeDesignSofa`, `loungeSofa`, `loungeSofaLong`, `loungeSofaOttoman`, `stoolBar`, `stoolBarSquare`
-    - Tables and desks: `desk`, `deskCorner`, `sideTable`, `sideTableDrawers`, `tableCoffee`, `tableCoffeeGlass`, `tableCoffeeGlassSquare`, `tableCoffeeSquare`, `tableGlass`, `tableRound`
-    - Storage and kitchen: `bookcaseClosed`, `bookcaseClosedDoors`, `bookcaseClosedWide`, `bookcaseOpen`, `bookcaseOpenLow`, `cabinetTelevision`, `cabinetTelevisionDoors`, `kitchenCabinet`, `kitchenCabinetDrawer`, `kitchenCabinetUpper`, `kitchenCabinetUpperDouble`, `kitchenCabinetUpperLow`
-    - Beds: `bedBunk`, `bedDouble`, `bedSingle`
-    - Electronics and appliances: `computerScreen`, `dryer`, `hoodModern`, `kitchenFridge`, `kitchenFridgeLarge`, `kitchenMicrowave`, `kitchenStoveElectric`, `laptop`, `radio`, `speaker`, `speakerSmall`, `televisionModern`, `washer`, `washerDryerStacked`
-    - Lighting and decor: `coatRackStanding`, `lampRoundFloor`, `lampRoundTable`, `lampSquareCeiling`, `lampSquareFloor`, `lampSquareTable`, `lampWall`, `pillow`, `pillowLong`, `plantSmall1`, `plantSmall2`, `plantSmall3`, `pottedPlant`, `rugRectangle`, `rugRound`
+  - Included modern furniture expansion assets:
+    - Seating: `sharetextures-bench-32`, `sharetextures-chair-25`, `sharetextures-chair-26`, `sharetextures-chair-27`, `sharetextures-chair-28`, `sharetextures-chair-29`, `sharetextures-stool-5`, `sharetextures-stool-7`, `sharetextures-stool-8`
+    - Storage: `sharetextures-cabinet-3`
+  - Excluded after conversion QA: `stool-6`; its FBX converts, but the resulting GLB fails glTF-Transform validation/optimization.
 
-- `models/environment/windows/*.optimized.glb`
-  - Source: Kenney Building Kit
-  - License: CC0 / Public Domain
-  - https://kenney.nl/assets/building-kit
-  - Runtime format: glTF-Transform optimized `.glb`
-  - Included window assets: `wall-window-wide-round-detailed`, `wall-window-square-detailed`, `wall-window-wide-square-detailed`, `wall-window-square`, `wall-window-wide-round`, `wall-window-round-detailed`, `wall-window-wide-square`, `wall-window-round`, `barricade-window-a`, `barricade-window-b`, `barricade-window-c`
+- `models/objaverse/*.optimized.glb`
+  - Source: Objaverse 1.0 direct GLB objects mirrored on Hugging Face, with original Sketchfab source metadata retained in `raw/assets/models/objaverse/{assetId}/source.json`
+  - License: CC-BY-4.0; attribution required to the original listed author
+  - Dataset: https://huggingface.co/datasets/allenai/objaverse
+  - Runtime format: source `.glb` re-optimized with glTF-Transform, Meshopt compression, WebP textures, and a 1024px texture cap
+  - Included modern bed expansion assets:
+    - `objaverse-messy-bed-2`: "Messy bed 2.0 (with wall mounted backboard)" by thethieme, https://sketchfab.com/3d-models/a2b2645701c94fa49e65661806219c6b
+    - `objaverse-soho-bed`: "Soho bed - 3D Model" by BertO, https://sketchfab.com/3d-models/97e361e8beda4112ac5b1b5bcd388cdf
+    - `objaverse-chelsea-storage-bed`: "Chelsea bed with storage - 3D Model" by BertO, https://sketchfab.com/3d-models/cbe6e0dcc10a414a84acc5cc08171b87
+    - `objaverse-bed-0101`: "bed.0101" by Elo.Q..Pereira, https://sketchfab.com/3d-models/5633ff2f729142bebf6b304118647f6f
+    - `objaverse-king-floor-bed`: "King Floor Bed" by Jakoza, https://sketchfab.com/3d-models/6ee7831cc521471384191baea365e211
+    - `objaverse-large-grantham-bed`: "Large Bed - Grantham Dantone Bed" by Lahcen.el, https://sketchfab.com/3d-models/203cfdb977ef4caab19d3b35fd8b3c42
 
-- `models/environment/doors/*.optimized.glb`
-  - Source: Kenney Building Kit
-  - License: CC0 / Public Domain
-  - https://kenney.nl/assets/building-kit
-  - Runtime format: glTF-Transform optimized `.glb`
-  - Included door assets: `door-rotate-square-a`, `door-rotate-square-b`, `door-rotate-square-c`, `door-rotate-square-d`, `door-rotate-round-a`, `door-rotate-round-b`, `door-rotate-round-c`, `door-rotate-round-d`, `wall-doorway-square`, `wall-doorway-round`, `wall-doorway-wide-square`, `wall-doorway-wide-round`, `barricade-doorway-a`, `barricade-doorway-b`, `barricade-doorway-c`
+- `models/manual/*.optimized.glb`
+  - Source: manually imported high-quality free furniture/decor model packages.
+  - Runtime format: downloaded source FBX packages converted with `fbx2gltf`, then glTF-Transform optimized with Meshopt and WebP textures.
+  - Source of truth: `raw/assets/models/manual/catalog-candidates.json`, `src/constants/manualProductCatalog.generated.ts`, `scripts/download-dimensiva-free-assets.mjs`, `scripts/download-designconnected-free-assets.mjs`, and `scripts/import-manual-assets.mjs`.
+  - Included runtime assets: 120 manual models; 41 from Dimensiva and 79 from Design Connected.
+  - Dimensiva source: https://dimensiva.com/free-3d-models/
+  - Dimensiva license reference: https://dimensiva.com/license/
+  - Design Connected source: https://www.designconnected.com/freebies
+  - Design Connected model FAQ reference: https://www.designconnected.com/faq
+  - QA exclusions: `designconnected-fuwl-cage-table-8851` did not produce a download after repeated logged-in attempts; `designconnected-rosa-rosa-rosas-wall-light-9791` and `designconnected-shaker-vases-set-9478` timed out in FBX conversion and are retained only in raw/import failure logs.
+  - Category additions exposed in product catalog: 1 sofa, 1 bed, 11 chairs, 31 tables, 4 storage pieces, 24 decor pieces, and 48 lighting pieces.
 
-- `models/environment/shell/*.optimized.glb`
-  - Source: Kenney Building Kit
-  - License: CC0 / Public Domain
-  - https://kenney.nl/assets/building-kit
-  - Runtime format: glTF-Transform optimized `.glb`
-  - Included shell assets: `wall`, `wall-half`, `wall-low`, `wall-corner`, `wall-corner-round`, `floor`, `floor-half`, `floor-quarter`, `border`, `border-high`, `column`, `column-thin`, `column-wide`, `plating`, `plating-wide`, `stairs-open`
+- `models-ktx2/**/*.optimized.glb`
+  - Source: matching source model from `models/**`
+  - License: same as the source model
+  - Runtime format: opt-in glTF-Transform KTX2/BasisU variant with Meshopt
+  - Source of truth: `pnpm assets:prepare:ktx2` with optional `ASSET_PREPARE_SCOPE` and `ASSET_MODEL_FILTER`
+  - Current runtime candidates: `sheen-chair`, `modern_arm_chair_01`, `CoffeeTable_01`, `side_table_01`, `hanging_picture_frame_01`, `hanging_picture_frame_02`, `potted_plant_04`
+  - QA note: `sheen-wood-leather-sofa` is intentionally excluded from KTX2 runtime use because its source textures are already WebP and glTF-Transform cannot convert that path to `KHR_texture_basisu`.
+
+- `models/architectural/*.optimized.glb`
+  - Source: Pocketroom procedural architectural assets
+  - License: Project-owned generated geometry
+  - Runtime format: generated `.glb` from `scripts/generate-architectural-assets.mjs`, then glTF-Transform optimized with Meshopt
+  - Source of truth: `scripts/generate-architectural-assets.mjs`, `scripts/prepare-assets.mjs`, and `src/constants/environmentCatalog.ts`
+  - Included modern window assets: `modern-wide-picture-window`, `modern-sliding-window`, `modern-tall-casement-window`, `modern-square-awning-window`, `modern-transom-window`
+  - Included modern door assets: `modern-flush-white-door`, `modern-slim-glass-door`, `modern-sliding-glass-door`, `modern-double-glass-door`, `modern-ribbed-oak-door`
+  - Replaces the previously exposed Kenney Building Kit door/window pieces in the Room catalog. Kenney Building Kit runtime assets have been removed from the app asset tree.
 
 - `environment-catalog.json`
   - Runtime manifest for room environment selectors.

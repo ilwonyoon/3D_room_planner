@@ -17,7 +17,7 @@ import {
   type EditorObject,
   type PlacementDragMode,
 } from '@/store'
-import { color, shadow } from '@/constants'
+import { color, shadow, zIndex } from '@/constants'
 
 type DragKind = PlacementDragMode
 
@@ -30,6 +30,7 @@ type DragState = {
   startElevationM: number
   floorOffset?: { x: number; z: number }
   wallOffset?: { u: number; y: number }
+  wallSide?: WallSide
   moved: boolean
 }
 
@@ -40,6 +41,8 @@ type WallHit = {
   u: number
   y: number
 }
+
+type PlacementHandlersVariant = 'full' | 'pov-move'
 
 const HANDLER_ICON = {
   lift: '/icons/handler-up-down-arrow.svg',
@@ -77,6 +80,30 @@ function wallSideForObject(object: EditorObject, room: { widthM: number; depthM:
 
   distances.sort((a, b) => a.distance - b.distance)
   return distances[0].side
+}
+
+function wallBoundsRotationY(side: WallSide) {
+  return side === 'back'
+    ? 0
+    : side === 'front'
+      ? Math.PI
+      : side === 'left'
+        ? Math.PI / 2
+        : -Math.PI / 2
+}
+
+function wallModelRotationY(object: EditorObject, side: WallSide) {
+  if (object.wallSurfacePlane === 'yz') {
+    return side === 'back'
+      ? Math.PI / 2
+      : side === 'front'
+        ? -Math.PI / 2
+        : side === 'left'
+          ? 0
+          : Math.PI
+  }
+
+  return wallBoundsRotationY(side)
 }
 
 function HandlerButton({
@@ -201,7 +228,11 @@ function HandlerButton({
   )
 }
 
-export function PlacementHandlers() {
+export function PlacementHandlers({
+  variant = 'full',
+}: {
+  variant?: PlacementHandlersVariant
+}) {
   const { camera, gl, invalidate } = useThree()
   const room = useRoomStore((state) => state.room)
   const selectedId = useSelectionStore((state) => state.selectedId)
@@ -267,6 +298,7 @@ export function PlacementHandlers() {
       others,
       room,
       gridM: 0.01,
+      avoidCollisions: false,
     })
 
     if (constrained) {
@@ -289,39 +321,37 @@ export function PlacementHandlers() {
       Math.max(0.02, room.heightM - selected.dimensionsM.y),
       Math.max(0.02, Math.round(elevationM * 100) / 100),
     )
+    const rotationY = wallModelRotationY(selected, hit.side)
+    const boundsRotationY = wallBoundsRotationY(hit.side)
 
     const patch =
       hit.side === 'back'
         ? {
             position: { x: u, z: -room.depthM / 2 + wallDepth / 2 },
-            rotationY: 0,
-            boundsRotationY: 0,
           }
         : hit.side === 'front'
           ? {
               position: { x: u, z: room.depthM / 2 - wallDepth / 2 },
-              rotationY: Math.PI,
-              boundsRotationY: Math.PI,
             }
           : hit.side === 'left'
           ? {
               position: { x: -room.widthM / 2 + wallDepth / 2, z: u },
-              rotationY: Math.PI / 2,
-              boundsRotationY: Math.PI / 2,
             }
           : {
               position: { x: room.widthM / 2 - wallDepth / 2, z: u },
-              rotationY: -Math.PI / 2,
-              boundsRotationY: -Math.PI / 2,
             }
 
-    updateObject(selected.id, { ...patch, elevationM: y })
+    updateObject(selected.id, { ...patch, elevationM: y, rotationY, boundsRotationY })
     invalidate()
   }
 
   const rotateSelected = (deltaRad: number) => {
     setActiveDragMode(null)
     setEditMode('idle')
+    if (selected.placement === 'wall') {
+      return
+    }
+
     const rotationY = selected.rotationY + deltaRad
     const constrainedPosition = canRotate(
       { ...toFootprint(selected), rotationY },
@@ -388,13 +418,23 @@ export function PlacementHandlers() {
       const hit = new THREE.Vector3()
       const result = raycasterRef.current.ray.intersectPlane(plane, hit)
 
-      if (!result || hit.y < 0 || hit.y > room.heightM) {
+      if (!result) {
         return
       }
 
-      if ((side === 'back' || side === 'front') && hit.x >= -halfW && hit.x <= halfW) {
+      const preferred = side === preferredSide
+      const withinY = hit.y >= 0 && hit.y <= room.heightM
+      const withinU = side === 'back' || side === 'front'
+        ? hit.x >= -halfW && hit.x <= halfW
+        : hit.z >= -halfD && hit.z <= halfD
+
+      if (!preferred && (!withinY || !withinU)) {
+        return
+      }
+
+      if (side === 'back' || side === 'front') {
         candidates.push({ side, u: hit.x, y: hit.y, distance: raycasterRef.current.ray.origin.distanceTo(hit) })
-      } else if ((side === 'left' || side === 'right') && hit.z >= -halfD && hit.z <= halfD) {
+      } else {
         candidates.push({ side, u: hit.z, y: hit.y, distance: raycasterRef.current.ray.origin.distanceTo(hit) })
       }
     })
@@ -446,6 +486,7 @@ export function PlacementHandlers() {
             y: selected.elevationM - wallPoint.y,
           }
         : undefined,
+      wallSide: selectedWallSide,
       moved: false,
     }
   }
@@ -465,8 +506,9 @@ export function PlacementHandlers() {
 
     if (state.kind === 'move') {
       if (selected.placement === 'wall') {
-        const wallPoint = wallPointFromClient(event.clientX, event.clientY)
+        const wallPoint = wallPointFromClient(event.clientX, event.clientY, state.wallSide)
         if (wallPoint && state.wallOffset) {
+          state.wallSide = wallPoint.side
           moveWallSelected(
             {
               ...wallPoint,
@@ -510,6 +552,48 @@ export function PlacementHandlers() {
     requestAnimationFrame(() => invalidate())
   }
 
+  if (variant === 'pov-move') {
+    return (
+      <Html
+        position={[
+          selected.position.x,
+          selected.elevationM + selected.dimensionsM.y * 0.62,
+          selected.position.z,
+        ]}
+        center
+        occlude={false}
+        pointerEvents="none"
+        zIndexRange={[zIndex.topBar - 1, zIndex.sheet + 1]}
+      >
+        <div
+          aria-label="Selected furniture POV move control"
+          style={{
+            position: 'relative',
+            width: 52,
+            height: 52,
+            pointerEvents: 'none',
+          }}
+        >
+          <HandlerButton
+            label="Move selected object"
+            active={activeDragMode === 'move'}
+            icon={HANDLER_ICON.move}
+            iconViewportSize={16}
+            glyphWidth={13.65}
+            glyphHeight={13.65}
+            glyphTop={1.175}
+            glyphLeft={1.175}
+            size={38}
+            style={{ left: 7, top: 7 }}
+            onPointerDown={(event) => beginDrag('move', event)}
+            onPointerMove={drag}
+            onPointerUp={endDrag}
+          />
+        </div>
+      </Html>
+    )
+  }
+
   return (
     <Html
       position={[
@@ -520,7 +604,7 @@ export function PlacementHandlers() {
       center
       occlude={false}
       pointerEvents="none"
-      zIndexRange={[12, 0]}
+      zIndexRange={[zIndex.topBar - 1, zIndex.sheet + 1]}
     >
       <div
         aria-label="Selected furniture controls"

@@ -1,0 +1,1585 @@
+import type { ProductCatalogSeed, ProductCategory, ProductRetailAlias } from './productCatalog'
+
+// Generated from raw/assets/models/manual/catalog-candidates.json.
+// Only assets with public/assets/models/manual/*.optimized.glb are included.
+export const manualModelSeedsByCategory: Partial<Record<ProductCategory, ProductCatalogSeed[]>> = {
+  "sofa": [
+    {
+      "id": "dimensiva-hackney-sofa-by-hay",
+      "source": "manual",
+      "dimensionsCm": [
+        220,
+        94,
+        82
+      ]
+    }
+  ],
+  "chair": [
+    {
+      "id": "designconnected-02-armchair-8286",
+      "source": "manual",
+      "dimensionsCm": [
+        66,
+        70,
+        84
+      ]
+    },
+    {
+      "id": "designconnected-bolt-stool-8411",
+      "source": "manual",
+      "dimensionsCm": [
+        66,
+        70,
+        84
+      ]
+    },
+    {
+      "id": "designconnected-jolly-roger-8903",
+      "source": "manual",
+      "dimensionsCm": [
+        66,
+        70,
+        84
+      ]
+    },
+    {
+      "id": "designconnected-roly-poly-chair-8816",
+      "source": "manual",
+      "dimensionsCm": [
+        66,
+        70,
+        84
+      ]
+    },
+    {
+      "id": "designconnected-sellier-chair-8201",
+      "source": "manual",
+      "dimensionsCm": [
+        66,
+        70,
+        84
+      ]
+    },
+    {
+      "id": "dimensiva-eames-armchair-rocker-rar-by-vitra",
+      "source": "manual",
+      "dimensionsCm": [
+        62,
+        66,
+        82
+      ]
+    },
+    {
+      "id": "dimensiva-form-armchair-by-normann-copenhagen",
+      "source": "manual",
+      "dimensionsCm": [
+        62,
+        66,
+        82
+      ]
+    },
+    {
+      "id": "dimensiva-oyster-light-armchair-by-i4marini",
+      "source": "manual",
+      "dimensionsCm": [
+        62,
+        66,
+        82
+      ]
+    },
+    {
+      "id": "dimensiva-panton-chair-junior-by-vitra",
+      "source": "manual",
+      "dimensionsCm": [
+        62,
+        66,
+        82
+      ]
+    },
+    {
+      "id": "dimensiva-plan-chair-by-fredericia",
+      "source": "manual",
+      "dimensionsCm": [
+        62,
+        66,
+        82
+      ]
+    },
+    {
+      "id": "dimensiva-roly-poly-chair-by-driade",
+      "source": "manual",
+      "dimensionsCm": [
+        62,
+        66,
+        82
+      ]
+    }
+  ],
+  "table": [
+    {
+      "id": "designconnected-520-accordo-table-8210",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "designconnected-alando-desk-10784",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "designconnected-alessi-mia-and-tua-pitchers-9656",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "designconnected-alleluia-coffee-table-8678",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "designconnected-androgyne-side-table-9225",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "designconnected-colomn-base-lounge-tables-10965",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "designconnected-dita-desk-with-drawer-10712",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "designconnected-drink-tray-9944",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "designconnected-goods-pure-carafe-set-9145",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "designconnected-grace-trolley-8825",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "designconnected-iconic-industrial-table-clock-11283",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "designconnected-knockout-tables-7887",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "designconnected-lythos-coffee-table-7807",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "designconnected-oda-pedestal-table-9925",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "designconnected-plane-coffee-table-8347",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "designconnected-round-side-table-with-marble-top-11326",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "designconnected-shagreen-desk-box-10281",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "designconnected-square-scandi-coffee-table-11631",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "dimensiva-8950-dining-table-by-rolf-benz",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "dimensiva-be-easy-table-by-kristalia",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "dimensiva-coffee-table-in-and-outdoor-large-by-freifrau",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "dimensiva-coffee-table-in-and-outdoor-small-by-freifrau",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "dimensiva-coffee-table-in-and-outdoor-xl-by-freifrau",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "dimensiva-ibiza-forte-coffee-table-by-ritzwell",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "dimensiva-metodo-round-coffee-table-by-mdf-italia",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "dimensiva-oliver-tray-table-by-evie-group",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "dimensiva-slim-charme-coffee-table-by-zeus",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "dimensiva-slit-coffee-table-oblong-by-hay",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "dimensiva-slit-coffee-table-round-by-hay",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "dimensiva-slit-side-table-round-high-by-hay",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "dimensiva-tray-table-by-hay",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    }
+  ],
+  "storage": [
+    {
+      "id": "designconnected-perforated-metal-tea-trolley-11005",
+      "source": "manual",
+      "dimensionsCm": [
+        120,
+        45,
+        92
+      ]
+    },
+    {
+      "id": "dimensiva-beyla-shoe-cabinet-by-kave-home",
+      "source": "manual",
+      "dimensionsCm": [
+        120,
+        45,
+        92
+      ]
+    },
+    {
+      "id": "dimensiva-next-desk-body-by-mobimex",
+      "source": "manual",
+      "dimensionsCm": [
+        120,
+        45,
+        92
+      ]
+    },
+    {
+      "id": "dimensiva-titanes-sideboard-by-maxalto",
+      "source": "manual",
+      "dimensionsCm": [
+        120,
+        45,
+        92
+      ]
+    }
+  ],
+  "decor": [
+    {
+      "id": "designconnected-arceau-mirrors-9820",
+      "source": "manual",
+      "dimensionsCm": [
+        44,
+        34,
+        54
+      ]
+    },
+    {
+      "id": "designconnected-contour-7968",
+      "source": "manual",
+      "dimensionsCm": [
+        44,
+        34,
+        54
+      ]
+    },
+    {
+      "id": "designconnected-emerald-mirror-9036",
+      "source": "manual",
+      "dimensionsCm": [
+        44,
+        34,
+        54
+      ]
+    },
+    {
+      "id": "designconnected-eric-mirror-9776",
+      "source": "manual",
+      "dimensionsCm": [
+        44,
+        34,
+        54
+      ]
+    },
+    {
+      "id": "designconnected-good-vibes-mirror-9960",
+      "source": "manual",
+      "dimensionsCm": [
+        44,
+        34,
+        54
+      ]
+    },
+    {
+      "id": "designconnected-pamukkale-mirror-9958",
+      "source": "manual",
+      "dimensionsCm": [
+        44,
+        34,
+        54
+      ]
+    },
+    {
+      "id": "designconnected-pendulum-wall-mirror-9203",
+      "source": "manual",
+      "dimensionsCm": [
+        44,
+        34,
+        54
+      ]
+    },
+    {
+      "id": "designconnected-reunion-mirror-10451",
+      "source": "manual",
+      "dimensionsCm": [
+        44,
+        34,
+        54
+      ]
+    },
+    {
+      "id": "designconnected-revolution-mirror-9044",
+      "source": "manual",
+      "dimensionsCm": [
+        44,
+        34,
+        54
+      ]
+    },
+    {
+      "id": "designconnected-t-vases-9798",
+      "source": "manual",
+      "dimensionsCm": [
+        44,
+        34,
+        54
+      ]
+    },
+    {
+      "id": "designconnected-time-hourglasses-8934",
+      "source": "manual",
+      "dimensionsCm": [
+        44,
+        34,
+        54
+      ]
+    },
+    {
+      "id": "designconnected-wonderland-mirror-9048",
+      "source": "manual",
+      "dimensionsCm": [
+        44,
+        34,
+        54
+      ]
+    },
+    {
+      "id": "dimensiva-hoop-coat-rack-by-covo",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        34,
+        52
+      ]
+    },
+    {
+      "id": "dimensiva-iconic-alarm-clock-by-karlsson",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        34,
+        52
+      ]
+    },
+    {
+      "id": "dimensiva-infinity-clock-by-bosa-ceramiche",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        34,
+        52
+      ]
+    },
+    {
+      "id": "dimensiva-lotus-vase-by-101-copenhagen",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        34,
+        52
+      ]
+    },
+    {
+      "id": "dimensiva-paradise-tree-coat-stand-by-magis",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        34,
+        52
+      ]
+    },
+    {
+      "id": "dimensiva-parcel-pedestal-by-ferm-living",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        34,
+        52
+      ]
+    },
+    {
+      "id": "dimensiva-plus-coat-hook-by-porventura",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        34,
+        52
+      ]
+    },
+    {
+      "id": "dimensiva-podium-pedestal-by-101-copenhagen",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        34,
+        52
+      ]
+    },
+    {
+      "id": "dimensiva-pov-candleholder-wall-by-menu",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        34,
+        52
+      ]
+    },
+    {
+      "id": "dimensiva-serif-vase-by-kristina-dam-studio",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        34,
+        52
+      ]
+    },
+    {
+      "id": "dimensiva-stop-bookend-by-e15",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        34,
+        52
+      ]
+    },
+    {
+      "id": "dimensiva-wire-basket-by-ferm-living",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        34,
+        52
+      ]
+    }
+  ],
+  "lighting": [
+    {
+      "id": "designconnected-arancini-floor-lamp-9045",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-arc-wall-sconce-9056",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-argento-l-pendant-lamp-8968",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-atlas-01-table-lamp-9206",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-beaubien-double-shade-wall-lamp-9035",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-big-kick-pendant-10509",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-big-kick-solid-pendant-10510",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-boshi-table-lamp-9953",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-bower-floor-lamp-8963",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-calee-pendants-8956",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-cercle-et-trat-suspension-lamp-8969",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-cheshire-floor-lamp-9072",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-circuit-1-sconce-lamp-8959",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-clarine-table-lamp-9984",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-collision-table-lights-9775",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-curved-neck-table-lamp-8669",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-dauphine-floor-lamp-9047",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-drop-dss-03-01-wall-lamp-9769",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-dyad-sconce-lamp-9054",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-eclisse-table-lamp-8834",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-endless-knot-wall-lamp-9240",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-hollie-table-lamp-8909",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-kite-floor-lamp-8490",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-lia-pendant-lamp-9658",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-link-pendant-lamp-9038",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-magnifier-lamp-9032",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-meta-wall-lamp-7997",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-mobil-wall-lamp-8957",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-model-2065-suspension-luminaire-8733",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-my-lamp-floor-8961",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-neat-noon-table-lamp-10748",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-orbis-vx58-pendant-lamp-9039",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-pin-floor-lamp-9743",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-projekt-pendant-9021",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-quille-desk-lamp-8203",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-rabbit-lamps-7779",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-ring-wall-lamp-8952",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-sarn-7868",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-sospir-table-lamp-10001",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-strike-pendant-lamp-8962",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-the-globe-table-lamp-8624",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-tip-of-the-tongue-table-lamp-9197",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "designconnected-vulcain-table-lamp-9805",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "dimensiva-aballs-a-wall-light-by-parachilna",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "dimensiva-hello-floor-lamp-by-normann-copenhagen",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "dimensiva-talk-lamp-by-orsjo",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "dimensiva-toio-led-floor-lamp-by-flos",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    },
+    {
+      "id": "dimensiva-tripod-lamp-by-lombok",
+      "source": "manual",
+      "dimensionsCm": [
+        42,
+        42,
+        120
+      ]
+    }
+  ],
+  "appliance": [],
+  "bed": [
+    {
+      "id": "dimensiva-bunky-bunk-bed-by-magis",
+      "source": "manual",
+      "dimensionsCm": [
+        210,
+        160,
+        90
+      ]
+    }
+  ],
+  "pets": []
+}
+
+export const manualRetailAliasById: Record<string, ProductRetailAlias> = {
+  "designconnected-02-armchair-8286": {
+    "brand": "Quick View",
+    "name": "02 Armchair"
+  },
+  "designconnected-520-accordo-table-8210": {
+    "brand": "Quick View",
+    "name": "520 Accordo Table"
+  },
+  "designconnected-alando-desk-10784": {
+    "brand": "Quick View",
+    "name": "Alando Desk"
+  },
+  "designconnected-alessi-mia-and-tua-pitchers-9656": {
+    "brand": "Quick View",
+    "name": "ALESSI Mia and Tua Pitchers"
+  },
+  "designconnected-alleluia-coffee-table-8678": {
+    "brand": "Quick View",
+    "name": "Alleluia Coffee Table"
+  },
+  "designconnected-androgyne-side-table-9225": {
+    "brand": "Quick View",
+    "name": "Androgyne Side Table"
+  },
+  "designconnected-arancini-floor-lamp-9045": {
+    "brand": "Quick View",
+    "name": "Arancini Floor Lamp"
+  },
+  "designconnected-arc-wall-sconce-9056": {
+    "brand": "Quick View",
+    "name": "Arc Wall Sconce"
+  },
+  "designconnected-arceau-mirrors-9820": {
+    "brand": "Quick View",
+    "name": "Arceau Mirrors"
+  },
+  "designconnected-argento-l-pendant-lamp-8968": {
+    "brand": "Quick View",
+    "name": "Argento L Pendant Lamp"
+  },
+  "designconnected-atlas-01-table-lamp-9206": {
+    "brand": "Quick View",
+    "name": "Atlas 01 Table Lamp"
+  },
+  "designconnected-beaubien-double-shade-wall-lamp-9035": {
+    "brand": "Quick View",
+    "name": "Beaubien Double Shade Wall Lamp"
+  },
+  "designconnected-big-kick-pendant-10509": {
+    "brand": "Quick View",
+    "name": "Big Kick Pendant"
+  },
+  "designconnected-big-kick-solid-pendant-10510": {
+    "brand": "Quick View",
+    "name": "Big Kick Solid Pendant"
+  },
+  "designconnected-bolt-stool-8411": {
+    "brand": "Quick View",
+    "name": "Bolt Stool"
+  },
+  "designconnected-boshi-table-lamp-9953": {
+    "brand": "Quick View",
+    "name": "Boshi Table Lamp"
+  },
+  "designconnected-bower-floor-lamp-8963": {
+    "brand": "Quick View",
+    "name": "Bower Floor Lamp"
+  },
+  "designconnected-calee-pendants-8956": {
+    "brand": "Quick View",
+    "name": "Calee Pendants"
+  },
+  "designconnected-cercle-et-trat-suspension-lamp-8969": {
+    "brand": "Quick View",
+    "name": "Cercle et Trat Suspension Lamp"
+  },
+  "designconnected-cheshire-floor-lamp-9072": {
+    "brand": "Quick View",
+    "name": "Cheshire Floor Lamp"
+  },
+  "designconnected-circuit-1-sconce-lamp-8959": {
+    "brand": "Quick View",
+    "name": "Circuit 1 Sconce Lamp"
+  },
+  "designconnected-clarine-table-lamp-9984": {
+    "brand": "Quick View",
+    "name": "Clarine Table Lamp"
+  },
+  "designconnected-collision-table-lights-9775": {
+    "brand": "Quick View",
+    "name": "Collision Table Lights"
+  },
+  "designconnected-colomn-base-lounge-tables-10965": {
+    "brand": "Quick View",
+    "name": "Colomn Base Lounge Tables"
+  },
+  "designconnected-contour-7968": {
+    "brand": "Quick View",
+    "name": "Contour"
+  },
+  "designconnected-curved-neck-table-lamp-8669": {
+    "brand": "Quick View",
+    "name": "Curved Neck Table Lamp"
+  },
+  "designconnected-dauphine-floor-lamp-9047": {
+    "brand": "Quick View",
+    "name": "Dauphine Floor Lamp"
+  },
+  "designconnected-dita-desk-with-drawer-10712": {
+    "brand": "Quick View",
+    "name": "Dita Desk with Drawer"
+  },
+  "designconnected-drink-tray-9944": {
+    "brand": "Quick View",
+    "name": "Drink Tray"
+  },
+  "designconnected-drop-dss-03-01-wall-lamp-9769": {
+    "brand": "Quick View",
+    "name": "Drop DSS.03.01 Wall Lamp"
+  },
+  "designconnected-dyad-sconce-lamp-9054": {
+    "brand": "Quick View",
+    "name": "Dyad Sconce Lamp"
+  },
+  "designconnected-eclisse-table-lamp-8834": {
+    "brand": "Quick View",
+    "name": "Eclisse Table Lamp"
+  },
+  "designconnected-emerald-mirror-9036": {
+    "brand": "Quick View",
+    "name": "Emerald Mirror"
+  },
+  "designconnected-endless-knot-wall-lamp-9240": {
+    "brand": "Quick View",
+    "name": "Endless Knot Wall Lamp"
+  },
+  "designconnected-eric-mirror-9776": {
+    "brand": "Quick View",
+    "name": "Eric Mirror"
+  },
+  "designconnected-good-vibes-mirror-9960": {
+    "brand": "Quick View",
+    "name": "Good Vibes Mirror"
+  },
+  "designconnected-goods-pure-carafe-set-9145": {
+    "brand": "Quick View",
+    "name": "GOODS Pure Carafe Set"
+  },
+  "designconnected-grace-trolley-8825": {
+    "brand": "Quick View",
+    "name": "Grace Trolley"
+  },
+  "designconnected-hollie-table-lamp-8909": {
+    "brand": "Quick View",
+    "name": "Hollie Table Lamp"
+  },
+  "designconnected-iconic-industrial-table-clock-11283": {
+    "brand": "Quick View",
+    "name": "Iconic Industrial Table Clock"
+  },
+  "designconnected-jolly-roger-8903": {
+    "brand": "Quick View",
+    "name": "Jolly Roger"
+  },
+  "designconnected-kite-floor-lamp-8490": {
+    "brand": "Quick View",
+    "name": "Kite Floor Lamp"
+  },
+  "designconnected-knockout-tables-7887": {
+    "brand": "Quick View",
+    "name": "Knockout tables"
+  },
+  "designconnected-lia-pendant-lamp-9658": {
+    "brand": "Quick View",
+    "name": "Lia Pendant Lamp"
+  },
+  "designconnected-link-pendant-lamp-9038": {
+    "brand": "Quick View",
+    "name": "Link Pendant Lamp"
+  },
+  "designconnected-lythos-coffee-table-7807": {
+    "brand": "Quick View",
+    "name": "Lythos Coffee Table"
+  },
+  "designconnected-magnifier-lamp-9032": {
+    "brand": "Quick View",
+    "name": "Magnifier Lamp"
+  },
+  "designconnected-meta-wall-lamp-7997": {
+    "brand": "Quick View",
+    "name": "Meta Wall Lamp"
+  },
+  "designconnected-mobil-wall-lamp-8957": {
+    "brand": "Quick View",
+    "name": "Mobil Wall Lamp"
+  },
+  "designconnected-model-2065-suspension-luminaire-8733": {
+    "brand": "Quick View",
+    "name": "Model 2065 Suspension Luminaire"
+  },
+  "designconnected-my-lamp-floor-8961": {
+    "brand": "Quick View",
+    "name": "My Lamp Floor"
+  },
+  "designconnected-neat-noon-table-lamp-10748": {
+    "brand": "Quick View",
+    "name": "Neat Noon Table Lamp"
+  },
+  "designconnected-oda-pedestal-table-9925": {
+    "brand": "Quick View",
+    "name": "Oda Pedestal Table"
+  },
+  "designconnected-orbis-vx58-pendant-lamp-9039": {
+    "brand": "Quick View",
+    "name": "Orbis VX58 Pendant Lamp"
+  },
+  "designconnected-pamukkale-mirror-9958": {
+    "brand": "Quick View",
+    "name": "Pamukkale Mirror"
+  },
+  "designconnected-pendulum-wall-mirror-9203": {
+    "brand": "Quick View",
+    "name": "Pendulum Wall Mirror"
+  },
+  "designconnected-perforated-metal-tea-trolley-11005": {
+    "brand": "Quick View",
+    "name": "Perforated Metal Tea Trolley"
+  },
+  "designconnected-pin-floor-lamp-9743": {
+    "brand": "Quick View",
+    "name": "Pin Floor Lamp"
+  },
+  "designconnected-plane-coffee-table-8347": {
+    "brand": "Quick View",
+    "name": "Plane Coffee Table"
+  },
+  "designconnected-projekt-pendant-9021": {
+    "brand": "Quick View",
+    "name": "Projekt Pendant"
+  },
+  "designconnected-quille-desk-lamp-8203": {
+    "brand": "Quick View",
+    "name": "Quille Desk Lamp"
+  },
+  "designconnected-rabbit-lamps-7779": {
+    "brand": "Quick View",
+    "name": "Rabbit Lamps"
+  },
+  "designconnected-reunion-mirror-10451": {
+    "brand": "Quick View",
+    "name": "Reunion Mirror"
+  },
+  "designconnected-revolution-mirror-9044": {
+    "brand": "Quick View",
+    "name": "Revolution Mirror"
+  },
+  "designconnected-ring-wall-lamp-8952": {
+    "brand": "Quick View",
+    "name": "Ring Wall Lamp"
+  },
+  "designconnected-roly-poly-chair-8816": {
+    "brand": "Quick View",
+    "name": "Roly-Poly Chair"
+  },
+  "designconnected-round-side-table-with-marble-top-11326": {
+    "brand": "Quick View",
+    "name": "Round Side Table with Marble Top"
+  },
+  "designconnected-sarn-7868": {
+    "brand": "Quick View",
+    "name": "Sarn"
+  },
+  "designconnected-sellier-chair-8201": {
+    "brand": "Quick View",
+    "name": "Sellier Chair"
+  },
+  "designconnected-shagreen-desk-box-10281": {
+    "brand": "Quick View",
+    "name": "Shagreen desk box"
+  },
+  "designconnected-sospir-table-lamp-10001": {
+    "brand": "Quick View",
+    "name": "Sospir Table Lamp"
+  },
+  "designconnected-square-scandi-coffee-table-11631": {
+    "brand": "Quick View",
+    "name": "Square Scandi Coffee Table"
+  },
+  "designconnected-strike-pendant-lamp-8962": {
+    "brand": "Quick View",
+    "name": "Strike Pendant Lamp"
+  },
+  "designconnected-t-vases-9798": {
+    "brand": "Quick View",
+    "name": "T Vases"
+  },
+  "designconnected-the-globe-table-lamp-8624": {
+    "brand": "Quick View",
+    "name": "The Globe Table Lamp"
+  },
+  "designconnected-time-hourglasses-8934": {
+    "brand": "Quick View",
+    "name": "Time Hourglasses"
+  },
+  "designconnected-tip-of-the-tongue-table-lamp-9197": {
+    "brand": "Quick View",
+    "name": "Tip of the Tongue Table Lamp"
+  },
+  "designconnected-vulcain-table-lamp-9805": {
+    "brand": "Quick View",
+    "name": "Vulcain Table Lamp"
+  },
+  "designconnected-wonderland-mirror-9048": {
+    "brand": "Quick View",
+    "name": "Wonderland Mirror"
+  },
+  "dimensiva-8950-dining-table-by-rolf-benz": {
+    "brand": "Rolf Benz",
+    "name": "8950 Dining Table"
+  },
+  "dimensiva-aballs-a-wall-light-by-parachilna": {
+    "brand": "Parachilna",
+    "name": "Aballs A Wall Light"
+  },
+  "dimensiva-be-easy-table-by-kristalia": {
+    "brand": "Kristalia",
+    "name": "be-Easy Table"
+  },
+  "dimensiva-beyla-shoe-cabinet-by-kave-home": {
+    "brand": "Kave Home",
+    "name": "Beyla Shoe Cabinet"
+  },
+  "dimensiva-bunky-bunk-bed-by-magis": {
+    "brand": "Magis",
+    "name": "Bunky Bunk Bed"
+  },
+  "dimensiva-coffee-table-in-and-outdoor-large-by-freifrau": {
+    "brand": "Freifrau",
+    "name": "Coffee Table In and Outdoor Large"
+  },
+  "dimensiva-coffee-table-in-and-outdoor-small-by-freifrau": {
+    "brand": "Freifrau",
+    "name": "Coffee Table In and Outdoor Small"
+  },
+  "dimensiva-coffee-table-in-and-outdoor-xl-by-freifrau": {
+    "brand": "Freifrau",
+    "name": "Coffee Table In and Outdoor XL"
+  },
+  "dimensiva-eames-armchair-rocker-rar-by-vitra": {
+    "brand": "Vitra",
+    "name": "Eames Armchair Rocker RAR"
+  },
+  "dimensiva-form-armchair-by-normann-copenhagen": {
+    "brand": "Normann Copenhagen",
+    "name": "Form Armchair"
+  },
+  "dimensiva-hackney-sofa-by-hay": {
+    "brand": "Hay",
+    "name": "Hackney Sofa"
+  },
+  "dimensiva-hello-floor-lamp-by-normann-copenhagen": {
+    "brand": "Normann Copenhagen",
+    "name": "Hello Floor Lamp"
+  },
+  "dimensiva-hoop-coat-rack-by-covo": {
+    "brand": "Covo",
+    "name": "Hoop Coat Rack"
+  },
+  "dimensiva-ibiza-forte-coffee-table-by-ritzwell": {
+    "brand": "Ritzwell",
+    "name": "Ibiza Forte Coffee Table"
+  },
+  "dimensiva-iconic-alarm-clock-by-karlsson": {
+    "brand": "Karlsson",
+    "name": "Iconic Alarm Clock"
+  },
+  "dimensiva-infinity-clock-by-bosa-ceramiche": {
+    "brand": "Bosa Ceramiche",
+    "name": "Infinity Clock"
+  },
+  "dimensiva-lotus-vase-by-101-copenhagen": {
+    "brand": "101 Copenhagen",
+    "name": "Lotus Vase"
+  },
+  "dimensiva-metodo-round-coffee-table-by-mdf-italia": {
+    "brand": "MDF Italia",
+    "name": "Metodo Round Coffee Table"
+  },
+  "dimensiva-next-desk-body-by-mobimex": {
+    "brand": "Mobimex",
+    "name": "Next Desk Body"
+  },
+  "dimensiva-oliver-tray-table-by-evie-group": {
+    "brand": "Evie Group",
+    "name": "Oliver Tray Table"
+  },
+  "dimensiva-oyster-light-armchair-by-i4marini": {
+    "brand": "i4Marini",
+    "name": "Oyster Light Armchair"
+  },
+  "dimensiva-panton-chair-junior-by-vitra": {
+    "brand": "Vitra",
+    "name": "Panton Chair Junior"
+  },
+  "dimensiva-paradise-tree-coat-stand-by-magis": {
+    "brand": "Magis",
+    "name": "Paradise Tree Coat Stand"
+  },
+  "dimensiva-parcel-pedestal-by-ferm-living": {
+    "brand": "Ferm Living",
+    "name": "Parcel Pedestal"
+  },
+  "dimensiva-plan-chair-by-fredericia": {
+    "brand": "Fredericia",
+    "name": "Plan Chair"
+  },
+  "dimensiva-plus-coat-hook-by-porventura": {
+    "brand": "Porventura",
+    "name": "Plus Coat Hook"
+  },
+  "dimensiva-podium-pedestal-by-101-copenhagen": {
+    "brand": "101 Copenhagen",
+    "name": "Podium Pedestal"
+  },
+  "dimensiva-pov-candleholder-wall-by-menu": {
+    "brand": "Menu",
+    "name": "POV Candleholder Wall"
+  },
+  "dimensiva-roly-poly-chair-by-driade": {
+    "brand": "Driade",
+    "name": "Roly Poly Chair"
+  },
+  "dimensiva-serif-vase-by-kristina-dam-studio": {
+    "brand": "Kristina Dam Studio",
+    "name": "Serif Vase"
+  },
+  "dimensiva-slim-charme-coffee-table-by-zeus": {
+    "brand": "Zeus",
+    "name": "Slim Charme Coffee Table"
+  },
+  "dimensiva-slit-coffee-table-oblong-by-hay": {
+    "brand": "Hay",
+    "name": "Slit Coffee Table Oblong"
+  },
+  "dimensiva-slit-coffee-table-round-by-hay": {
+    "brand": "Hay",
+    "name": "Slit Coffee Table Round"
+  },
+  "dimensiva-slit-side-table-round-high-by-hay": {
+    "brand": "Hay",
+    "name": "Slit Side Table Round High"
+  },
+  "dimensiva-stop-bookend-by-e15": {
+    "brand": "e15",
+    "name": "Stop Bookend"
+  },
+  "dimensiva-talk-lamp-by-orsjo": {
+    "brand": "Orsjo",
+    "name": "Talk Lamp"
+  },
+  "dimensiva-titanes-sideboard-by-maxalto": {
+    "brand": "Maxalto",
+    "name": "Titanes Sideboard"
+  },
+  "dimensiva-toio-led-floor-lamp-by-flos": {
+    "brand": "Flos",
+    "name": "Toio Led Floor Lamp"
+  },
+  "dimensiva-tray-table-by-hay": {
+    "brand": "Hay",
+    "name": "Tray Table"
+  },
+  "dimensiva-tripod-lamp-by-lombok": {
+    "brand": "Lombok",
+    "name": "Tripod Lamp"
+  },
+  "dimensiva-wire-basket-by-ferm-living": {
+    "brand": "Ferm Living",
+    "name": "Wire Basket"
+  }
+}
