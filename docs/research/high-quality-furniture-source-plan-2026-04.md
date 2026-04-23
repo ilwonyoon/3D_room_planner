@@ -192,11 +192,12 @@ For every accepted batch:
 
 - Dimensiva: 41 free candidates downloaded, imported, converted to runtime GLB, thumbnailed, and exposed through `manualProductCatalog.generated.ts`.
 - Design Connected: login-assisted freebie flow confirmed. 82 relevant candidates were staged, 81 produced FBX/OBJ locally, and 79 converted to runtime GLB plus thumbnails. A metadata refresh pass now replaces bad `Quick View` card labels with detail-page brand/designer/product names.
+- 3dsky: manufacturer-free bed intake is now wired through `scripts/download-3dsky-free-assets.mjs`. Two bed packages from mebelrika were downloaded; `Cherry Single Bed for Children and Teens` converted, optimized, thumbnailed, and exposed in the app. `Olivia bed with lifting mechanism` shipped a zero-byte OBJ, and `Oscar sofa bed with roll-out drawer` returned a secure download URL whose archive fetch resolved to 404.
 - Muuto: 12 official digital showroom candidates attempted; 11 OBJ packages downloaded, converted through `obj2gltf`, optimized, thumbnailed, and exposed. `muuto-ambit-pendant-943052121460012` failed ZIP extraction because of filename encoding.
 - Vitra: 10 official GLB packages downloaded through the downloads API, optimized, thumbnailed, and exposed.
-- App catalog: 141 manual models are now exposed under `models/manual/*.optimized.glb` with real source brand/product names.
-- Runtime category expansion: 1 sofa, 1 bed, 19 chairs, 40 tables, 4 storage pieces, 26 decor pieces, and 50 lighting pieces.
-- Blocked/failed rows: `designconnected-fuwl-cage-table-8851` did not generate a download after repeated logged-in attempts; `designconnected-rosa-rosa-rosas-wall-light-9791` and `designconnected-shaker-vases-set-9478` exceeded the FBX conversion timeout and remain in raw failure logs; several Muuto OBJ packages converted with default materials because their official archives reference missing or mismatched `.mtl`/texture paths.
+- App catalog: 142 manual models are now exposed under `models/manual/*.optimized.glb` with real source brand/product names.
+- Runtime category expansion: 1 sofa, 2 beds, 19 chairs, 40 tables, 4 storage pieces, 26 decor pieces, and 50 lighting pieces.
+- Blocked/failed rows: `designconnected-fuwl-cage-table-8851` did not generate a download after repeated logged-in attempts; `designconnected-rosa-rosa-rosas-wall-light-9791` and `designconnected-shaker-vases-set-9478` exceeded the FBX conversion timeout and remain in raw failure logs; `3dsky-om-oficial-model-krovat-olivia-odnospalnaia-dlia-detei-i-podrostkov` shipped a zero-byte OBJ; `3dsky-om-oficial-model-krovat-divan-oskar-s-vykatnym-iashchikom` exposed a secure download URL but the archive fetch returned 404; several Muuto OBJ packages converted with default materials because their official archives reference missing or mismatched `.mtl`/texture paths.
 
 ## Immediate Next Batch
 
