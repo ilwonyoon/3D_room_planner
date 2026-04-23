@@ -75,6 +75,12 @@ const SHEET_HEIGHT = 705
 const COLLAPSED_VISIBLE_HEIGHT = 162
 const COLLAPSED_OFFSET = SHEET_HEIGHT - COLLAPSED_VISIBLE_HEIGHT
 const DRAG_THRESHOLD = 36
+const SHEET_SIDE_PADDING = 16
+const SECTION_GAP = 12
+const CHIPS_HEIGHT = 44
+const TOP_TABS_HEIGHT = 44
+const CHIP_BUTTON_HEIGHT = 32
+const TOP_STACK_HEIGHT = TOP_TABS_HEIGHT + SECTION_GAP + CHIPS_HEIGHT
 
 const chips: Chip[] = [
   { id: 'search', label: 'Search' },
@@ -214,17 +220,6 @@ function getRoomSettingTiles(
   )
 }
 
-function productTitleFor(filter: FilterId, count: number) {
-  const chip = chips.find((item) => item.id === filter)
-  const label = chip?.id === 'in-room' ? 'In this Room' : chip?.label ?? 'Products'
-  return `${label} ${count}`
-}
-
-function roomTitleFor(filter: RoomFilterId, count: number) {
-  const chip = roomChips.find((item) => item.id === filter)
-  return `${chip?.label ?? 'Room Settings'} ${count}`
-}
-
 function dimensionsToObjectSize(values: [number, number, number]) {
   const [width, depth, height] = values
   return {
@@ -263,21 +258,6 @@ export function CatalogSheet() {
     () => getRoomSettingTiles(activeRoomFilter, wallMaterial.id, floorMaterial.id),
     [activeRoomFilter, floorMaterial.id, wallMaterial.id],
   )
-  const activeCount =
-    activeSegment === 'product'
-      ? activeFilter === 'in-room'
-        ? objects.length
-        : productTiles.length
-      : activeSegment === 'room-settings'
-        ? roomTiles.length
-        : 0
-  const activeTitle =
-    activeSegment === 'product'
-      ? productTitleFor(activeFilter, activeCount)
-      : activeSegment === 'room-settings'
-        ? roomTitleFor(activeRoomFilter, activeCount)
-        : 'Explore 0'
-
   if (cameraMode === 'pov') {
     return null
   }
@@ -528,28 +508,10 @@ export function CatalogSheet() {
         )}
 
         <div
-          style={{
-            height: 44,
-            padding: '0 10px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          <span style={{ ...css(text.body15_semibold), color: color.base[1] }}>
-            {activeTitle}
-          </span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <FilterMenuLabel label="Color" />
-            <FilterMenuLabel label="Latest" />
-          </div>
-        </div>
-
-        <div
           className="no-scrollbar"
           style={{
-            height: 'calc(100% - 191px)',
-            padding: '0 10px 24px',
+            height: `calc(100% - ${23 + TOP_STACK_HEIGHT}px)`,
+            padding: '20px 10px 24px',
             overflowY: catalogExpanded ? 'auto' : 'hidden',
             overscrollBehavior: 'contain',
             WebkitOverflowScrolling: 'touch',
@@ -632,20 +594,33 @@ function TopTabs({
     { id: 'room-settings', label: 'Room' },
     { id: 'explore', label: 'Explore' },
   ]
+  const activeIndex = Math.max(0, segments.findIndex((segment) => segment.id === activeSegment))
 
   return (
-    <div style={{ padding: '1px 0 0' }}>
+    <div style={{ paddingTop: 1 }}>
       <div
         style={{
           position: 'relative',
-          height: 52,
-          padding: '0 16px',
+          height: TOP_TABS_HEIGHT,
+          padding: `0 ${SHEET_SIDE_PADDING}px`,
           display: 'grid',
           gridTemplateColumns: 'repeat(3, 1fr)',
           alignItems: 'stretch',
           borderBottom: '1px solid #EAEDEF',
         }}
       >
+        <span
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            left: `calc(${SHEET_SIDE_PADDING}px + ((100% - ${SHEET_SIDE_PADDING * 2}px) / 3) * ${activeIndex})`,
+            bottom: 0,
+            width: `calc((100% - ${SHEET_SIDE_PADDING * 2}px) / 3)`,
+            height: 1,
+            background: color.base[1],
+            transition: 'left 220ms cubic-bezier(0.2, 0.8, 0.2, 1)',
+          }}
+        />
         {segments.map((segment) => {
           const active = segment.id === activeSegment
 
@@ -657,7 +632,7 @@ function TopTabs({
               onClick={() => onChange(segment.id)}
               style={{
                 position: 'relative',
-                height: 52,
+                height: TOP_TABS_HEIGHT,
                 background: 'transparent',
                 color: active ? color.base[1] : color.base[2],
                 ...css(active ? text.body14_bold : text.body14_medium),
@@ -665,20 +640,6 @@ function TopTabs({
               }}
             >
               {segment.label}
-              <span
-                aria-hidden="true"
-                style={{
-                  position: 'absolute',
-                  left: '50%',
-                  bottom: -1,
-                  width: active ? 68 : 0,
-                  height: 3,
-                  borderRadius: '3px 3px 0 0',
-                  background: color.base[1],
-                  transform: 'translateX(-50%)',
-                  transition: 'width 160ms ease',
-                }}
-              />
             </button>
           )
         })}
@@ -696,44 +657,56 @@ function FilterChips({
 }) {
   return (
     <div
-      className="no-scrollbar"
       style={{
-        height: 72,
-        padding: '12px 16px',
-        display: 'flex',
-        gap: 4,
-        overflowX: 'auto',
+        position: 'relative',
+        height: CHIPS_HEIGHT,
       }}
     >
-      {chips.map((chip) => {
-        const active = chip.id === activeFilter
+      <div
+        className="no-scrollbar"
+        style={{
+          height: CHIPS_HEIGHT,
+          padding: `12px ${SHEET_SIDE_PADDING}px 0`,
+          display: 'flex',
+          gap: 4,
+          overflowX: 'auto',
+        }}
+      >
+        {chips.map((chip) => {
+          const active = chip.id === activeFilter
 
-        return (
-          <button
-            key={chip.id}
-            type="button"
-            onClick={() => setInteractiveFilter(chip.id, onChange)}
-            style={{
-              flex: '0 0 auto',
-              height: 30,
-              padding: chip.id === 'search' ? '0 12px' : '0 14px',
-              borderRadius: 30,
-              background: active ? '#000000' : '#FFFFFF',
-              border: active ? '1px solid #000000' : '1px solid #DADDE0',
-              color: active ? '#FFFFFF' : color.base[1],
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 4,
-              ...css(text.body14_medium),
-              lineHeight: '18px',
-            }}
-          >
-            {chip.id === 'search' ? <SearchIcon active={active} /> : null}
-            {chip.label}
-          </button>
-        )
-      })}
+          return (
+            <button
+              key={chip.id}
+              type="button"
+              onClick={() => setInteractiveFilter(chip.id, onChange)}
+              style={{
+                flex: '0 0 auto',
+                height: CHIP_BUTTON_HEIGHT,
+                padding: chip.id === 'search' ? '0 12px' : '0 14px',
+                borderRadius: 30,
+                background: active ? '#000000' : '#FFFFFF',
+                border: active ? '1px solid #000000' : '1px solid #DADDE0',
+                color: active ? '#FFFFFF' : color.base[1],
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 4,
+                fontFamily: '"SF Pro Text", -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+                fontSize: 15,
+                fontWeight: 500,
+                lineHeight: '20px',
+                letterSpacing: '-0.4px',
+              }}
+            >
+              {chip.id === 'search' ? <SearchIcon active={active} /> : null}
+              {chip.label}
+            </button>
+          )
+        })}
+      </div>
+      <ChipEdgeFade side="left" />
+      <ChipEdgeFade side="right" />
     </div>
   )
 }
@@ -747,48 +720,60 @@ function RoomFilterChips({
 }) {
   return (
     <div
-      className="no-scrollbar"
       style={{
-        height: 72,
-        padding: '12px 16px',
-        display: 'flex',
-        gap: 4,
-        overflowX: 'auto',
+        position: 'relative',
+        height: CHIPS_HEIGHT,
       }}
     >
-      {roomChips.map((chip) => {
-        const active = chip.id === activeFilter
+      <div
+        className="no-scrollbar"
+        style={{
+          height: CHIPS_HEIGHT,
+          padding: `12px ${SHEET_SIDE_PADDING}px 0`,
+          display: 'flex',
+          gap: 4,
+          overflowX: 'auto',
+        }}
+      >
+        {roomChips.map((chip) => {
+          const active = chip.id === activeFilter
 
-        return (
-          <button
-            key={chip.id}
-            type="button"
-            onClick={() => onChange(chip.id)}
-            style={{
-              flex: '0 0 auto',
-              height: 30,
-              padding: '0 14px',
-              borderRadius: 30,
-              background: active ? '#000000' : '#FFFFFF',
-              border: active ? '1px solid #000000' : '1px solid #DADDE0',
-              color: active ? '#FFFFFF' : color.base[1],
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              ...css(text.body14_medium),
-              lineHeight: '18px',
-            }}
-          >
-            {chip.label}
-          </button>
-        )
-      })}
+          return (
+            <button
+              key={chip.id}
+              type="button"
+              onClick={() => onChange(chip.id)}
+              style={{
+                flex: '0 0 auto',
+                height: CHIP_BUTTON_HEIGHT,
+                padding: '0 14px',
+                borderRadius: 30,
+                background: active ? '#000000' : '#FFFFFF',
+                border: active ? '1px solid #000000' : '1px solid #DADDE0',
+                color: active ? '#FFFFFF' : color.base[1],
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: '"SF Pro Text", -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+                fontSize: 15,
+                fontWeight: 500,
+                lineHeight: '20px',
+                letterSpacing: '-0.4px',
+              }}
+            >
+              {chip.label}
+            </button>
+          )
+        })}
+      </div>
+      <ChipEdgeFade side="left" />
+      <ChipEdgeFade side="right" />
     </div>
   )
 }
 
 function ExploreSpacer() {
-  return <div style={{ height: 72 }} />
+  return <div style={{ height: CHIPS_HEIGHT }} />
 }
 
 function setInteractiveFilter(filter: FilterId, onChange: (filter: FilterId) => void) {
@@ -799,22 +784,23 @@ function setInteractiveFilter(filter: FilterId, onChange: (filter: FilterId) => 
   onChange(filter)
 }
 
-function FilterMenuLabel({ label }: { label: string }) {
+function ChipEdgeFade({ side }: { side: 'left' | 'right' }) {
   return (
-    <button
-      type="button"
+    <div
+      aria-hidden="true"
       style={{
-        height: 28,
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 2,
-        ...css(text.body14_medium),
-        color: '#505960',
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        [side]: 0,
+        width: 26,
+        pointerEvents: 'none',
+        background:
+          side === 'left'
+            ? `linear-gradient(90deg, ${color.sheet.bg} 28%, rgba(255,255,255,0) 100%)`
+            : `linear-gradient(270deg, ${color.sheet.bg} 28%, rgba(255,255,255,0) 100%)`,
       }}
-    >
-      <span>{label}</span>
-      <img src="/icons/ui-chevron-down.svg" alt="" width={12} height={12} />
-    </button>
+    />
   )
 }
 
