@@ -86,8 +86,8 @@
 - `models/manual/*.optimized.glb`
   - Source: manually imported high-quality free furniture/decor model packages.
   - Runtime format: downloaded source GLB/GLTF packages optimized directly; FBX packages converted with `fbx2gltf`; OBJ packages converted with `obj2gltf`; then glTF-Transform optimized with Meshopt and WebP textures.
-  - Source of truth: `raw/assets/models/manual/catalog-candidates.json`, `src/constants/manualProductCatalog.generated.ts`, `scripts/download-dimensiva-free-assets.mjs`, `scripts/download-designconnected-free-assets.mjs`, `scripts/download-muuto-3d-assets.mjs`, `scripts/download-3dsky-free-assets.mjs`, `scripts/download-vitra-glb-assets.mjs`, `scripts/update-designconnected-metadata.mjs`, `scripts/generate-manual-product-catalog.mjs`, and `scripts/import-manual-assets.mjs`.
-  - Included runtime assets: 144 manual models; 41 from Dimensiva, 79 from Design Connected, 12 from Muuto, 11 from Vitra, and 1 from 3dsky.
+  - Source of truth: `raw/assets/models/manual/catalog-candidates.json`, `src/constants/manualProductCatalog.generated.ts`, `scripts/download-dimensiva-free-assets.mjs`, `scripts/download-designconnected-free-assets.mjs`, `scripts/download-muuto-3d-assets.mjs`, `scripts/download-3dsky-free-assets.mjs`, `scripts/download-vitra-glb-assets.mjs`, `scripts/download-herman-miller-configurator-assets.mjs`, `scripts/download-zeel-free-assets.mjs`, `scripts/update-designconnected-metadata.mjs`, `scripts/generate-manual-product-catalog.mjs`, and `scripts/import-manual-assets.mjs`.
+  - Included runtime assets: 153 manual models; 41 from Dimensiva, 79 from Design Connected, 12 from Muuto, 11 from Vitra, 2 from Herman Miller, 7 from Zeel, and 1 from 3dsky.
   - Dimensiva source: https://dimensiva.com/free-3d-models/
   - Dimensiva license reference: https://dimensiva.com/license/
   - Design Connected source: https://www.designconnected.com/freebies
@@ -96,9 +96,12 @@
   - 3dsky free manufacturer model rules: https://3dsky.org/faq/163/show
   - Muuto source: https://download.muuto.com/digitalshowroom/#/gallery/3D-files
   - Vitra source: https://downloads.vitra.com/#/media?media_category_media_type=root.cad.glb.
-  - QA exclusions: `designconnected-fuwl-cage-table-8851` did not produce a download after repeated logged-in attempts; `designconnected-rosa-rosa-rosas-wall-light-9791` and `designconnected-shaker-vases-set-9478` timed out in FBX conversion and are retained only in raw/import failure logs; `muuto-ambit-pendant-943052121460012` failed archive extraction because of ZIP filename encoding; `3dsky-om-oficial-model-krovat-olivia-odnospalnaia-dlia-detei-i-podrostkov` shipped a zero-byte OBJ; `3dsky-om-oficial-model-krovat-divan-oskar-s-vykatnym-iashchikom` exposed a download URL but the secure archive returned 404 during fetch.
-  - QA notes: several Muuto OBJ packages reference missing or mismatched `.mtl`/texture filenames in the official archive; those models were converted as geometry-first GLBs and may use default materials.
-  - Category additions exposed in product catalog: 1 sofa, 2 beds, 20 chairs, 40 tables, 5 storage pieces, 26 decor pieces, and 50 lighting pieces.
+  - Herman Miller source: https://www.hermanmiller.com/resources/3d-models-and-planning-tools/product-models/
+  - Zeel source: https://zeelproject.com/3d-models/
+  - QA exclusions: `designconnected-fuwl-cage-table-8851` did not produce a download after repeated logged-in attempts; `designconnected-rosa-rosa-rosas-wall-light-9791` and `designconnected-shaker-vases-set-9478` timed out in FBX conversion and are retained only in raw/import failure logs; `muuto-ambit-pendant-943052121460012` failed archive extraction because of ZIP filename encoding; `3dsky-om-oficial-model-krovat-olivia-odnospalnaia-dlia-detei-i-podrostkov` shipped a zero-byte OBJ; `3dsky-om-oficial-model-krovat-divan-oskar-s-vykatnym-iashchikom` exposed a download URL but the secure archive returned 404 during fetch; Herman Miller `Pawson Drift Sofa Group` remains intermittent because the official configurator iframe sometimes does not attach during automation.
+  - QA notes: several Muuto OBJ packages reference missing or mismatched `.mtl`/texture filenames in the official archive; those models were converted as geometry-first GLBs and may use default materials. Herman Miller configurator exports include embedded punctual lights, and the app now strips those scene lights during runtime and thumbnail rendering to keep lighting consistent.
+  - Recent local addition: `polyhaven-decorative-book-set-01` imported from Poly Haven `Decorative Book Set 01` as a CC0 bookshelf prop set for shelf styling.
+  - Category additions exposed in product catalog: 3 sofas, 3 beds, 20 chairs, 43 tables, 8 storage pieces, 26 decor pieces, and 50 lighting pieces.
 
 - `models-ktx2/**/*.optimized.glb`
   - Source: matching source model from `models/**`
@@ -109,13 +112,31 @@
   - QA note: `sheen-wood-leather-sofa` is intentionally excluded from KTX2 runtime use because its source textures are already WebP and glTF-Transform cannot convert that path to `KHR_texture_basisu`.
 
 - `models/architectural/*.optimized.glb`
-  - Source: Pocketroom procedural architectural assets
-  - License: Project-owned generated geometry
-  - Runtime format: generated `.glb` from `scripts/generate-architectural-assets.mjs`, then glTF-Transform optimized with Meshopt
-  - Source of truth: `scripts/generate-architectural-assets.mjs`, `scripts/prepare-assets.mjs`, and `src/constants/environmentCatalog.ts`
-  - Included modern window assets: `modern-wide-picture-window`, `modern-sliding-window`, `modern-tall-casement-window`, `modern-square-awning-window`, `modern-transom-window`
+  - Source split:
+    - Windows: official manufacturer `SketchUp` models from Marvin and Pella, converted locally to runtime `GLB`
+    - Doors: Pocketroom-generated modern door runtime set
+  - License:
+    - Windows: manufacturer design-file references used for this local prototype
+    - Doors: Pocketroom-generated geometry for this local prototype
+  - Runtime format: normalized `.glb` and optimized `.optimized.glb`
+  - Source of truth: `scripts/convert-skp-window-to-glb.py`, `scripts/generate-architectural-assets.mjs`, `scripts/prepare-assets.mjs`, and `src/constants/environmentCatalog.ts`
+  - Included modern window assets: `modern-wide-picture-window`, `modern-triple-window`, `modern-sliding-window`, `modern-sliding-door-window`, `modern-tall-casement-window`, `modern-upper-transom-window`, `modern-dynamic-window`, `modern-casement-slider-window`, `modern-pvc-transom-window`
+  - Current window references:
+    - Marvin: `Modern Awning Crank Out`, `Modern Casement Crank Out MultiW 1H`, `Modern Direct Glaze Rectangle`, `Modern Awning Crank Out 2H`, `Modern Casement Crank Out`, `Modern Casement Picture`
+    - Pella: `Impervia Casement Vent`, `Impervia Casement Fixed`, `Impervia Transom`
   - Included modern door assets: `modern-flush-white-door`, `modern-slim-glass-door`, `modern-sliding-glass-door`, `modern-double-glass-door`, `modern-ribbed-oak-door`
   - Replaces the previously exposed Kenney Building Kit door/window pieces in the Room catalog. Kenney Building Kit runtime assets have been removed from the app asset tree.
+
+- `models/apple-official/*.usdz`
+  - Source: Apple official AR Quick Look product models served from apple.com product pages.
+  - License: Apple marketing/media assets. Treated as `personal-local` reference assets for this prototype, not as redistributable marketplace content.
+  - Runtime format: original `.usdz` archives are loaded directly at runtime with Three.js `USDLoader`. Extracted USDA folders are kept only for local inspection/debugging.
+  - Included home-office props:
+    - `imac-with-accessories-silver.usdz` from https://www.apple.com/imac/
+    - `macbook-air-13in-starlight.usdz` from https://www.apple.com/macbook-air/
+    - `homepod-mini-white.usdz` from https://www.apple.com/homepod-mini/
+    - `mac-mini-studio-display.usdz` from https://www.apple.com/mac-mini/
+    - `airpods-max-starlight.usdz` from https://www.apple.com/airpods-max/
 
 - `environment-catalog.json`
   - Runtime manifest for room environment selectors.

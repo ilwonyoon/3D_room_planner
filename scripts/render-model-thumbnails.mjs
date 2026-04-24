@@ -95,12 +95,27 @@ async function main() {
     const page = await browser.newPage({ viewport: { width: 240, height: 240 }, deviceScaleFactor: 2 })
     await page.goto(rendererUrl, { waitUntil: 'networkidle' })
     await page.waitForFunction(() => window.__thumbnailRendererReady === true)
+    const failures = []
 
     for (const [index, target] of targets.entries()) {
-      const dataUrl = await page.evaluate((modelUrl) => window.renderModelThumbnail(modelUrl), target.modelUrl)
-      const base64 = dataUrl.replace(/^data:image\/png;base64,/, '')
-      await writeFile(target.thumbnailPath, Buffer.from(base64, 'base64'))
-      console.log(`[thumbs] ${index + 1}/${targets.length} ${path.basename(target.thumbnailPath)}`)
+      try {
+        const dataUrl = await page.evaluate((modelUrl) => window.renderModelThumbnail(modelUrl), target.modelUrl)
+        const base64 = dataUrl.replace(/^data:image\/png;base64,/, '')
+        await writeFile(target.thumbnailPath, Buffer.from(base64, 'base64'))
+        console.log(`[thumbs] ${index + 1}/${targets.length} ${path.basename(target.thumbnailPath)}`)
+      } catch (error) {
+        failures.push({ target, error })
+        console.error(`[thumbs] failed ${path.basename(target.thumbnailPath)}`)
+      }
+    }
+
+    if (failures.length > 0) {
+      for (const failure of failures) {
+        console.error(failure.target.filePath)
+        console.error(failure.error)
+      }
+
+      throw new Error(`Thumbnail generation failed for ${failures.length} model(s).`)
     }
   } finally {
     if (browser) {

@@ -9,6 +9,7 @@ import {
   type RoomSettingsItem,
 } from '@/constants/environmentCatalog'
 import {
+  PRODUCT_BY_ID,
   PRODUCT_BY_MODEL_URL,
   PRODUCT_CATALOG,
   type ProductAssetSource,
@@ -60,6 +61,12 @@ type ProductTile = ProductCatalogItem & {
   ariaLabel?: string
 }
 
+type SelectedProductContext = {
+  object: EditorObject
+  item: ProductCatalogItem
+  candidates: ProductCatalogItem[]
+}
+
 type RoomSettingsTile = CardTile & {
   item: RoomSettingsItem
 }
@@ -75,6 +82,18 @@ const SHEET_HEIGHT = 705
 const COLLAPSED_VISIBLE_HEIGHT = 162
 const COLLAPSED_OFFSET = SHEET_HEIGHT - COLLAPSED_VISIBLE_HEIGHT
 const DRAG_THRESHOLD = 36
+const SHEET_SIDE_PADDING = 16
+const SECTION_GAP = 12
+const CHIPS_HEIGHT = 44
+const TOP_TABS_HEIGHT = 44
+const CHIP_BUTTON_HEIGHT = 32
+const TOP_STACK_HEIGHT = TOP_TABS_HEIGHT + SECTION_GAP + CHIPS_HEIGHT
+const EDIT_CONTEXT_RAIL_TILE_SIZE = 72
+const EDIT_CONTEXT_RAIL_PADDING_Y = 12
+const EDIT_CONTEXT_RAIL_HEIGHT = EDIT_CONTEXT_RAIL_TILE_SIZE + EDIT_CONTEXT_RAIL_PADDING_Y * 2
+const EDIT_CONTEXT_CARD_HEIGHT = 88
+const EDIT_CONTEXT_CARD_BOTTOM = 28
+const EDIT_CONTEXT_MODULE_GAP = 3
 
 const chips: Chip[] = [
   { id: 'search', label: 'Search' },
@@ -82,6 +101,7 @@ const chips: Chip[] = [
   { id: 'saved', label: 'Saved' },
   { id: 'table', label: 'Table', category: 'table' },
   { id: 'storage', label: 'Drawers', category: 'storage' },
+  { id: 'rug', label: 'Rug', category: 'rug' },
   { id: 'decor', label: 'Deco', category: 'decor' },
   { id: 'chair', label: 'Chair', category: 'chair' },
   { id: 'bed', label: 'Bed', category: 'bed' },
@@ -116,7 +136,7 @@ function productSourceForRoomSource(source: string): ProductAssetSource {
 }
 
 function objectToTile(object: EditorObject): ProductTile {
-  const catalogItem = PRODUCT_BY_MODEL_URL.get(object.url)
+  const catalogItem = (object.catalogItemId ? PRODUCT_BY_ID.get(object.catalogItemId) : undefined) ?? PRODUCT_BY_MODEL_URL.get(object.url)
 
   if (catalogItem) {
     return {
@@ -138,6 +158,9 @@ function objectToTile(object: EditorObject): ProductTile {
       source: productSourceForRoomSource(roomItem.source),
       renderCost: 'standard',
       modelUrl: object.url,
+      sourceModelUrl: object.sourceModelUrl ?? object.url,
+      runtimeModelUrl: object.runtimeModelUrl,
+      heroModelUrl: object.heroModelUrl,
       thumbnailUrl: roomItem.thumbnailUrl,
       dimensionsCm: [
         Math.round(roomItem.dimensionsM.x * 100),
@@ -158,6 +181,9 @@ function objectToTile(object: EditorObject): ProductTile {
     source: 'polyhaven',
     renderCost: 'standard',
     modelUrl: object.url,
+    sourceModelUrl: object.sourceModelUrl ?? object.url,
+    runtimeModelUrl: object.runtimeModelUrl,
+    heroModelUrl: object.heroModelUrl,
     thumbnailUrl: '/assets/model-thumbnails/sheen-chair.png',
     dimensionsCm: [80, 80, 80],
     placedObjectId: object.id,
@@ -194,12 +220,12 @@ function roomSettingToTile(
 
   return {
     id: item.id,
-    brand: item.source,
+    brand: item.kind === 'material' ? (item.brand ?? item.source) : item.source,
     thumbnailUrl: item.thumbnailUrl,
-    displayDimensions: item.kind === 'material' ? (item.target === 'wall' ? 'Wall material' : 'Floor material') : item.displayLabel,
+    displayDimensions: item.kind === 'material' ? item.name : item.displayLabel,
     imageFit: item.kind === 'material' ? 'cover' : 'contain',
     selected,
-    ariaLabel: `${item.name} ${item.kind === 'material' ? item.source : item.displayLabel}`,
+    ariaLabel: `${item.kind === 'material' ? (item.brand ?? item.source) : item.source} ${item.name}${item.kind === 'material' && item.catalogCode ? ` ${item.catalogCode}` : ''}`,
     item,
   }
 }
@@ -214,23 +240,35 @@ function getRoomSettingTiles(
   )
 }
 
-function productTitleFor(filter: FilterId, count: number) {
-  const chip = chips.find((item) => item.id === filter)
-  const label = chip?.id === 'in-room' ? 'In this Room' : chip?.label ?? 'Products'
-  return `${label} ${count}`
-}
-
-function roomTitleFor(filter: RoomFilterId, count: number) {
-  const chip = roomChips.find((item) => item.id === filter)
-  return `${chip?.label ?? 'Room Settings'} ${count}`
-}
-
 function dimensionsToObjectSize(values: [number, number, number]) {
   const [width, depth, height] = values
   return {
     x: width / 100,
     y: height / 100,
     z: depth / 100,
+  }
+}
+
+function productPriceMeta(item: ProductCatalogItem) {
+  const baseSeed = item.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0)
+  const discount = 12 + (baseSeed % 27)
+  const categoryBase =
+    item.category === 'chair'
+      ? 89000
+      : item.category === 'table'
+        ? 139000
+        : item.category === 'storage'
+          ? 189000
+          : item.category === 'lighting'
+            ? 79000
+            : item.category === 'sofa'
+              ? 429000
+              : 59000
+  const price = Math.round((categoryBase + (baseSeed % 37) * 3000) / 1000) * 1000
+
+  return {
+    discountLabel: `${discount}%`,
+    priceLabel: price.toLocaleString('ko-KR'),
   }
 }
 
@@ -251,10 +289,12 @@ export function CatalogSheet() {
   const renderQuality = useRenderQualityStore((s) => s.quality)
   const room = useRoomStore((s) => s.room)
   const select = useSelectionStore((s) => s.select)
+  const selectedId = useSelectionStore((s) => s.selectedId)
   const cameraMode = useCameraViewStore((s) => s.mode)
   const catalogExpanded = useUiStore((s) => s.catalogExpanded)
   const toggleCatalog = useUiStore((s) => s.toggleCatalog)
   const setCatalog = useUiStore((s) => s.setCatalog)
+  const replaceObject = useEditorObjectsStore((s) => s.replaceObject)
 
   const inRoomTiles = useMemo(() => objects.map(objectToTile), [objects])
   const catalogTiles = useMemo(() => getCatalogTiles(activeFilter, renderQuality), [activeFilter, renderQuality])
@@ -263,29 +303,47 @@ export function CatalogSheet() {
     () => getRoomSettingTiles(activeRoomFilter, wallMaterial.id, floorMaterial.id),
     [activeRoomFilter, floorMaterial.id, wallMaterial.id],
   )
-  const activeCount =
-    activeSegment === 'product'
-      ? activeFilter === 'in-room'
-        ? objects.length
-        : productTiles.length
-      : activeSegment === 'room-settings'
-        ? roomTiles.length
-        : 0
-  const activeTitle =
-    activeSegment === 'product'
-      ? productTitleFor(activeFilter, activeCount)
-      : activeSegment === 'room-settings'
-        ? roomTitleFor(activeRoomFilter, activeCount)
-        : 'Explore 0'
+  const selectedProductContext = useMemo<SelectedProductContext | null>(() => {
+    const selectedObject = objects.find((object) => object.id === selectedId)
+
+    if (!selectedObject) {
+      return null
+    }
+
+    const selectedItem =
+      (selectedObject.catalogItemId ? PRODUCT_BY_ID.get(selectedObject.catalogItemId) : undefined) ??
+      PRODUCT_BY_MODEL_URL.get(selectedObject.url)
+
+    if (!selectedItem) {
+      return null
+    }
+
+    const candidates = PRODUCT_CATALOG.filter(
+      (item) =>
+        item.category === selectedItem.category &&
+        (item.id === selectedItem.id || renderQuality === 'high' || item.renderCost !== 'heavy'),
+    )
+
+    return {
+      object: selectedObject,
+      item: selectedItem,
+      candidates,
+    }
+  }, [objects, renderQuality, selectedId])
 
   if (cameraMode === 'pov') {
     return null
   }
 
+  const showSelectedEditMode = selectedProductContext !== null
   const expandSheet = () => setCatalog(true)
   const collapseSheet = () => setCatalog(false)
 
   const handleSheetClickCapture = (event: MouseEvent<HTMLDivElement>) => {
+    if (showSelectedEditMode) {
+      return
+    }
+
     if (suppressNextClickRef.current) {
       suppressNextClickRef.current = false
       event.preventDefault()
@@ -308,6 +366,10 @@ export function CatalogSheet() {
   }
 
   const handleSheetPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    if (showSelectedEditMode) {
+      return
+    }
+
     if (!event.isPrimary) {
       return
     }
@@ -321,6 +383,10 @@ export function CatalogSheet() {
   }
 
   const handleSheetPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    if (showSelectedEditMode) {
+      return
+    }
+
     const state = pointerRef.current
     if (!state || state.pointerId !== event.pointerId) {
       return
@@ -331,6 +397,10 @@ export function CatalogSheet() {
   }
 
   const handleSheetPointerEnd = (event: PointerEvent<HTMLDivElement>) => {
+    if (showSelectedEditMode) {
+      return
+    }
+
     const state = pointerRef.current
     if (!state || state.pointerId !== event.pointerId) {
       return
@@ -352,6 +422,10 @@ export function CatalogSheet() {
   }
 
   const handleSheetWheelCapture = (event: WheelEvent<HTMLDivElement>) => {
+    if (showSelectedEditMode) {
+      return
+    }
+
     if (!catalogExpanded) {
       event.preventDefault()
       event.stopPropagation()
@@ -372,10 +446,18 @@ export function CatalogSheet() {
     const targetSize = Math.max(dimensionsM.x, dimensionsM.y, dimensionsM.z)
     const id = `${item.id}-${Date.now()}`
 
+    const isRug = item.category === 'rug' || item.modelUrl.startsWith('/procedural/area-rug/')
+
     addObject({
       id,
-      label: item.brand,
+      label: item.name,
       url: item.modelUrl,
+      sourceModelUrl: item.sourceModelUrl,
+      runtimeModelUrl: item.runtimeModelUrl,
+      heroModelUrl: item.heroModelUrl,
+      catalogItemId: item.id,
+      productCategory: item.category,
+      renderKind: isRug ? 'area-rug' : 'model',
       position: { x: 0.15, z: 0.35 },
       placement: 'floor',
       elevationM: 0.02,
@@ -387,6 +469,32 @@ export function CatalogSheet() {
     setEditMode('idle')
     setActiveDragMode(null)
     setCatalog(false)
+  }
+
+  const handleReplacementClick = (item: ProductCatalogItem) => {
+    if (!selectedProductContext) {
+      return
+    }
+
+    const dimensionsM = dimensionsToObjectSize(item.dimensionsCm)
+    const targetSize = Math.max(dimensionsM.x, dimensionsM.y, dimensionsM.z)
+
+    const isRug = item.category === 'rug' || item.modelUrl.startsWith('/procedural/area-rug/')
+
+    replaceObject(selectedProductContext.object.id, {
+      label: item.name,
+      url: item.modelUrl,
+      sourceModelUrl: item.sourceModelUrl,
+      runtimeModelUrl: item.runtimeModelUrl,
+      heroModelUrl: item.heroModelUrl,
+      catalogItemId: item.id,
+      productCategory: item.category,
+      renderKind: isRug ? 'area-rug' : 'model',
+      targetSize,
+      dimensionsM,
+    })
+    setEditMode('idle')
+    setActiveDragMode(null)
   }
 
   const applyRoomMaterial = (item: RoomMaterialItem) => {
@@ -437,6 +545,10 @@ export function CatalogSheet() {
     }
 
     addRoomModel(tile.item)
+  }
+
+  if (showSelectedEditMode && selectedProductContext) {
+    return <SelectedObjectEditOverlay context={selectedProductContext} onReplace={handleReplacementClick} />
   }
 
   return (
@@ -528,28 +640,10 @@ export function CatalogSheet() {
         )}
 
         <div
-          style={{
-            height: 44,
-            padding: '0 10px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          <span style={{ ...css(text.body15_semibold), color: color.base[1] }}>
-            {activeTitle}
-          </span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <FilterMenuLabel label="Color" />
-            <FilterMenuLabel label="Latest" />
-          </div>
-        </div>
-
-        <div
           className="no-scrollbar"
           style={{
-            height: 'calc(100% - 191px)',
-            padding: '0 10px 24px',
+            height: `calc(100% - ${23 + TOP_STACK_HEIGHT}px)`,
+            padding: '20px 10px 24px',
             overflowY: catalogExpanded ? 'auto' : 'hidden',
             overscrollBehavior: 'contain',
             WebkitOverflowScrolling: 'touch',
@@ -620,6 +714,202 @@ export function CatalogSheet() {
   )
 }
 
+function SelectedObjectEditOverlay({
+  context,
+  onReplace,
+}: {
+  context: SelectedProductContext
+  onReplace: (item: ProductCatalogItem) => void
+}) {
+  const priceMeta = productPriceMeta(context.item)
+
+  return (
+    <>
+      <div
+        className="no-scrollbar"
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: EDIT_CONTEXT_CARD_BOTTOM + EDIT_CONTEXT_CARD_HEIGHT + EDIT_CONTEXT_MODULE_GAP,
+          zIndex: zIndex.sheet,
+          height: EDIT_CONTEXT_RAIL_HEIGHT,
+          padding: `0 ${SHEET_SIDE_PADDING}px`,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 7,
+          overflowX: 'auto',
+          overflowY: 'hidden',
+        }}
+      >
+        {context.candidates.map((item) => {
+          const active = item.id === context.item.id
+
+          return (
+            <button
+              key={item.id}
+              type="button"
+              aria-label={`${item.brand} ${item.name}`}
+              onClick={() => onReplace(item)}
+              style={{
+                flex: '0 0 auto',
+                width: EDIT_CONTEXT_RAIL_TILE_SIZE,
+                height: EDIT_CONTEXT_RAIL_TILE_SIZE,
+                borderRadius: 9,
+                background: active ? 'rgba(255,255,255,0.11)' : 'rgba(255,255,255,0.07)',
+                backdropFilter: 'blur(2.5px)',
+                WebkitBackdropFilter: 'blur(2.5px)',
+                display: 'grid',
+                placeItems: 'center',
+                overflow: 'hidden',
+              }}
+            >
+              <img
+                src={item.thumbnailUrl}
+                alt=""
+                loading="lazy"
+                draggable={false}
+                style={{
+                  width: 58,
+                  height: 58,
+                  objectFit: 'contain',
+                  display: 'block',
+                }}
+              />
+            </button>
+          )
+        })}
+      </div>
+
+      <div
+        style={{
+          position: 'absolute',
+          left: SHEET_SIDE_PADDING,
+          right: SHEET_SIDE_PADDING,
+          bottom: EDIT_CONTEXT_CARD_BOTTOM,
+          zIndex: zIndex.sheet,
+        }}
+      >
+        <div
+          style={{
+            height: EDIT_CONTEXT_CARD_HEIGHT,
+            boxSizing: 'border-box',
+            borderRadius: 14,
+            background: '#242426',
+            border: '1px solid #2F3036',
+            boxShadow: '0 16px 24px rgba(0,0,0,0.04)',
+            padding: '12px 20px 12px 12px',
+            display: 'grid',
+            gridTemplateColumns: '64px 1fr 24px',
+            alignItems: 'center',
+            gap: 12,
+          }}
+        >
+          <div
+            style={{
+              width: 64,
+              height: 64,
+              borderRadius: 8,
+              background: 'transparent',
+              display: 'grid',
+              placeItems: 'center',
+              overflow: 'hidden',
+            }}
+          >
+            <img
+              src={context.item.thumbnailUrl}
+              alt=""
+              loading="lazy"
+              draggable={false}
+              style={{
+                width: 64,
+                height: 64,
+                objectFit: 'cover',
+                display: 'block',
+              }}
+            />
+          </div>
+
+          <div style={{ minWidth: 0 }}>
+            <div
+              style={{
+                fontFamily: '"SF Pro Text", -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+                fontSize: 12,
+                fontWeight: 400,
+                lineHeight: '20px',
+                letterSpacing: 0,
+                color: '#A7ABB2',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {context.item.brand}
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+                minWidth: 0,
+                color: '#FFFFFF',
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: '"SF Pro Text", -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+                  fontSize: 14,
+                  fontWeight: 400,
+                  lineHeight: '18px',
+                  letterSpacing: 0,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {context.item.name}
+              </div>
+              <ChevronRightIcon />
+            </div>
+            <div
+              style={{
+                marginTop: 2,
+                display: 'flex',
+                gap: 2,
+                alignItems: 'flex-start',
+                fontFamily: '"SF Pro Display", -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+                fontSize: 16,
+                fontWeight: 600,
+                lineHeight: '24px',
+                letterSpacing: 0,
+              }}
+            >
+              <span style={{ color: '#35C5F0' }}>{priceMeta.discountLabel}</span>
+              <span style={{ color: '#FFFFFF' }}>{priceMeta.priceLabel}</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            aria-label={`Save ${context.item.brand} ${context.item.name}`}
+            style={{
+              width: 24,
+              height: 24,
+              alignSelf: 'center',
+              display: 'grid',
+              placeItems: 'center',
+              color: '#FFFFFF',
+              padding: 0,
+            }}
+          >
+            <BookmarkIcon />
+          </button>
+        </div>
+      </div>
+    </>
+  )
+}
+
 function TopTabs({
   activeSegment,
   onChange,
@@ -632,20 +922,33 @@ function TopTabs({
     { id: 'room-settings', label: 'Room' },
     { id: 'explore', label: 'Explore' },
   ]
+  const activeIndex = Math.max(0, segments.findIndex((segment) => segment.id === activeSegment))
 
   return (
-    <div style={{ padding: '1px 0 0' }}>
+    <div style={{ paddingTop: 1 }}>
       <div
         style={{
           position: 'relative',
-          height: 52,
-          padding: '0 16px',
+          height: TOP_TABS_HEIGHT,
+          padding: `0 ${SHEET_SIDE_PADDING}px`,
           display: 'grid',
           gridTemplateColumns: 'repeat(3, 1fr)',
           alignItems: 'stretch',
           borderBottom: '1px solid #EAEDEF',
         }}
       >
+        <span
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            left: `calc(${SHEET_SIDE_PADDING}px + ((100% - ${SHEET_SIDE_PADDING * 2}px) / 3) * ${activeIndex})`,
+            bottom: 0,
+            width: `calc((100% - ${SHEET_SIDE_PADDING * 2}px) / 3)`,
+            height: 1,
+            background: color.base[1],
+            transition: 'left 220ms cubic-bezier(0.2, 0.8, 0.2, 1)',
+          }}
+        />
         {segments.map((segment) => {
           const active = segment.id === activeSegment
 
@@ -657,7 +960,7 @@ function TopTabs({
               onClick={() => onChange(segment.id)}
               style={{
                 position: 'relative',
-                height: 52,
+                height: TOP_TABS_HEIGHT,
                 background: 'transparent',
                 color: active ? color.base[1] : color.base[2],
                 ...css(active ? text.body14_bold : text.body14_medium),
@@ -665,20 +968,6 @@ function TopTabs({
               }}
             >
               {segment.label}
-              <span
-                aria-hidden="true"
-                style={{
-                  position: 'absolute',
-                  left: '50%',
-                  bottom: -1,
-                  width: active ? 68 : 0,
-                  height: 3,
-                  borderRadius: '3px 3px 0 0',
-                  background: color.base[1],
-                  transform: 'translateX(-50%)',
-                  transition: 'width 160ms ease',
-                }}
-              />
             </button>
           )
         })}
@@ -696,44 +985,56 @@ function FilterChips({
 }) {
   return (
     <div
-      className="no-scrollbar"
       style={{
-        height: 72,
-        padding: '12px 16px',
-        display: 'flex',
-        gap: 4,
-        overflowX: 'auto',
+        position: 'relative',
+        height: CHIPS_HEIGHT,
       }}
     >
-      {chips.map((chip) => {
-        const active = chip.id === activeFilter
+      <div
+        className="no-scrollbar"
+        style={{
+          height: CHIPS_HEIGHT,
+          padding: `12px ${SHEET_SIDE_PADDING}px 0`,
+          display: 'flex',
+          gap: 6,
+          overflowX: 'auto',
+        }}
+      >
+        {chips.map((chip) => {
+          const active = chip.id === activeFilter
 
-        return (
-          <button
-            key={chip.id}
-            type="button"
-            onClick={() => setInteractiveFilter(chip.id, onChange)}
-            style={{
-              flex: '0 0 auto',
-              height: 30,
-              padding: chip.id === 'search' ? '0 12px' : '0 14px',
-              borderRadius: 30,
-              background: active ? '#000000' : '#FFFFFF',
-              border: active ? '1px solid #000000' : '1px solid #DADDE0',
-              color: active ? '#FFFFFF' : color.base[1],
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 4,
-              ...css(text.body14_medium),
-              lineHeight: '18px',
-            }}
-          >
-            {chip.id === 'search' ? <SearchIcon active={active} /> : null}
-            {chip.label}
-          </button>
-        )
-      })}
+          return (
+            <button
+              key={chip.id}
+              type="button"
+              onClick={() => setInteractiveFilter(chip.id, onChange)}
+              style={{
+                flex: '0 0 auto',
+                height: CHIP_BUTTON_HEIGHT,
+                padding: chip.id === 'search' ? '0 12px' : '0 14px',
+                borderRadius: 30,
+                background: active ? '#000000' : '#FFFFFF',
+                border: active ? '1px solid #000000' : '1px solid #DADDE0',
+                color: active ? '#FFFFFF' : color.base[1],
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 4,
+                fontFamily: '"SF Pro Text", -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+                fontSize: 15,
+                fontWeight: 500,
+                lineHeight: '20px',
+                letterSpacing: '-0.4px',
+              }}
+            >
+              {chip.id === 'search' ? <SearchIcon active={active} /> : null}
+              {chip.label}
+            </button>
+          )
+        })}
+      </div>
+      <ChipEdgeFade side="left" />
+      <ChipEdgeFade side="right" />
     </div>
   )
 }
@@ -747,48 +1048,60 @@ function RoomFilterChips({
 }) {
   return (
     <div
-      className="no-scrollbar"
       style={{
-        height: 72,
-        padding: '12px 16px',
-        display: 'flex',
-        gap: 4,
-        overflowX: 'auto',
+        position: 'relative',
+        height: CHIPS_HEIGHT,
       }}
     >
-      {roomChips.map((chip) => {
-        const active = chip.id === activeFilter
+      <div
+        className="no-scrollbar"
+        style={{
+          height: CHIPS_HEIGHT,
+          padding: `12px ${SHEET_SIDE_PADDING}px 0`,
+          display: 'flex',
+          gap: 6,
+          overflowX: 'auto',
+        }}
+      >
+        {roomChips.map((chip) => {
+          const active = chip.id === activeFilter
 
-        return (
-          <button
-            key={chip.id}
-            type="button"
-            onClick={() => onChange(chip.id)}
-            style={{
-              flex: '0 0 auto',
-              height: 30,
-              padding: '0 14px',
-              borderRadius: 30,
-              background: active ? '#000000' : '#FFFFFF',
-              border: active ? '1px solid #000000' : '1px solid #DADDE0',
-              color: active ? '#FFFFFF' : color.base[1],
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              ...css(text.body14_medium),
-              lineHeight: '18px',
-            }}
-          >
-            {chip.label}
-          </button>
-        )
-      })}
+          return (
+            <button
+              key={chip.id}
+              type="button"
+              onClick={() => onChange(chip.id)}
+              style={{
+                flex: '0 0 auto',
+                height: CHIP_BUTTON_HEIGHT,
+                padding: '0 14px',
+                borderRadius: 30,
+                background: active ? '#000000' : '#FFFFFF',
+                border: active ? '1px solid #000000' : '1px solid #DADDE0',
+                color: active ? '#FFFFFF' : color.base[1],
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: '"SF Pro Text", -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+                fontSize: 15,
+                fontWeight: 500,
+                lineHeight: '20px',
+                letterSpacing: '-0.4px',
+              }}
+            >
+              {chip.label}
+            </button>
+          )
+        })}
+      </div>
+      <ChipEdgeFade side="left" />
+      <ChipEdgeFade side="right" />
     </div>
   )
 }
 
 function ExploreSpacer() {
-  return <div style={{ height: 72 }} />
+  return <div style={{ height: CHIPS_HEIGHT }} />
 }
 
 function setInteractiveFilter(filter: FilterId, onChange: (filter: FilterId) => void) {
@@ -799,22 +1112,23 @@ function setInteractiveFilter(filter: FilterId, onChange: (filter: FilterId) => 
   onChange(filter)
 }
 
-function FilterMenuLabel({ label }: { label: string }) {
+function ChipEdgeFade({ side }: { side: 'left' | 'right' }) {
   return (
-    <button
-      type="button"
+    <div
+      aria-hidden="true"
       style={{
-        height: 28,
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 2,
-        ...css(text.body14_medium),
-        color: '#505960',
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        [side]: 0,
+        width: 26,
+        pointerEvents: 'none',
+        background:
+          side === 'left'
+            ? `linear-gradient(90deg, ${color.sheet.bg} 28%, rgba(255,255,255,0) 100%)`
+            : `linear-gradient(270deg, ${color.sheet.bg} 28%, rgba(255,255,255,0) 100%)`,
       }}
-    >
-      <span>{label}</span>
-      <img src="/icons/ui-chevron-down.svg" alt="" width={12} height={12} />
-    </button>
+    />
   )
 }
 
@@ -916,6 +1230,28 @@ function SearchIcon({ active }: { active: boolean }) {
         stroke={active ? '#FFFFFF' : '#2F3438'}
         strokeWidth="1.3"
         strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+function ChevronRightIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path d="M4.5 2.25 8.25 6 4.5 9.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function BookmarkIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M6.8 3.6C6.8 2.93726 7.33726 2.4 8 2.4H16C16.6627 2.4 17.2 2.93726 17.2 3.6V21L12 17.782L6.8 21V3.6Z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   )

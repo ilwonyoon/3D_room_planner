@@ -33,7 +33,7 @@ export default defineConfig({
         runtimeCaching: [
           {
             urlPattern: ({ url }) => url.pathname.startsWith('/assets/model-thumbnails/'),
-            handler: 'CacheFirst',
+            handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'model-thumbnails',
               expiration: {
@@ -46,7 +46,7 @@ export default defineConfig({
             urlPattern: ({ url }) =>
               url.pathname.startsWith('/assets/') &&
               /\.(?:glb|ktx2|hdr|jpg|jpeg|png|webp)$/i.test(url.pathname),
-            handler: 'CacheFirst',
+            handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'runtime-3d-assets',
               expiration: {

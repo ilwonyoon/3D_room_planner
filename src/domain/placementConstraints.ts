@@ -16,6 +16,14 @@ export type Bounds2D = {
 
 const QUARTER_TURN = Math.PI / 2
 
+export function snapToQuarterTurn(rotationY: number) {
+  return Math.round(rotationY / QUARTER_TURN) * QUARTER_TURN
+}
+
+export function normalizeRotation(rotationY: number, mode: 'orthogonal' | 'free' = 'orthogonal') {
+  return mode === 'free' ? rotationY : snapToQuarterTurn(rotationY)
+}
+
 export function snapToGrid(value: number, stepM = 0.05) {
   return Math.round(value / stepM) * stepM
 }

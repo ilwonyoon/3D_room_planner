@@ -8,8 +8,10 @@ import * as THREE from 'three'
 import {
   canRotate,
   constrainFloorMove,
+  normalizeRotation,
   type Footprint,
 } from '@/domain/placementConstraints'
+import type { Room } from '@/domain/types'
 import {
   useEditorObjectsStore,
   useRoomStore,
@@ -62,8 +64,57 @@ function toFootprint(object: EditorObject): Footprint {
   }
 }
 
-function isFloorObject(object: EditorObject) {
-  return object.placement === 'floor'
+function isFloorCollisionObstacle(object: EditorObject) {
+  return object.placement === 'floor' && !object.anchor && object.elevationM <= 0.08
+}
+
+function resolveRotationPosition(
+  candidate: Footprint,
+  others: Footprint[],
+  room: Room,
+) {
+  const direct = canRotate(candidate, others, room)
+
+  if (direct) {
+    return direct
+  }
+
+  const offsets: Array<{ x: number; z: number }> = [{ x: 0, z: 0 }]
+
+  for (let radius = 0.05; radius <= 0.8; radius += 0.05) {
+    offsets.push(
+      { x: -radius, z: 0 },
+      { x: radius, z: 0 },
+      { x: 0, z: -radius },
+      { x: 0, z: radius },
+      { x: -radius, z: -radius },
+      { x: radius, z: -radius },
+      { x: -radius, z: radius },
+      { x: radius, z: radius },
+    )
+  }
+
+  for (const offset of offsets) {
+    const constrained = constrainFloorMove({
+      candidate: {
+        ...candidate,
+        position: {
+          x: candidate.position.x + offset.x,
+          z: candidate.position.z + offset.z,
+        },
+      },
+      others,
+      room,
+      gridM: 0.01,
+      avoidCollisions: true,
+    })
+
+    if (constrained) {
+      return constrained
+    }
+  }
+
+  return null
 }
 
 function wallCoordinate(object: EditorObject, side: WallSide) {
@@ -289,7 +340,7 @@ export function PlacementHandlers({
   }
 
   const others = objects
-    .filter((object) => object.id !== selected.id && isFloorObject(object))
+    .filter((object) => object.id !== selected.id && isFloorCollisionObstacle(object))
     .map(toFootprint)
 
   const moveSelected = (position: { x: number; z: number }) => {
@@ -352,8 +403,8 @@ export function PlacementHandlers({
       return
     }
 
-    const rotationY = selected.rotationY + deltaRad
-    const constrainedPosition = canRotate(
+    const rotationY = normalizeRotation(selected.rotationY + deltaRad, selected.rotationMode)
+    const constrainedPosition = resolveRotationPosition(
       { ...toFootprint(selected), rotationY },
       others,
       room,

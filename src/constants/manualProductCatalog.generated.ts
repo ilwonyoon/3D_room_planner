@@ -12,6 +12,24 @@ export const manualModelSeedsByCategory: Partial<Record<ProductCategory, Product
         94,
         82
       ]
+    },
+    {
+      "id": "zeel-by-furniture-blown-armchair",
+      "source": "manual",
+      "dimensionsCm": [
+        80,
+        86,
+        40
+      ]
+    },
+    {
+      "id": "zeel-by-furniture-o-sofa",
+      "source": "manual",
+      "dimensionsCm": [
+        118,
+        236,
+        73
+      ]
     }
   ],
   "chair": [
@@ -477,6 +495,15 @@ export const manualModelSeedsByCategory: Partial<Record<ProductCategory, Product
       ]
     },
     {
+      "id": "herman-miller-girard-flower-table",
+      "source": "manual",
+      "dimensionsCm": [
+        280,
+        280,
+        24.8
+      ]
+    },
+    {
       "id": "muuto-70-70-outdoor-table-616704064406601",
       "source": "manual",
       "dimensionsCm": [
@@ -556,6 +583,24 @@ export const manualModelSeedsByCategory: Partial<Record<ProductCategory, Product
         80,
         74
       ]
+    },
+    {
+      "id": "zeel-by-furniture-coffee-table",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        70,
+        46
+      ]
+    },
+    {
+      "id": "zeel-by-furniture-simple-table",
+      "source": "manual",
+      "dimensionsCm": [
+        110,
+        270,
+        75
+      ]
     }
   ],
   "storage": [
@@ -596,12 +641,39 @@ export const manualModelSeedsByCategory: Partial<Record<ProductCategory, Product
       ]
     },
     {
+      "id": "herman-miller-nelson-basic-cabinet-series",
+      "source": "manual",
+      "dimensionsCm": [
+        247,
+        247,
+        56.4
+      ]
+    },
+    {
       "id": "muuto-stacked-storage-system-324705387045373",
       "source": "manual",
       "dimensionsCm": [
         120,
         45,
         92
+      ]
+    },
+    {
+      "id": "zeel-by-furniture-rounded-cabinet",
+      "source": "manual",
+      "dimensionsCm": [
+        60,
+        100,
+        200
+      ]
+    },
+    {
+      "id": "zeel-by-furniture-rounded-commode",
+      "source": "manual",
+      "dimensionsCm": [
+        50,
+        150,
+        80
       ]
     }
   ],
@@ -622,6 +694,15 @@ export const manualModelSeedsByCategory: Partial<Record<ProductCategory, Product
         210,
         160,
         90
+      ]
+    },
+    {
+      "id": "zeel-wewood-bed-platform",
+      "source": "manual",
+      "dimensionsCm": [
+        241,
+        253.5,
+        89
       ]
     }
   ],
@@ -1311,6 +1392,15 @@ export const manualModelSeedsByCategory: Partial<Record<ProductCategory, Product
         34,
         54
       ]
+    },
+    {
+      "id": "polyhaven-decorative-book-set-01",
+      "source": "manual",
+      "dimensionsCm": [
+        48,
+        28,
+        34
+      ]
     }
   ],
   "pets": []
@@ -1801,6 +1891,14 @@ export const manualRetailAliasById: Record<string, ProductRetailAlias> = {
     "brand": "Ferm Living",
     "name": "Wire Basket"
   },
+  "herman-miller-girard-flower-table": {
+    "brand": "Herman Miller",
+    "name": "Girard Flower Table"
+  },
+  "herman-miller-nelson-basic-cabinet-series": {
+    "brand": "Herman Miller",
+    "name": "Nelson Basic Cabinet Series"
+  },
   "muuto-70-70-outdoor-table-616704064406601": {
     "brand": "Muuto",
     "name": "70/70 Outdoor Table"
@@ -1849,6 +1947,10 @@ export const manualRetailAliasById: Record<string, ProductRetailAlias> = {
     "brand": "Muuto",
     "name": "Stacked Storage System"
   },
+  "polyhaven-decorative-book-set-01": {
+    "brand": "Poly Haven",
+    "name": "Decorative Book Set 01"
+  },
   "vitra-mikado-armchair-5-star-base-9343625": {
     "brand": "Vitra",
     "name": "Mikado Armchair 5 Star Base"
@@ -1892,5 +1994,33 @@ export const manualRetailAliasById: Record<string, ProductRetailAlias> = {
   "vitra-wire-chair-dkl-9777344": {
     "brand": "Vitra",
     "name": "Wire Chair DKL"
+  },
+  "zeel-by-furniture-blown-armchair": {
+    "brand": "BY Furniture",
+    "name": "BLOWN ARMCHAIR"
+  },
+  "zeel-by-furniture-coffee-table": {
+    "brand": "BY Furniture",
+    "name": "COFFEE TABLE"
+  },
+  "zeel-by-furniture-o-sofa": {
+    "brand": "BY Furniture",
+    "name": "O-SOFA"
+  },
+  "zeel-by-furniture-rounded-cabinet": {
+    "brand": "BY Furniture",
+    "name": "ROUNDED CABINET"
+  },
+  "zeel-by-furniture-rounded-commode": {
+    "brand": "BY Furniture",
+    "name": "ROUNDED COMMODE"
+  },
+  "zeel-by-furniture-simple-table": {
+    "brand": "BY Furniture",
+    "name": "SIMPLE TABLE"
+  },
+  "zeel-wewood-bed-platform": {
+    "brand": "Wewood",
+    "name": "Bed Platform"
   }
 }

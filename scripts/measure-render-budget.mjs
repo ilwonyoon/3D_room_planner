@@ -101,8 +101,9 @@ async function main() {
 
   const browser = await chromium.launch()
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 }, deviceScaleFactor: 1 })
-  await page.goto(options.url, { waitUntil: 'networkidle' })
-  await page.waitForSelector('canvas')
+  await page.goto(options.url, { waitUntil: 'domcontentloaded' })
+  await page.waitForFunction(() => !!document.querySelector('canvas'), undefined, { timeout: 15000 })
+  await page.waitForFunction(() => !!window.__pocketroomRenderStats, undefined, { timeout: 15000 })
 
   const measurements = []
 

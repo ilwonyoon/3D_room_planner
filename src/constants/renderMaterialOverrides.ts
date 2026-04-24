@@ -8,6 +8,9 @@ export type RenderMaterialTuning = {
   normalScaleMultiplier?: number
   emissiveColor?: string
   emissiveIntensity?: number
+  clearColorMap?: boolean
+  clearNormalMap?: boolean
+  clearRoughnessMap?: boolean
 }
 
 type RenderMaterialRule = {
@@ -95,6 +98,135 @@ const materialRules: RenderMaterialRule[] = [
       roughnessMax: 0.32,
       emissiveColor: '#ffd79a',
       emissiveIntensity: 1.85,
+    },
+  },
+  {
+    id: 'white-modern-desk',
+    objectIds: ['desk'],
+    tuning: {
+      baseColor: '#f7f4ef',
+      envMapIntensity: 0.68,
+      roughnessMin: 0.52,
+      roughnessMax: 0.66,
+      metalnessMax: 0.06,
+      clearColorMap: true,
+      clearNormalMap: true,
+      clearRoughnessMap: true,
+    },
+  },
+  {
+    id: 'white-modern-file-cabinet',
+    objectIds: ['storage-right'],
+    tuning: {
+      baseColor: '#ece5db',
+      envMapIntensity: 0.72,
+      roughnessMin: 0.48,
+      roughnessMax: 0.62,
+      metalnessMax: 0.04,
+      clearColorMap: true,
+      clearNormalMap: true,
+      clearRoughnessMap: true,
+    },
+  },
+  {
+    id: 'side-table-light-oak',
+    objectIds: ['round-side-table'],
+    tuning: {
+      baseColor: '#d6c5ae',
+      envMapIntensity: 0.76,
+      roughnessMin: 0.52,
+      roughnessMax: 0.68,
+      metalnessMax: 0.02,
+      clearColorMap: true,
+      clearNormalMap: true,
+      clearRoughnessMap: true,
+    },
+  },
+  {
+    id: 'shelves-soft-oak',
+    objectIds: ['bookcase-left'],
+    materialNameIncludes: ['drawer', 'drawers', 'wood', 'shelf'],
+    tuning: {
+      baseColor: '#dfcfba',
+      envMapIntensity: 0.8,
+      roughnessMin: 0.52,
+      roughnessMax: 0.7,
+      metalnessMax: 0.02,
+      clearColorMap: true,
+      clearNormalMap: true,
+      clearRoughnessMap: true,
+    },
+  },
+  {
+    id: 'chair-upholstery-oat',
+    objectIds: ['armchair', 'lounge-chair'],
+    materialNameIncludes: ['pillow', 'seat', 'cushion'],
+    tuning: {
+      baseColor: '#e9e1d6',
+      envMapIntensity: 0.58,
+      roughnessMin: 0.8,
+      roughnessMax: 0.9,
+      metalnessMax: 0,
+      clearColorMap: true,
+      clearNormalMap: true,
+      clearRoughnessMap: true,
+    },
+  },
+  {
+    id: 'chair-wood-frame',
+    objectIds: ['armchair', 'lounge-chair'],
+    materialNameIncludes: ['legs', 'leg', 'arm', 'wood', 'frame'],
+    tuning: {
+      baseColor: '#c7af91',
+      envMapIntensity: 0.78,
+      roughnessMin: 0.46,
+      roughnessMax: 0.62,
+      metalnessMax: 0.12,
+      clearColorMap: true,
+      clearNormalMap: true,
+      clearRoughnessMap: true,
+    },
+  },
+  {
+    id: 'ceramic-vase-ivory',
+    objectIds: ['small-plant'],
+    tuning: {
+      baseColor: '#f5f1ea',
+      envMapIntensity: 0.56,
+      roughnessMin: 0.52,
+      roughnessMax: 0.68,
+      metalnessMax: 0,
+      clearColorMap: true,
+      clearNormalMap: true,
+      clearRoughnessMap: true,
+    },
+  },
+  {
+    id: 'floor-lamp-charcoal',
+    objectIds: ['reading-lamp'],
+    tuning: {
+      baseColor: '#2b2b29',
+      envMapIntensity: 0.74,
+      roughnessMin: 0.5,
+      roughnessMax: 0.66,
+      metalnessMax: 0.22,
+      clearColorMap: true,
+      clearNormalMap: true,
+      clearRoughnessMap: true,
+    },
+  },
+  {
+    id: 'desk-lamp-charcoal',
+    objectIds: ['desk-lamp'],
+    tuning: {
+      baseColor: '#2f2e2b',
+      envMapIntensity: 0.72,
+      roughnessMin: 0.46,
+      roughnessMax: 0.62,
+      metalnessMax: 0,
+      clearColorMap: true,
+      clearNormalMap: true,
+      clearRoughnessMap: true,
     },
   },
 ]
