@@ -133,6 +133,15 @@ export const manualModelSeedsByCategory: Partial<Record<ProductCategory, Product
       ]
     },
     {
+      "id": "vitra-mikado-armchair-5-star-base-9343625",
+      "source": "manual",
+      "dimensionsCm": [
+        66,
+        70,
+        84
+      ]
+    },
+    {
       "id": "vitra-scout-meet-9746206",
       "source": "manual",
       "dimensionsCm": [
@@ -638,6 +647,15 @@ export const manualModelSeedsByCategory: Partial<Record<ProductCategory, Product
         247,
         247,
         56.4
+      ]
+    },
+    {
+      "id": "muuto-stacked-storage-system-324705387045373",
+      "source": "manual",
+      "dimensionsCm": [
+        120,
+        45,
+        92
       ]
     },
     {
@@ -1925,9 +1943,17 @@ export const manualRetailAliasById: Record<string, ProductRetailAlias> = {
     "brand": "Muuto",
     "name": "Base Table"
   },
+  "muuto-stacked-storage-system-324705387045373": {
+    "brand": "Muuto",
+    "name": "Stacked Storage System"
+  },
   "polyhaven-decorative-book-set-01": {
     "brand": "Poly Haven",
     "name": "Decorative Book Set 01"
+  },
+  "vitra-mikado-armchair-5-star-base-9343625": {
+    "brand": "Vitra",
+    "name": "Mikado Armchair 5 Star Base"
   },
   "vitra-scout-meet-9746206": {
     "brand": "Vitra",

@@ -8,6 +8,7 @@ const SOURCE_URL = 'https://downloads.vitra.com/#/media?media_category_media_typ
 const LICENSE_URL = 'https://downloads.vitra.com/#/media?media_category_media_type=root.cad.glb.'
 const outputRoot = join(ROOT, 'raw/inbox/vitra')
 const limit = Number.parseInt(process.env.VITRA_LIMIT ?? '14', 10)
+const filterPattern = process.env.VITRA_FILTER ? new RegExp(process.env.VITRA_FILTER, 'i') : null
 
 function ensureDir(path) {
   mkdirSync(path, { recursive: true })
@@ -69,7 +70,8 @@ async function fetchAndDownload() {
   await page.goto('https://downloads.vitra.com/', { waitUntil: 'domcontentloaded', timeout: 45000 })
   await page.waitForTimeout(6000)
 
-  const items = await page.evaluate(async (maxItems) => {
+  const items = await page.evaluate(async ({ maxItems, filterSource }) => {
+    const filter = filterSource ? new RegExp(filterSource, 'i') : null
     const response = await fetch(
       `/api/v2/media?media_category_media_type=root.cad.glb.&per_page=${maxItems}&sorting=create_desc`,
       { credentials: 'include' },
@@ -77,13 +79,14 @@ async function fetchAndDownload() {
     const json = await response.json()
     return json.items
       .filter((item) => item.showdownload && item.files?.some((file) => file.key === 'master'))
+      .filter((item) => !filter || filter.test(item.title))
       .slice(0, maxItems)
       .map((item) => ({
         id: item.id,
         title: item.title,
         size: item.files.find((file) => file.key === 'master')?.size ?? 0,
       }))
-  }, limit || 20)
+  }, { maxItems: limit || 20, filterSource: filterPattern?.source ?? null })
 
   const results = []
 

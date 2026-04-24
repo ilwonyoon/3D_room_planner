@@ -87,7 +87,7 @@
   - Source: manually imported high-quality free furniture/decor model packages.
   - Runtime format: downloaded source GLB/GLTF packages optimized directly; FBX packages converted with `fbx2gltf`; OBJ packages converted with `obj2gltf`; then glTF-Transform optimized with Meshopt and WebP textures.
   - Source of truth: `raw/assets/models/manual/catalog-candidates.json`, `src/constants/manualProductCatalog.generated.ts`, `scripts/download-dimensiva-free-assets.mjs`, `scripts/download-designconnected-free-assets.mjs`, `scripts/download-muuto-3d-assets.mjs`, `scripts/download-3dsky-free-assets.mjs`, `scripts/download-vitra-glb-assets.mjs`, `scripts/download-herman-miller-configurator-assets.mjs`, `scripts/download-zeel-free-assets.mjs`, `scripts/update-designconnected-metadata.mjs`, `scripts/generate-manual-product-catalog.mjs`, and `scripts/import-manual-assets.mjs`.
-  - Included runtime assets: 151 manual models; 41 from Dimensiva, 79 from Design Connected, 11 from Muuto, 10 from Vitra, 2 from Herman Miller, 7 from Zeel, and 1 from 3dsky.
+  - Included runtime assets: 153 manual models; 41 from Dimensiva, 79 from Design Connected, 12 from Muuto, 11 from Vitra, 2 from Herman Miller, 7 from Zeel, and 1 from 3dsky.
   - Dimensiva source: https://dimensiva.com/free-3d-models/
   - Dimensiva license reference: https://dimensiva.com/license/
   - Design Connected source: https://www.designconnected.com/freebies
@@ -101,7 +101,7 @@
   - QA exclusions: `designconnected-fuwl-cage-table-8851` did not produce a download after repeated logged-in attempts; `designconnected-rosa-rosa-rosas-wall-light-9791` and `designconnected-shaker-vases-set-9478` timed out in FBX conversion and are retained only in raw/import failure logs; `muuto-ambit-pendant-943052121460012` failed archive extraction because of ZIP filename encoding; `3dsky-om-oficial-model-krovat-olivia-odnospalnaia-dlia-detei-i-podrostkov` shipped a zero-byte OBJ; `3dsky-om-oficial-model-krovat-divan-oskar-s-vykatnym-iashchikom` exposed a download URL but the secure archive returned 404 during fetch; Herman Miller `Pawson Drift Sofa Group` remains intermittent because the official configurator iframe sometimes does not attach during automation.
   - QA notes: several Muuto OBJ packages reference missing or mismatched `.mtl`/texture filenames in the official archive; those models were converted as geometry-first GLBs and may use default materials. Herman Miller configurator exports include embedded punctual lights, and the app now strips those scene lights during runtime and thumbnail rendering to keep lighting consistent.
   - Recent local addition: `polyhaven-decorative-book-set-01` imported from Poly Haven `Decorative Book Set 01` as a CC0 bookshelf prop set for shelf styling.
-  - Category additions exposed in product catalog: 3 sofas, 3 beds, 19 chairs, 43 tables, 7 storage pieces, 26 decor pieces, and 50 lighting pieces.
+  - Category additions exposed in product catalog: 3 sofas, 3 beds, 20 chairs, 43 tables, 8 storage pieces, 26 decor pieces, and 50 lighting pieces.
 
 - `models-ktx2/**/*.optimized.glb`
   - Source: matching source model from `models/**`

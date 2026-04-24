@@ -24,6 +24,18 @@ type RenderMaterialRule = {
 
 const materialRules: RenderMaterialRule[] = [
   {
+    id: 'white-home-office-desk',
+    objectIds: ['desk'],
+    modelUrlIncludes: ['designconnected-dita-desk-with-drawer'],
+    tuning: {
+      baseColor: '#f2eee7',
+      envMapIntensity: 0.9,
+      roughnessMin: 0.58,
+      roughnessMax: 0.72,
+      metalnessMax: 0,
+    },
+  },
+  {
     id: 'fabric-surfaces',
     materialNameIncludes: ['pillow', 'fabric', 'seat', 'cushion'],
     tuning: {
