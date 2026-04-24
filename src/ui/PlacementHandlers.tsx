@@ -8,6 +8,7 @@ import * as THREE from 'three'
 import {
   canRotate,
   constrainFloorMove,
+  normalizeRotation,
   type Footprint,
 } from '@/domain/placementConstraints'
 import type { Room } from '@/domain/types'
@@ -402,7 +403,7 @@ export function PlacementHandlers({
       return
     }
 
-    const rotationY = selected.rotationY + deltaRad
+    const rotationY = normalizeRotation(selected.rotationY + deltaRad, selected.rotationMode)
     const constrainedPosition = resolveRotationPosition(
       { ...toFootprint(selected), rotationY },
       others,

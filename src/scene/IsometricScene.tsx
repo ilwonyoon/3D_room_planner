@@ -38,33 +38,38 @@ const RAYCAST_HITBOX_LAYER = 2
 const POV_EYE_HEIGHT_M = 1.7
 const POV_MOVE_SPEED_MPS = 1.8
 const POV_LOOK_SPEED = 0.0042
+const CONTACT_SHADOW_RESOLUTION = 256
+const webglLifecycleStats = {
+  contextLost: 0,
+  contextRestored: 0,
+}
 
 const renderQualitySettings = {
   low: {
     dpr: [1, 1] as [number, number],
     contactOpacity: 0.18,
-    contactResolution: 256,
-    enableAo: false,
+    aoIntensity: 0,
+    aoRadius: 1.2,
   },
   medium: {
     dpr: [1, 1] as [number, number],
     contactOpacity: 0.3,
-    contactResolution: 256,
-    enableAo: false,
+    aoIntensity: 0,
+    aoRadius: 1.25,
   },
   high: {
     dpr: [1, 1.25] as [number, number],
     contactOpacity: 0.34,
-    contactResolution: 384,
-    enableAo: true,
+    aoIntensity: 1.02,
+    aoRadius: 1.4,
   },
 } satisfies Record<
   RenderQuality,
   {
     dpr: [number, number]
     contactOpacity: number
-    contactResolution: number
-    enableAo: boolean
+    aoIntensity: number
+    aoRadius: number
   }
 >
 
@@ -84,6 +89,37 @@ function EditorInteractionLayers() {
       invalidate()
     }
   }, [camera, invalidate, raycaster])
+
+  return null
+}
+
+function WebglLifecycleGuard() {
+  const gl = useThree((state) => state.gl)
+  const invalidate = useThree((state) => state.invalidate)
+
+  useEffect(() => {
+    const canvas = gl.domElement
+
+    const handleContextLost = (event: Event) => {
+      event.preventDefault()
+      webglLifecycleStats.contextLost += 1
+      console.warn('[IsometricScene] WebGL context lost')
+    }
+
+    const handleContextRestored = () => {
+      webglLifecycleStats.contextRestored += 1
+      console.info('[IsometricScene] WebGL context restored')
+      invalidate()
+    }
+
+    canvas.addEventListener('webglcontextlost', handleContextLost, false)
+    canvas.addEventListener('webglcontextrestored', handleContextRestored, false)
+
+    return () => {
+      canvas.removeEventListener('webglcontextlost', handleContextLost, false)
+      canvas.removeEventListener('webglcontextrestored', handleContextRestored, false)
+    }
+  }, [gl, invalidate])
 
   return null
 }
@@ -163,14 +199,12 @@ function SceneGrid({
 
 function AdaptiveQuality() {
   const lowerQuality = useRenderQualityStore((state) => state.lowerQuality)
-  const raiseQuality = useRenderQualityStore((state) => state.raiseQuality)
 
   return (
     <PerformanceMonitor
       bounds={(refreshRate) => (refreshRate > 90 ? [48, 90] : [45, 60])}
       flipflops={3}
       onDecline={lowerQuality}
-      onIncline={raiseQuality}
     />
   )
 }
@@ -192,6 +226,7 @@ function RendererStatsBridge({ quality }: { quality: RenderQuality }) {
       lightingPreset,
       quality,
       dpr: gl.getPixelRatio(),
+      webgl: { ...webglLifecycleStats },
       canvas: {
         width: gl.domElement.width,
         height: gl.domElement.height,
@@ -212,13 +247,18 @@ function RendererStatsBridge({ quality }: { quality: RenderQuality }) {
 function ScenePostProcessing({ quality }: { quality: RenderQuality }) {
   const settings = renderQualitySettings[quality]
 
-  if (!settings.enableAo) {
-    return null
-  }
-
   return (
     <EffectComposer multisampling={0} enableNormalPass>
-      <N8AO aoRadius={quality === 'high' ? 1.6 : 1.25} intensity={quality === 'high' ? 1.1 : 0.82} distanceFalloff={0.9} />
+      <N8AO
+        quality="medium"
+        halfRes
+        aoSamples={16}
+        denoiseSamples={4}
+        denoiseRadius={12}
+        aoRadius={settings.aoRadius}
+        intensity={settings.aoIntensity}
+        distanceFalloff={0.9}
+      />
       <SMAA />
     </EffectComposer>
   )
@@ -534,6 +574,7 @@ export function IsometricScene({ className }: Props) {
         <color attach="background" args={[color.scene.bg]} />
 
         <AdaptiveQuality />
+        <WebglLifecycleGuard />
         <RendererStatsBridge quality={quality} />
         <EditorInteractionLayers />
         {viewMode !== 'pov' ? <SceneGrid active={gridActive} onClearSelection={clearSelection} /> : null}
@@ -554,7 +595,7 @@ export function IsometricScene({ className }: Props) {
           opacity={renderSettings.contactOpacity * contactSettings.opacityScale}
           blur={contactSettings.blur}
           scale={8}
-          resolution={renderSettings.contactResolution}
+          resolution={CONTACT_SHADOW_RESOLUTION}
           far={contactSettings.far}
           color="#000000"
         />

@@ -1,10 +1,12 @@
 import { create } from 'zustand'
 import { modelUrlWithBestVariant } from '@/constants/modelVariants'
 import type { ProductCategory } from '@/constants/productCatalog'
+import { normalizeRotation } from '@/domain/placementConstraints'
 import type { Vec2 } from '@/domain/types'
 
 export type EditorObjectPlacement = 'floor' | 'wall' | 'ceiling'
 export type WallSurfacePlane = 'xy' | 'yz'
+export type EditorObjectRotationMode = 'orthogonal' | 'free'
 export type EditorObjectRenderKind =
   | 'model'
   | 'area-rug'
@@ -31,6 +33,7 @@ export type EditorObject = {
   position: Vec2
   placement: EditorObjectPlacement
   elevationM: number
+  rotationMode?: EditorObjectRotationMode
   rotationY: number
   boundsRotationY?: number
   wallSurfacePlane?: WallSurfacePlane
@@ -56,7 +59,7 @@ interface EditorObjectsState {
   replaceObject: (
     id: string,
     replacement: Pick<EditorObject, 'label' | 'url' | 'targetSize' | 'dimensionsM'> &
-      Partial<Pick<EditorObject, 'catalogItemId' | 'productCategory' | 'renderKind'>>,
+      Partial<Pick<EditorObject, 'catalogItemId' | 'productCategory' | 'renderKind' | 'rotationMode'>>,
   ) => void
   updateObject: (
     id: string,
@@ -92,6 +95,58 @@ function rotateLocalOffset(localX: number, localZ: number, rotationY: number) {
   }
 }
 
+function inferRotationMode(object: EditorObject): EditorObjectRotationMode {
+  if (object.rotationMode) {
+    return object.rotationMode
+  }
+
+  return object.anchor ? 'free' : 'orthogonal'
+}
+
+function normalizeEditorObject(object: EditorObject) {
+  const rotationMode = inferRotationMode(object)
+  const rotationY = normalizeRotation(object.rotationY, rotationMode)
+  const boundsRotationY = object.boundsRotationY === undefined
+    ? undefined
+    : normalizeRotation(object.boundsRotationY, object.placement === 'wall' ? 'orthogonal' : rotationMode)
+
+  return {
+    ...object,
+    rotationMode,
+    rotationY,
+    boundsRotationY,
+  }
+}
+
+function cloneObject(object: EditorObject): EditorObject {
+  return normalizeEditorObject({
+    ...object,
+    position: { ...object.position },
+    dimensionsM: { ...object.dimensionsM },
+    anchor: object.anchor
+      ? {
+          ...object.anchor,
+          localOffsetM: object.anchor.localOffsetM ? { ...object.anchor.localOffsetM } : undefined,
+        }
+      : undefined,
+  })
+}
+
+function mergeObjectPatch(object: EditorObject, patch: Partial<Pick<EditorObject, 'position' | 'elevationM' | 'rotationY' | 'boundsRotationY' | 'dimensionsM'>>) {
+  const next: EditorObject = {
+    ...object,
+    ...patch,
+    position: patch.position ? { ...patch.position } : object.position,
+    dimensionsM: patch.dimensionsM ? { ...patch.dimensionsM } : object.dimensionsM,
+  }
+
+  if (object.placement !== 'wall' && patch.rotationY !== undefined && patch.boundsRotationY === undefined && object.boundsRotationY !== undefined) {
+    next.boundsRotationY = patch.rotationY
+  }
+
+  return normalizeEditorObject(next)
+}
+
 function resolveAnchoredObjects(objects: EditorObject[]) {
   const byId = new Map(objects.map((object) => [object.id, object]))
 
@@ -114,6 +169,7 @@ function resolveAnchoredObjects(objects: EditorObject[]) {
       z: slot.localPositionM.z + offset.z,
     }
     const rotated = rotateLocalOffset(local.x, local.z, parent.rotationY)
+    const rotationMode = inferRotationMode(object)
 
     return {
       ...object,
@@ -122,7 +178,8 @@ function resolveAnchoredObjects(objects: EditorObject[]) {
         z: parent.position.z + rotated.z,
       },
       elevationM: parent.elevationM + local.y,
-      rotationY: parent.rotationY + (object.anchor.localRotationY ?? 0),
+      rotationMode,
+      rotationY: normalizeRotation(parent.rotationY + (object.anchor.localRotationY ?? 0), rotationMode),
       boundsRotationY: object.boundsRotationY,
     }
   })
@@ -195,7 +252,7 @@ const INITIAL_OBJECTS: EditorObject[] = [
     position: { x: 0.92, z: -2.04 },
     placement: 'floor',
     elevationM: 0.555,
-    rotationY: -Math.PI / 8,
+    rotationY: 0,
     targetSize: 0.31,
     dimensionsM: { x: 0.31, y: 0.04, z: 0.22 },
     locked: true,
@@ -208,7 +265,7 @@ const INITIAL_OBJECTS: EditorObject[] = [
     position: { x: 0.18, z: -2.06 },
     placement: 'floor',
     elevationM: 0.555,
-    rotationY: Math.PI / 8,
+    rotationY: 0,
     targetSize: 0.1,
     dimensionsM: { x: 0.1, y: 0.085, z: 0.1 },
     locked: true,
@@ -244,8 +301,10 @@ const INITIAL_OBJECTS: EditorObject[] = [
   },
   {
     id: 'office-rug',
-    label: 'Wool Area Rug',
-    url: '/procedural/area-rug',
+    label: 'Caban Boucle Rug',
+    url: '/procedural/area-rug/polyhaven-caban-boucle-rug',
+    catalogItemId: 'polyhaven-caban-boucle-rug',
+    productCategory: 'rug',
     renderKind: 'area-rug',
     position: { x: 0.04, z: -0.02 },
     placement: 'floor',
@@ -257,7 +316,7 @@ const INITIAL_OBJECTS: EditorObject[] = [
   },
   {
     id: 'window-main',
-    label: 'Wide Triple Window',
+    label: 'Modern Awning Crank Out',
     url: modelUrlWithBestVariant('/assets/models/architectural/modern-wide-picture-window.optimized.glb'),
     renderKind: 'model',
     position: { x: 0.32, z: -2.84 },
@@ -266,8 +325,8 @@ const INITIAL_OBJECTS: EditorObject[] = [
     rotationY: 0,
     boundsRotationY: 0,
     wallSurfacePlane: 'xy',
-    targetSize: 1.82,
-    dimensionsM: { x: 1.82, y: 1.34, z: 0.12 },
+    targetSize: 1.524,
+    dimensionsM: { x: 1.524, y: 1.0668, z: 0.1143 },
     locked: true,
   },
   {
@@ -451,7 +510,7 @@ const INITIAL_OBJECTS: EditorObject[] = [
     position: { x: 2.14, z: 1.22 },
     placement: 'floor',
     elevationM: 0.02,
-    rotationY: -Math.PI / 12,
+    rotationY: 0,
     targetSize: 0.84,
     dimensionsM: { x: 0.527, y: 0.84, z: 0.58 },
   },
@@ -465,7 +524,7 @@ const INITIAL_OBJECTS: EditorObject[] = [
     position: { x: 2.22, z: -2.02 },
     placement: 'floor',
     elevationM: 0.96,
-    rotationY: Math.PI / 8,
+    rotationY: 0,
     targetSize: 0.32,
     dimensionsM: { x: 0.163, y: 0.32, z: 0.163 },
   },
@@ -507,7 +566,7 @@ const INITIAL_OBJECTS: EditorObject[] = [
     position: { x: -2.18, z: 0.44 },
     placement: 'floor',
     elevationM: 0.02,
-    rotationY: Math.PI / 10,
+    rotationY: 0,
     targetSize: 1.9,
     dimensionsM: { x: 0.478, y: 1.9, z: 0.503 },
   },
@@ -515,17 +574,7 @@ const INITIAL_OBJECTS: EditorObject[] = [
 
 function cloneInitialObjects() {
   return resolveAnchoredObjects(
-    INITIAL_OBJECTS.map((object) => ({
-      ...object,
-      position: { ...object.position },
-      dimensionsM: { ...object.dimensionsM },
-      anchor: object.anchor
-        ? {
-            ...object.anchor,
-            localOffsetM: object.anchor.localOffsetM ? { ...object.anchor.localOffsetM } : undefined,
-          }
-        : undefined,
-    })),
+    INITIAL_OBJECTS.map(cloneObject),
   )
 }
 
@@ -536,24 +585,14 @@ export const useEditorObjectsStore = create<EditorObjectsState>((set) => ({
   resetObjects: () => set({ objects: cloneInitialObjects(), editMode: 'idle', activeDragMode: null }),
   addObject: (object) =>
     set((state) => ({
-      objects: resolveAnchoredObjects([...state.objects, object]),
+      objects: resolveAnchoredObjects([...state.objects, normalizeEditorObject(object)]),
       editMode: 'idle',
       activeDragMode: null,
     })),
   setObjectsForDebug: (objects) =>
     set({
       objects: resolveAnchoredObjects(
-        objects.map((object) => ({
-          ...object,
-          position: { ...object.position },
-          dimensionsM: { ...object.dimensionsM },
-          anchor: object.anchor
-            ? {
-                ...object.anchor,
-                localOffsetM: object.anchor.localOffsetM ? { ...object.anchor.localOffsetM } : undefined,
-              }
-            : undefined,
-        })),
+        objects.map(cloneObject),
       ),
       editMode: 'idle',
       activeDragMode: null,
@@ -571,11 +610,11 @@ export const useEditorObjectsStore = create<EditorObjectsState>((set) => ({
       objects: resolveAnchoredObjects(
         state.objects.map((object) =>
           object.id === id
-            ? {
+            ? normalizeEditorObject({
                 ...object,
                 ...replacement,
                 dimensionsM: { ...replacement.dimensionsM },
-              }
+              })
             : object,
         ),
       ),
@@ -587,11 +626,7 @@ export const useEditorObjectsStore = create<EditorObjectsState>((set) => ({
       objects: resolveAnchoredObjects(
         state.objects.map((object) =>
           object.id === id
-            ? {
-                ...object,
-                ...patch,
-                position: patch.position ? { ...patch.position } : object.position,
-              }
+            ? mergeObjectPatch(object, patch)
             : object,
         ),
       ),

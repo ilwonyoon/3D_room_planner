@@ -5,6 +5,7 @@ type PocketRoomRenderStats = {
   lightingPreset: string
   quality: string
   dpr: number
+  webgl: { contextLost: number; contextRestored: number }
   canvas: { width: number; height: number }
   camera: { type: string; position: number[] }
   memory: { geometries: number; textures: number }

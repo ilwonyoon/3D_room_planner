@@ -10,6 +10,7 @@ import { KTX2Loader } from 'three/examples/jsm/loaders/KTX2Loader.js'
 import { USDLoader } from 'three/examples/jsm/loaders/USDLoader.js'
 
 import { getRenderMaterialTuning } from '@/constants/renderMaterialOverrides'
+import { RUG_BY_ID, type RugCatalogItem } from '@/constants/rugCatalog'
 import {
   useCameraViewStore,
   useEditorObjectsStore,
@@ -105,6 +106,7 @@ let ktx2Loader: KTX2Loader | null = null
 let dracoLoader: DRACOLoader | null = null
 const modelResourceCache = new Map<string, THREE.Object3D>()
 const modelResourcePromiseCache = new Map<string, Promise<THREE.Object3D>>()
+const modelResourceErrorCache = new Map<string, unknown>()
 
 type WallSide = 'back' | 'front' | 'left' | 'right'
 type GltfExtendLoader = (loader: GLTFLoader) => void
@@ -866,6 +868,22 @@ function WindowOpening({
 }
 
 function AreaRug({ object }: { object: EditorObject }) {
+  const rugId =
+    object.catalogItemId && RUG_BY_ID.has(object.catalogItemId)
+      ? object.catalogItemId
+      : object.url.startsWith('/procedural/area-rug/')
+        ? object.url.replace('/procedural/area-rug/', '')
+        : null
+  const rugVariant = rugId ? RUG_BY_ID.get(rugId) ?? null : null
+
+  if (rugVariant) {
+    return <TexturedAreaRug object={object} variant={rugVariant} />
+  }
+
+  return <BasicAreaRug object={object} />
+}
+
+function BasicAreaRug({ object }: { object: EditorObject }) {
   const rugMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
@@ -903,6 +921,96 @@ function AreaRug({ object }: { object: EditorObject }) {
       </mesh>
       <mesh position={[width / 2 - 0.035, 0.007, 0]} material={borderMaterial}>
         <boxGeometry args={[0.07, 0.01, depth]} />
+      </mesh>
+    </group>
+  )
+}
+
+function TexturedAreaRug({ object, variant }: { object: EditorObject; variant: RugCatalogItem }) {
+  const texturePaths = useMemo(
+    () => ({
+      map: variant.maps.color,
+      normalMap: variant.maps.normal,
+      roughnessMap: variant.maps.roughness,
+      displacementMap: variant.maps.displacement ?? variant.maps.roughness,
+      ...(variant.maps.ao ? { aoMap: variant.maps.ao } : {}),
+    }),
+    [variant],
+  )
+  const textures = useTexture(texturePaths) as {
+    map: THREE.Texture
+    normalMap: THREE.Texture
+    roughnessMap: THREE.Texture
+    displacementMap: THREE.Texture
+    aoMap?: THREE.Texture
+  }
+  const width = object.dimensionsM.x
+  const depth = object.dimensionsM.z
+  const repeat = useMemo(
+    () => repeatFromSampleSize([width, depth], variant.sampleSizeM),
+    [depth, variant.sampleSizeM, width],
+  )
+
+  useMemo(() => {
+    configureTexture(textures.map, repeat, true)
+    configureTexture(textures.normalMap, repeat)
+    configureTexture(textures.roughnessMap, repeat)
+    configureTexture(textures.displacementMap, repeat)
+    if (textures.aoMap) {
+      configureTexture(textures.aoMap, repeat)
+    }
+  }, [repeat, textures])
+
+  const rugMaterial = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        ...textures,
+        color: '#fbf8f2',
+        roughness: 0.94,
+        metalness: 0,
+        normalScale: new THREE.Vector2(0.22, 0.22),
+        displacementScale: 0.0026,
+        displacementBias: -0.0012,
+        aoMapIntensity: 0.7,
+      }),
+    [textures],
+  )
+  const shadowMaterial = useMemo(
+    () =>
+      new THREE.MeshBasicMaterial({
+        color: '#000000',
+        transparent: true,
+        opacity: 0.1,
+        depthWrite: false,
+      }),
+    [],
+  )
+
+  const rugGeometry = useMemo(() => {
+    if (variant.shape === 'round' || variant.shape === 'oval') {
+      const geometry = new THREE.CircleGeometry(0.5, 96)
+      const uv = geometry.getAttribute('uv') as THREE.BufferAttribute
+      geometry.setAttribute('uv2', new THREE.BufferAttribute(uv.array, 2))
+      return geometry
+    }
+
+    return makePlaneGeometry(1, 1, 72)
+  }, [variant.shape])
+
+  const rugScale: [number, number, number] =
+    variant.shape === 'round' || variant.shape === 'oval'
+      ? [width, depth, 1]
+      : [width, 1, depth]
+
+  return (
+    <group>
+      {variant.shape === 'round' || variant.shape === 'oval' ? (
+        <mesh position={[0, 0.004, 0]} rotation={[-Math.PI / 2, 0, 0]} scale={rugScale} geometry={rugGeometry} material={rugMaterial} receiveShadow />
+      ) : (
+        <mesh position={[0, 0.004, 0]} rotation={[-Math.PI / 2, 0, 0]} scale={rugScale} geometry={rugGeometry} material={rugMaterial} receiveShadow />
+      )}
+      <mesh position={[0, 0.002, 0]} rotation={[-Math.PI / 2, 0, 0]} scale={[width * 1.02, depth * 1.02, 1]} material={shadowMaterial}>
+        <planeGeometry args={[1, 1]} />
       </mesh>
     </group>
   )
@@ -1089,15 +1197,99 @@ function loadModelResource(url: string, renderer: THREE.WebGLRenderer) {
     }
 
     modelResourceCache.set(url, scene)
+    modelResourceErrorCache.delete(url)
     modelResourcePromiseCache.delete(url)
     return scene
   })().catch((error) => {
+    modelResourceErrorCache.set(url, error)
     modelResourcePromiseCache.delete(url)
     throw error
   })
 
   modelResourcePromiseCache.set(url, request)
   return request
+}
+
+function ModelFallbackProxy({
+  object,
+  onSelect,
+  interactive = true,
+}: {
+  object: EditorObject
+  onSelect: (id: string) => void
+  interactive?: boolean
+}) {
+  const room = useRoomStore((s) => s.room)
+  const cameraMode = useCameraViewStore((s) => s.mode)
+  const groupRef = useRef<THREE.Group>(null)
+  const hitboxRef = useRef<THREE.Mesh>(null)
+  const shellMaterial = useMemo(
+    () =>
+      new THREE.MeshStandardMaterial({
+        color: object.placement === 'wall' ? '#d9ddd9' : '#d8d3cb',
+        roughness: 0.92,
+        metalness: 0,
+        transparent: true,
+        opacity: 0.42,
+      }),
+    [object.placement],
+  )
+  const edgeMaterial = useMemo(
+    () =>
+      new THREE.MeshBasicMaterial({
+        color: '#c8c2b9',
+        transparent: true,
+        opacity: 0.35,
+        depthWrite: false,
+      }),
+    [],
+  )
+  const handlePointerDown = (event: ThreeEvent<PointerEvent>) => {
+    if (!interactive) {
+      return
+    }
+
+    event.stopPropagation()
+    onSelect(object.id)
+  }
+
+  useLayoutEffect(() => {
+    hitboxRef.current?.layers.set(RAYCAST_HITBOX_LAYER)
+  }, [])
+
+  useFrame(({ camera }) => {
+    if (!groupRef.current) return
+
+    if (object.placement !== 'wall') {
+      groupRef.current.visible = true
+      return
+    }
+
+    const side = wallSideFromPosition(object.position, room)
+    groupRef.current.visible = visibleWallSidesForMode(camera.position, cameraMode)[side]
+  })
+
+  return (
+    <group
+      ref={groupRef}
+      position={[object.position.x, object.elevationM, object.position.z]}
+      rotation={[0, object.rotationY, 0]}
+      onPointerDown={handlePointerDown}
+    >
+      {object.placement === 'floor' ? <ModelContactShadow object={object} scale={1} /> : null}
+      <mesh position={[0, object.dimensionsM.y / 2, 0]} material={shellMaterial}>
+        <boxGeometry args={[object.dimensionsM.x, object.dimensionsM.y, object.dimensionsM.z]} />
+      </mesh>
+      <lineSegments position={[0, object.dimensionsM.y / 2, 0]}>
+        <edgesGeometry args={[new THREE.BoxGeometry(object.dimensionsM.x, object.dimensionsM.y, object.dimensionsM.z)]} />
+        <primitive object={edgeMaterial} attach="material" />
+      </lineSegments>
+      <mesh ref={hitboxRef} position={[0, object.dimensionsM.y / 2, 0]}>
+        <boxGeometry args={[object.dimensionsM.x, object.dimensionsM.y, object.dimensionsM.z]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      </mesh>
+    </group>
+  )
 }
 
 function LoadedFurnitureModel({
@@ -1218,12 +1410,25 @@ function FurnitureModel(props: {
   interactive?: boolean
 }) {
   const gl = useThree((state) => state.gl)
+  const invalidate = useThree((state) => state.invalidate)
   const [displayUrl, setDisplayUrl] = useState<string | null>(() => (modelResourceCache.has(props.object.url) ? props.object.url : null))
   const [sourceScene, setSourceScene] = useState<THREE.Object3D | null>(() => modelResourceCache.get(props.object.url) ?? null)
   const [displayObject, setDisplayObject] = useState(props.object)
+  const [loadError, setLoadError] = useState<unknown | null>(() => modelResourceErrorCache.get(props.object.url) ?? null)
 
   useEffect(() => {
-    if (displayUrl === props.object.url) {
+    const cached = modelResourceCache.get(props.object.url)
+
+    if (cached) {
+      setSourceScene(cached)
+      setDisplayUrl(props.object.url)
+      setDisplayObject(props.object)
+      setLoadError(null)
+      invalidate()
+      return
+    }
+
+    if (displayUrl === props.object.url && sourceScene) {
       setDisplayObject(props.object)
       return
     }
@@ -1239,23 +1444,64 @@ function FurnitureModel(props: {
         setSourceScene(scene)
         setDisplayUrl(props.object.url)
         setDisplayObject(props.object)
+        setLoadError(null)
+        invalidate()
       })
       .catch((error) => {
+        if (cancelled) {
+          return
+        }
+
+        setLoadError(error)
         console.error('[AssetRoom] Failed to load model resource', props.object.url, error)
       })
 
     return () => {
       cancelled = true
     }
-  }, [displayUrl, gl, props.object])
+  }, [displayUrl, gl, invalidate, props.object, sourceScene])
 
   if (!sourceScene) {
-    return null
+    if (loadError) {
+      return <ModelFallbackProxy object={props.object} onSelect={props.onSelect} interactive={props.interactive} />
+    }
+
+    return <ModelFallbackProxy object={props.object} onSelect={props.onSelect} interactive={props.interactive} />
   }
 
   return (
     <LoadedFurnitureModel object={displayObject} sourceScene={sourceScene} onSelect={props.onSelect} interactive={props.interactive} />
   )
+}
+
+function RoomModelPreloader({ objects }: { objects: EditorObject[] }) {
+  const gl = useThree((state) => state.gl)
+
+  const modelUrls = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          objects
+            .filter((object) => !object.renderKind || object.renderKind === 'model')
+            .map((object) => object.url),
+        ),
+      ),
+    [objects],
+  )
+
+  useEffect(() => {
+    modelUrls.forEach((url) => {
+      if (modelResourceCache.has(url) || modelResourcePromiseCache.has(url)) {
+        return
+      }
+
+      loadModelResource(url, gl).catch((error) => {
+        console.error('[AssetRoom] Failed to preload model resource', url, error)
+      })
+    })
+  }, [gl, modelUrls])
+
+  return null
 }
 
 function FloorLamp({ materials }: { materials: ReturnType<typeof usePbrRoomMaterials> }) {
@@ -1466,6 +1712,7 @@ export function AssetRoom({
 
   return (
     <group onPointerDown={handleBackgroundPointerDown}>
+      <RoomModelPreloader objects={objects} />
       <RoomShell materials={materials} />
       {objects.map((object) => (
         object.renderKind && object.renderKind !== 'model' ? (
