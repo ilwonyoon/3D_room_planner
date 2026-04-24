@@ -1,5 +1,5 @@
 import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
-import { basename, dirname, join } from 'node:path'
+import { basename, dirname, extname, join, relative } from 'node:path'
 import { spawnSync } from 'node:child_process'
 
 const ROOT = new URL('..', import.meta.url).pathname
@@ -18,9 +18,17 @@ const modelFilter = new Set(
     .map((id) => id.trim())
     .filter(Boolean),
 )
+const textureFilter = new Set(
+  (process.env.ASSET_TEXTURE_FILTER ?? '')
+    .split(',')
+    .map((filter) => filter.trim())
+    .filter(Boolean),
+)
 
 const shouldPrepare = (scope) => prepareScope.has('all') || prepareScope.has(scope)
 const shouldPrepareModel = (id) => modelFilter.size === 0 || modelFilter.has(id)
+const shouldPrepareTexture = (path) =>
+  textureFilter.size === 0 || [...textureFilter].some((filter) => path.includes(filter))
 const textureCompression = process.env.ASSET_TEXTURE_FORMAT ?? 'webp'
 const modelOutputVariant = process.env.ASSET_MODEL_VARIANT ?? 'runtime'
 const forcePrepare = process.env.ASSET_PREPARE_FORCE === '1'
@@ -32,6 +40,9 @@ const modelOutputRoot = join(
   ROOT,
   modelOutputVariant === 'ktx2' ? 'public/assets/models-ktx2' : 'public/assets/models',
 )
+const runtimeTextureRoot = join(ROOT, 'public/assets/textures-runtime')
+const ktx2TextureRoot = join(ROOT, 'public/assets/textures-runtime-ktx2')
+const textureVariantModulePath = join(ROOT, 'src/constants/textureVariants.generated.ts')
 
 if (!['webp', 'ktx2', 'avif', 'auto'].includes(textureCompression)) {
   throw new Error(
@@ -170,34 +181,136 @@ function prepareTextureGroup(sourceRoot, targetRoot, maxSize) {
   }
 }
 
+function isRuntimeTextureFile(file) {
+  return ['.jpg', '.jpeg', '.png'].includes(extname(file).toLowerCase())
+}
+
+function walkFiles(directory) {
+  if (!existsSync(directory)) {
+    return []
+  }
+
+  const files = []
+
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const path = join(directory, entry.name)
+
+    if (entry.isDirectory()) {
+      files.push(...walkFiles(path))
+    } else if (entry.isFile()) {
+      files.push(path)
+    }
+  }
+
+  return files
+}
+
+function ktx2EncodeArgs(source) {
+  const name = basename(source).toLowerCase()
+  const common = ['--t2', '--genmipmap']
+
+  if (name.includes('color')) {
+    return [
+      ...common,
+      '--encode',
+      'uastc',
+      '--uastc_quality',
+      '1',
+      '--uastc_rdo_l',
+      '1.5',
+      '--zcmp',
+      '8',
+      '--assign_oetf',
+      'srgb',
+    ]
+  }
+
+  if (name.includes('normal')) {
+    return [
+      ...common,
+      '--encode',
+      'uastc',
+      '--uastc_quality',
+      '1',
+      '--uastc_rdo_l',
+      '0.75',
+      '--zcmp',
+      '8',
+      '--assign_oetf',
+      'linear',
+      '--normal_mode',
+      '--normalize',
+    ]
+  }
+
+  return [...common, '--encode', 'etc1s', '--clevel', '3', '--qlevel', '128', '--assign_oetf', 'linear']
+}
+
+function prepareKtx2TextureVariants() {
+  if (!hasCommand('toktx')) {
+    throw new Error('KTX2 texture preparation requires `toktx`. Run `pnpm assets:install-ktx` first.')
+  }
+
+  const sources = walkFiles(runtimeTextureRoot)
+    .filter(isRuntimeTextureFile)
+    .filter((source) => shouldPrepareTexture(relative(runtimeTextureRoot, source)))
+
+  if (sources.length === 0) {
+    throw new Error(`No runtime textures found in ${runtimeTextureRoot}. Prepare JPG/PNG textures first.`)
+  }
+
+  rmSync(ktx2TextureRoot, { recursive: true, force: true })
+
+  const variants = []
+
+  for (const source of sources) {
+    const relativePath = relative(runtimeTextureRoot, source)
+    const destination = join(ktx2TextureRoot, relativePath.replace(/\.(jpe?g|png)$/i, '.ktx2'))
+    const sourceUrl = `/assets/textures-runtime/${relativePath}`
+    const variantUrl = `/assets/textures-runtime-ktx2/${relativePath.replace(/\.(jpe?g|png)$/i, '.ktx2')}`
+
+    ensureDir(dirname(destination))
+    run('toktx', [...ktx2EncodeArgs(source), destination, source])
+    variants.push([sourceUrl, variantUrl])
+  }
+
+  variants.sort((a, b) => a[0].localeCompare(b[0]))
+
+  writeFileSync(
+    textureVariantModulePath,
+    `export const ktx2RuntimeTextureVariants = new Map<string, string>(${JSON.stringify(variants, null, 2)})\n`,
+  )
+}
+
 function prepareTextures() {
+  const rawTextureRoot = join(ROOT, 'raw/assets/textures')
   const jobs = [
     {
-      source: join(ROOT, 'raw/assets/textures/wood-floor-051'),
-      target: join(ROOT, 'public/assets/textures-runtime/wood-floor-051'),
+      source: join(rawTextureRoot, 'wood-floor-051'),
+      target: join(runtimeTextureRoot, 'wood-floor-051'),
       maxSize: 1024,
     },
     {
-      source: join(ROOT, 'raw/assets/textures/painted-plaster-017'),
-      target: join(ROOT, 'public/assets/textures-runtime/painted-plaster-017'),
+      source: join(rawTextureRoot, 'painted-plaster-017'),
+      target: join(runtimeTextureRoot, 'painted-plaster-017'),
       maxSize: 1024,
     },
   ]
 
-  for (const job of jobs) {
-    prepareTextureDirectory(job.source, job.target, job.maxSize)
+  if (existsSync(rawTextureRoot)) {
+    for (const job of jobs) {
+      prepareTextureDirectory(job.source, job.target, job.maxSize)
+    }
+
+    prepareTextureGroup(join(rawTextureRoot, 'walls'), join(runtimeTextureRoot, 'walls'), 1024)
+    prepareTextureGroup(join(rawTextureRoot, 'floors'), join(runtimeTextureRoot, 'floors'), 1024)
+  } else if (!existsSync(runtimeTextureRoot)) {
+    throw new Error(`Missing texture sources: ${rawTextureRoot} and ${runtimeTextureRoot}`)
   }
 
-  prepareTextureGroup(
-    join(ROOT, 'raw/assets/textures/walls'),
-    join(ROOT, 'public/assets/textures-runtime/walls'),
-    1024,
-  )
-  prepareTextureGroup(
-    join(ROOT, 'raw/assets/textures/floors'),
-    join(ROOT, 'public/assets/textures-runtime/floors'),
-    1024,
-  )
+  if (textureCompression === 'ktx2') {
+    prepareKtx2TextureVariants()
+  }
 }
 
 function optimizeModel(input, output) {

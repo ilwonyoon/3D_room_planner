@@ -268,6 +268,22 @@ Reduce draw calls from repeated decorative content.
 
 ## Execution Order
 
+## Progress Notes
+
+As of 2026-04-24:
+
+- Phase 1 was completed in the preceding render-stability slice.
+- Phase 2 now has a standalone opt-in KTX2 runtime texture path behind `VITE_ENABLE_KTX2_TEXTURES=true`.
+- Phase 3 has a runtime budget audit and four validated opt-in runtime-lite variants behind `VITE_ENABLE_RUNTIME_VARIANTS=true`.
+- Phase 4 has started: product catalog items and placed editor objects now preserve `sourceModelUrl`, `runtimeModelUrl`, and `heroModelUrl` metadata for explicit variant policy work.
+- Browser visual comparison and render-budget measurement still need to be run locally because this sandbox cannot bind the Vite dev server to `127.0.0.1:5190`.
+
+See:
+
+- [docs/22-runtime-texture-ktx2-report.md](/Users/ilwonyoon/Documents/3d_room_planner/docs/22-runtime-texture-ktx2-report.md)
+- [docs/asset-runtime-budget.md](/Users/ilwonyoon/Documents/3d_room_planner/docs/asset-runtime-budget.md)
+- [docs/runtime-variant-report.md](/Users/ilwonyoon/Documents/3d_room_planner/docs/runtime-variant-report.md)
+
 ## Phase 1. Stabilize Runtime
 
 Do first.
@@ -313,9 +329,15 @@ Per asset:
 
 Do fourth.
 
-1. add `runtimeModelUrl` / `heroModelUrl`
+1. add `runtimeModelUrl` / `heroModelUrl` metadata
 2. switch selected object or near-POV object to hero only
 3. keep isometric default on runtime-lite
+
+Status:
+
+- `sourceModelUrl`, `runtimeModelUrl`, and `heroModelUrl` metadata are now available on product catalog entries and carried onto placed editor objects.
+- Runtime-lite loading remains opt-in through `VITE_ENABLE_RUNTIME_VARIANTS=true`.
+- Selection-aware and camera-distance switching is still pending browser visual QA.
 
 ## Phase 5. Repeated Decor Optimization
 

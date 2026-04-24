@@ -1,4 +1,4 @@
-import { modelUrlWithBestVariant } from './modelVariants'
+import { modelUrlWithBestVariant, modelVariantUrlsFor } from './modelVariants'
 import {
   manualModelSeedsByCategory,
   manualRetailAliasById,
@@ -28,6 +28,9 @@ export type ProductCatalogItem = {
   source: ProductAssetSource
   renderCost: ProductRenderCost
   modelUrl: string
+  sourceModelUrl: string
+  runtimeModelUrl?: string
+  heroModelUrl?: string
   thumbnailUrl: string
   dimensionsCm: [number, number, number]
 }
@@ -470,6 +473,9 @@ function toItem(category: ProductCategory, seed: ProductCatalogSeed, index: numb
       ? inferredLightingDimensions ?? seed.dimensionsCm ?? dimensionByCategory[category]
       : seed.dimensionsCm ?? dimensionByCategory[category]
 
+  const sourceModelUrl = modelUrlFor(seed.id, source)
+  const variantUrls = modelVariantUrlsFor(sourceModelUrl)
+
   return {
     id: seed.id,
     name: resolvedName,
@@ -489,7 +495,8 @@ function toItem(category: ProductCategory, seed: ProductCatalogSeed, index: numb
     category,
     source,
     renderCost: highTierOnlyModelIds.has(seed.id) ? 'heavy' : 'standard',
-    modelUrl: modelUrlWithBestVariant(modelUrlFor(seed.id, source)),
+    modelUrl: modelUrlWithBestVariant(sourceModelUrl),
+    ...variantUrls,
     thumbnailUrl: `/assets/model-thumbnails/${seed.id}.png`,
     dimensionsCm: resolvedDimensions,
   }
@@ -507,6 +514,7 @@ const rugCatalogItems: ProductCatalogItem[] = RUG_CATALOG.map((item) => ({
   source: 'procedural',
   renderCost: highTierOnlyModelIds.has(item.id) ? 'heavy' : 'standard',
   modelUrl: item.modelUrl,
+  sourceModelUrl: item.modelUrl,
   thumbnailUrl: item.thumbnailUrl,
   dimensionsCm: item.dimensionsCm,
 }))
@@ -514,4 +522,10 @@ const rugCatalogItems: ProductCatalogItem[] = RUG_CATALOG.map((item) => ({
 export const PRODUCT_CATALOG: ProductCatalogItem[] = [...generatedProductCatalog, ...rugCatalogItems]
 
 export const PRODUCT_BY_ID = new Map(PRODUCT_CATALOG.map((item) => [item.id, item]))
-export const PRODUCT_BY_MODEL_URL = new Map(PRODUCT_CATALOG.map((item) => [item.modelUrl, item]))
+export const PRODUCT_BY_MODEL_URL = new Map(
+  PRODUCT_CATALOG.flatMap((item) =>
+    [item.modelUrl, item.sourceModelUrl, item.runtimeModelUrl, item.heroModelUrl]
+      .filter((url): url is string => Boolean(url))
+      .map((url) => [url, item] as const),
+  ),
+)

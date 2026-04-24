@@ -27,6 +27,9 @@ export type EditorObject = {
   id: string
   label: string
   url: string
+  sourceModelUrl?: string
+  runtimeModelUrl?: string
+  heroModelUrl?: string
   catalogItemId?: string
   productCategory?: ProductCategory
   renderKind?: EditorObjectRenderKind
@@ -59,7 +62,18 @@ interface EditorObjectsState {
   replaceObject: (
     id: string,
     replacement: Pick<EditorObject, 'label' | 'url' | 'targetSize' | 'dimensionsM'> &
-      Partial<Pick<EditorObject, 'catalogItemId' | 'productCategory' | 'renderKind' | 'rotationMode'>>,
+      Partial<
+        Pick<
+          EditorObject,
+          | 'catalogItemId'
+          | 'productCategory'
+          | 'renderKind'
+          | 'rotationMode'
+          | 'sourceModelUrl'
+          | 'runtimeModelUrl'
+          | 'heroModelUrl'
+        >
+      >,
   ) => void
   updateObject: (
     id: string,

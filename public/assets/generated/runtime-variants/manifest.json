@@ -1,0 +1,117 @@
+{
+  "generatedAt": "2026-04-24T18:41:18.182Z",
+  "variants": [
+    {
+      "id": "beyla-shoe-cabinet-runtime-lite",
+      "source": "public/assets/models/manual/dimensiva-beyla-shoe-cabinet-by-kave-home.optimized.glb",
+      "output": "beyla-shoe-cabinet-runtime-lite.glb",
+      "simplifyRatio": 0.6,
+      "simplifyError": 0.002,
+      "textureSize": 512,
+      "outputUrl": "/assets/generated/runtime-variants/beyla-shoe-cabinet-runtime-lite.glb",
+      "sourceStats": {
+        "bytes": 713604,
+        "renderVertexCount": 132795,
+        "uploadVertexCount": 26512,
+        "textureCount": 6,
+        "textureGpuBytes": 33554424
+      },
+      "runtimeStats": {
+        "bytes": 614772,
+        "renderVertexCount": 80178,
+        "uploadVertexCount": 16635,
+        "textureCount": 6,
+        "textureGpuBytes": 33554424
+      },
+      "deltas": {
+        "transferBytes": "-13.8%",
+        "renderVertexCount": "-39.6%",
+        "textureGpuBytes": "0.0%"
+      }
+    },
+    {
+      "id": "vintage-cabinet-runtime-lite",
+      "source": "public/assets/models/polyhaven/vintage_cabinet_01.optimized.glb",
+      "output": "vintage-cabinet-runtime-lite.glb",
+      "simplifyRatio": 0.75,
+      "simplifyError": 0.0015,
+      "textureSize": 512,
+      "outputUrl": "/assets/generated/runtime-variants/vintage-cabinet-runtime-lite.glb",
+      "sourceStats": {
+        "bytes": 596208,
+        "renderVertexCount": 106608,
+        "uploadVertexCount": 25808,
+        "textureCount": 7,
+        "textureGpuBytes": 39146828
+      },
+      "runtimeStats": {
+        "bytes": 542244,
+        "renderVertexCount": 79953,
+        "uploadVertexCount": 20202,
+        "textureCount": 7,
+        "textureGpuBytes": 39146828
+      },
+      "deltas": {
+        "transferBytes": "-9.1%",
+        "renderVertexCount": "-25.0%",
+        "textureGpuBytes": "0.0%"
+      }
+    },
+    {
+      "id": "eames-armchair-runtime-lite",
+      "source": "public/assets/models/manual/dimensiva-eames-armchair-rocker-rar-by-vitra.optimized.glb",
+      "output": "eames-armchair-runtime-lite.glb",
+      "simplifyRatio": 0.32,
+      "simplifyError": 0.0025,
+      "textureSize": 512,
+      "outputUrl": "/assets/generated/runtime-variants/eames-armchair-runtime-lite.glb",
+      "sourceStats": {
+        "bytes": 224332,
+        "renderVertexCount": 155814,
+        "uploadVertexCount": 27418,
+        "textureCount": 0,
+        "textureGpuBytes": 0
+      },
+      "runtimeStats": {
+        "bytes": 82232,
+        "renderVertexCount": 49851,
+        "uploadVertexCount": 9243,
+        "textureCount": 0,
+        "textureGpuBytes": 0
+      },
+      "deltas": {
+        "transferBytes": "-63.3%",
+        "renderVertexCount": "-68.0%",
+        "textureGpuBytes": "n/a"
+      }
+    },
+    {
+      "id": "lotus-vase-runtime-lite",
+      "source": "public/assets/models/manual/dimensiva-lotus-vase-by-101-copenhagen.optimized.glb",
+      "output": "lotus-vase-runtime-lite.glb",
+      "simplifyRatio": 0.125,
+      "simplifyError": 0.003,
+      "textureSize": 512,
+      "outputUrl": "/assets/generated/runtime-variants/lotus-vase-runtime-lite.glb",
+      "sourceStats": {
+        "bytes": 626476,
+        "renderVertexCount": 318954,
+        "uploadVertexCount": 55127,
+        "textureCount": 1,
+        "textureGpuBytes": 5592404
+      },
+      "runtimeStats": {
+        "bytes": 104732,
+        "renderVertexCount": 39864,
+        "uploadVertexCount": 7310,
+        "textureCount": 1,
+        "textureGpuBytes": 5592404
+      },
+      "deltas": {
+        "transferBytes": "-83.3%",
+        "renderVertexCount": "-87.5%",
+        "textureGpuBytes": "0.0%"
+      }
+    }
+  ]
+}

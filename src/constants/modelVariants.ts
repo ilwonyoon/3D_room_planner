@@ -1,3 +1,11 @@
+import { runtimeModelVariantUrls } from './runtimeModelVariants.generated'
+
+export type ModelVariantUrls = {
+  sourceModelUrl: string
+  runtimeModelUrl?: string
+  heroModelUrl?: string
+}
+
 const ktx2ModelVariantUrls = new Set([
   '/assets/models/sheen-chair.optimized.glb',
   '/assets/models/polyhaven/CoffeeTable_01.optimized.glb',
@@ -41,7 +49,22 @@ export function assetUrlWithRevision(assetUrl: string) {
   return `${assetUrl}${separator}v=${revision}`
 }
 
+export function modelVariantUrlsFor(sourceModelUrl: string): ModelVariantUrls {
+  const runtimeModelUrl = runtimeModelVariantUrls.get(sourceModelUrl)
+
+  return {
+    sourceModelUrl: assetUrlWithRevision(sourceModelUrl),
+    runtimeModelUrl: runtimeModelUrl ? assetUrlWithRevision(runtimeModelUrl) : undefined,
+  }
+}
+
 export function modelUrlWithBestVariant(modelUrl: string) {
+  const runtimeVariantUrl = runtimeModelVariantUrls.get(modelUrl)
+
+  if (import.meta.env.VITE_ENABLE_RUNTIME_VARIANTS === 'true' && runtimeVariantUrl) {
+    return assetUrlWithRevision(runtimeVariantUrl)
+  }
+
   if (import.meta.env.VITE_ENABLE_KTX2_MODELS !== 'true' || !ktx2ModelVariantUrls.has(modelUrl)) {
     return assetUrlWithRevision(modelUrl)
   }

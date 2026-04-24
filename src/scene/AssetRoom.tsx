@@ -1,5 +1,5 @@
 import { useGLTF, useTexture } from '@react-three/drei'
-import { useFrame, useThree } from '@react-three/fiber'
+import { useFrame, useLoader, useThree } from '@react-three/fiber'
 import type { ThreeEvent } from '@react-three/fiber'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
@@ -11,6 +11,7 @@ import { USDLoader } from 'three/examples/jsm/loaders/USDLoader.js'
 
 import { getRenderMaterialTuning } from '@/constants/renderMaterialOverrides'
 import { RUG_BY_ID, type RugCatalogItem } from '@/constants/rugCatalog'
+import { enableKtx2RuntimeTextures, textureUrlWithBestVariant } from '@/constants/textureVariants'
 import {
   useCameraViewStore,
   useEditorObjectsStore,
@@ -110,6 +111,12 @@ const modelResourceErrorCache = new Map<string, unknown>()
 
 type WallSide = 'back' | 'front' | 'left' | 'right'
 type GltfExtendLoader = (loader: GLTFLoader) => void
+type TexturePathSet = Record<string, string>
+type TextureSet<TPaths extends TexturePathSet> = Record<keyof TPaths, THREE.Texture>
+
+function isKtx2TextureUrl(url: string) {
+  return url.split('?', 1)[0].endsWith('.ktx2')
+}
 
 function extendGltfLoaderWithKtx2(renderer: THREE.WebGLRenderer): GltfExtendLoader {
   return (loader) => {
@@ -266,6 +273,45 @@ function configureTexture(
   return texture
 }
 
+function useTextureSet<TPaths extends TexturePathSet>(paths: TPaths): TextureSet<TPaths> {
+  const gl = useThree((state) => state.gl)
+  const entries = useMemo(
+    () => {
+      const baseEntries = Object.entries(paths)
+      const variantEntries = baseEntries.map(
+        ([key, path]) => [key, textureUrlWithBestVariant(path)] as const,
+      )
+      const ktx2VariantCount = variantEntries.filter(([, path]) => isKtx2TextureUrl(path)).length
+
+      if (
+        enableKtx2RuntimeTextures &&
+        ktx2VariantCount > 0 &&
+        ktx2VariantCount < variantEntries.length
+      ) {
+        return baseEntries
+      }
+
+      return variantEntries
+    },
+    [paths],
+  )
+  const urls = useMemo(() => entries.map(([, path]) => path), [entries])
+  const useKtx2 = enableKtx2RuntimeTextures && urls.every(isKtx2TextureUrl)
+  const Loader = useKtx2 ? KTX2Loader : THREE.TextureLoader
+  const textures = useLoader(Loader, urls, (loader) => {
+    if (loader instanceof KTX2Loader) {
+      loader.setTranscoderPath(KTX2_TRANSCODER_PATH)
+      loader.detectSupport(gl)
+    }
+  }) as THREE.Texture[]
+
+  return useMemo(
+    () =>
+      Object.fromEntries(entries.map(([key], index) => [key, textures[index]])) as TextureSet<TPaths>,
+    [entries, textures],
+  )
+}
+
 function repeatFromSampleSize(
   surfaceSizeM: readonly [number, number],
   sampleSizeM: readonly [number, number],
@@ -351,7 +397,7 @@ function usePbrRoomMaterials() {
     [wallMaterial],
   )
 
-  const floorTextures = useTexture(floorTexturePaths) as {
+  const floorTextures = useTextureSet(floorTexturePaths) as {
     map: THREE.Texture
     normalMap: THREE.Texture
     roughnessMap: THREE.Texture
@@ -359,7 +405,7 @@ function usePbrRoomMaterials() {
     aoMap?: THREE.Texture
   }
 
-  const wallTextures = useTexture(wallTexturePaths) as {
+  const wallTextures = useTextureSet(wallTexturePaths) as {
     map: THREE.Texture
     normalMap: THREE.Texture
     roughnessMap: THREE.Texture
@@ -937,7 +983,7 @@ function TexturedAreaRug({ object, variant }: { object: EditorObject; variant: R
     }),
     [variant],
   )
-  const textures = useTexture(texturePaths) as {
+  const textures = useTextureSet(texturePaths) as {
     map: THREE.Texture
     normalMap: THREE.Texture
     roughnessMap: THREE.Texture
