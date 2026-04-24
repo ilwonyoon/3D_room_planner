@@ -8,17 +8,21 @@ const SOURCE_URL = 'https://download.muuto.com/digitalshowroom/#/gallery/3D-file
 const LICENSE_URL = 'https://professionals.muuto.com/toolbox/product-information/download-ad-files/'
 const outputRoot = join(ROOT, 'raw/inbox/muuto')
 const limit = Number.parseInt(process.env.MUUTO_LIMIT ?? '18', 10)
+const filterPattern = process.env.MUUTO_FILTER ? new RegExp(process.env.MUUTO_FILTER, 'i') : null
 
 const includeTerms = [
   'bench',
   'chair',
   'coffee table',
+  'compile',
   'desk',
   'lamp',
   'mirror',
   'pendant',
   'shelf',
   'sofa',
+  'stacked',
+  'storage',
   'stool',
   'table',
 ]
@@ -101,7 +105,11 @@ function cleanProductName(filetitle) {
 
 function isRelevant(file) {
   const text = `${file.filetitle} ${file.filename}`.toLowerCase()
-  return includeTerms.some((term) => text.includes(term)) && !skipTerms.some((term) => text.includes(term))
+  return (
+    includeTerms.some((term) => text.includes(term)) &&
+    !skipTerms.some((term) => text.includes(term)) &&
+    (!filterPattern || filterPattern.test(`${file.filetitle} ${file.filename}`))
+  )
 }
 
 async function fetchCandidates() {

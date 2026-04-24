@@ -7,6 +7,7 @@ const FREE_MODELS_URL = 'https://dimensiva.com/free-3d-models/'
 const LICENSE_URL = 'https://dimensiva.com/license/'
 const outputRoot = join(ROOT, 'raw/inbox/dimensiva')
 const limit = Number.parseInt(process.env.DIMENSIVA_LIMIT ?? '0', 10)
+const filterPattern = process.env.DIMENSIVA_FILTER ? new RegExp(process.env.DIMENSIVA_FILTER, 'i') : null
 
 const includeTerms = [
   'armchair',
@@ -33,7 +34,6 @@ const includeTerms = [
 ]
 
 const skipTerms = [
-  'case',
   'camera',
   'iphone',
   'keyboard',
@@ -240,7 +240,10 @@ const html = existsSync(join(outputRoot, 'free-3d-models.html'))
 writeFileSync(join(outputRoot, 'free-3d-models.html'), html)
 
 const rows = parseRows(html)
-const selectedRows = limit > 0 ? rows.slice(0, limit) : rows
+const filteredRows = filterPattern
+  ? rows.filter((row) => filterPattern.test(`${row.title} ${row.sourceUrl}`))
+  : rows
+const selectedRows = limit > 0 ? filteredRows.slice(0, limit) : filteredRows
 
 for (const row of selectedRows) {
   downloadRow(row)

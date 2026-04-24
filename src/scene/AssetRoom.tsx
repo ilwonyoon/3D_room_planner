@@ -366,6 +366,23 @@ function usePbrRoomMaterials() {
       plant: new THREE.MeshStandardMaterial({ color: '#476e3f', roughness: 0.7 }),
       plantDark: new THREE.MeshStandardMaterial({ color: '#243f2a', roughness: 0.78 }),
       pot: new THREE.MeshStandardMaterial({ color: '#272322', roughness: 0.72 }),
+      screen: new THREE.MeshStandardMaterial({
+        color: '#14161a',
+        emissive: '#1f3448',
+        emissiveIntensity: 0.18,
+        roughness: 0.42,
+        metalness: 0.05,
+      }),
+      deviceShell: new THREE.MeshStandardMaterial({
+        color: '#e7e5df',
+        roughness: 0.38,
+        metalness: 0.18,
+      }),
+      deviceDark: new THREE.MeshStandardMaterial({
+        color: '#25272b',
+        roughness: 0.5,
+        metalness: 0.08,
+      }),
       shadow: new THREE.MeshBasicMaterial({
         color: '#000000',
         transparent: true,
@@ -835,6 +852,10 @@ function tunePbrMaterial(material: THREE.MeshStandardMaterial | THREE.MeshPhysic
     material.envMapIntensity = tuning.envMapIntensity
   }
 
+  if (tuning.baseColor) {
+    material.color = new THREE.Color(tuning.baseColor)
+  }
+
   if (tuning.roughnessMin !== undefined) {
     material.roughness = Math.max(material.roughness, tuning.roughnessMin)
   }
@@ -1133,6 +1154,46 @@ function WallArt({ variant }: { variant: 'left' | 'right' }) {
   )
 }
 
+function DeskMonitor({ materials }: { materials: ReturnType<typeof usePbrRoomMaterials> }) {
+  return (
+    <group>
+      <FloorShadow material={materials.shadow} position={[0, 0.012, 0.01]} scale={[0.24, 0.12, 0.24]} opacity={0.08} />
+      <mesh position={[0, 0.05, 0.01]} material={materials.deviceShell}>
+        <boxGeometry args={[0.2, 0.025, 0.12]} />
+      </mesh>
+      <mesh position={[0, 0.16, 0.005]} material={materials.deviceShell}>
+        <boxGeometry args={[0.035, 0.22, 0.025]} />
+      </mesh>
+      <mesh position={[0, 0.31, 0]} material={materials.deviceShell}>
+        <boxGeometry args={[0.46, 0.3, 0.026]} />
+      </mesh>
+      <mesh position={[0, 0.31, 0.015]} material={materials.screen}>
+        <boxGeometry args={[0.405, 0.235, 0.008]} />
+      </mesh>
+    </group>
+  )
+}
+
+function Laptop({ materials }: { materials: ReturnType<typeof usePbrRoomMaterials> }) {
+  return (
+    <group>
+      <FloorShadow material={materials.shadow} position={[0, 0.008, 0.02]} scale={[0.2, 0.14, 0.2]} opacity={0.07} />
+      <mesh position={[0, 0.015, 0]} material={materials.deviceShell}>
+        <boxGeometry args={[0.32, 0.022, 0.22]} />
+      </mesh>
+      <mesh position={[0, 0.032, -0.01]} material={materials.deviceDark}>
+        <boxGeometry args={[0.25, 0.006, 0.13]} />
+      </mesh>
+      <mesh position={[0, 0.125, -0.095]} rotation={[Math.PI / 5, 0, 0]} material={materials.deviceShell}>
+        <boxGeometry args={[0.31, 0.19, 0.015]} />
+      </mesh>
+      <mesh position={[0, 0.129, -0.088]} rotation={[Math.PI / 5, 0, 0]} material={materials.screen}>
+        <boxGeometry args={[0.27, 0.15, 0.006]} />
+      </mesh>
+    </group>
+  )
+}
+
 function ProceduralObject({
   object,
   onSelect,
@@ -1190,6 +1251,8 @@ function ProceduralObject({
       {object.renderKind === 'area-rug' ? <AreaRug object={object} /> : null}
       {object.renderKind === 'floor-lamp' ? <FloorLamp materials={materials} /> : null}
       {object.renderKind === 'plant' ? <Plant materials={materials} /> : null}
+      {object.renderKind === 'desk-monitor' ? <DeskMonitor materials={materials} /> : null}
+      {object.renderKind === 'laptop' ? <Laptop materials={materials} /> : null}
       {object.renderKind === 'wall-art' ? (
         <WallArt variant={object.id === 'wall-art-left' ? 'left' : 'right'} />
       ) : null}

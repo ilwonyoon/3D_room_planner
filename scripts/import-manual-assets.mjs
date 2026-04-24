@@ -17,6 +17,7 @@ const inboxRoot = process.env.ASSET_INBOX_DIR
     : join(ROOT, process.env.ASSET_INBOX_DIR)
   : join(ROOT, 'raw/inbox')
 const outputRoot = join(ROOT, 'raw/assets/models/manual')
+const catalogCandidatesPath = join(outputRoot, 'catalog-candidates.json')
 const allowReviewRequired = process.env.ASSET_IMPORT_ALLOW_REVIEW_REQUIRED === '1'
 const acceptedStatuses = new Set(['approved', 'personal-local'])
 
@@ -88,6 +89,10 @@ function validateManifest(manifest, manifestPath) {
 function collectCandidateDirectories() {
   if (!existsSync(inboxRoot)) {
     return []
+  }
+
+  if (existsSync(join(inboxRoot, 'manifest.json'))) {
+    return [inboxRoot]
   }
 
   const candidates = []
@@ -261,10 +266,15 @@ for (const candidate of candidates) {
   }
 }
 
-writeFileSync(
-  join(outputRoot, 'catalog-candidates.json'),
-  `${JSON.stringify(
-    imported.map((item) => ({
+const existingCatalogCandidates = existsSync(catalogCandidatesPath)
+  ? readJson(catalogCandidatesPath)
+  : []
+const mergedCatalogCandidates = new Map(
+  existingCatalogCandidates.map((item) => [item.assetId, item]),
+)
+
+for (const item of imported) {
+  mergedCatalogCandidates.set(item.assetId, {
       assetId: item.assetId,
       source: item.source,
       brand: item.brand,
@@ -275,7 +285,13 @@ writeFileSync(
       licenseUrl: item.licenseUrl,
       redistributionStatus: item.redistributionStatus,
       runtimePrepareStatus: item.runtimePrepareStatus,
-    })),
+  })
+}
+
+writeFileSync(
+  catalogCandidatesPath,
+  `${JSON.stringify(
+    [...mergedCatalogCandidates.values()].sort((a, b) => a.assetId.localeCompare(b.assetId)),
     null,
     2,
   )}\n`,
