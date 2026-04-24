@@ -19,10 +19,14 @@ const reportPath = path.join(outputDir, 'room-setting-model-bounds-audit.md')
 const polyhavenModelIds = new Set(['dartboard'])
 const architecturalModelIds = new Set([
   'modern-wide-picture-window',
+  'modern-triple-window',
   'modern-sliding-window',
+  'modern-sliding-door-window',
   'modern-tall-casement-window',
-  'modern-square-awning-window',
-  'modern-transom-window',
+  'modern-upper-transom-window',
+  'modern-dynamic-window',
+  'modern-casement-slider-window',
+  'modern-pvc-transom-window',
   'modern-flush-white-door',
   'modern-slim-glass-door',
   'modern-sliding-glass-door',

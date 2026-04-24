@@ -4,11 +4,6 @@ This compares catalog dimensions against the size that `FurnitureModel` actually
 
 | Risk | Category | Placement | Model | Catalog m | Rendered m | Max axis error |
 | --- | --- | --- | --- | --- | --- | --- |
-| fail | windows | wall | modern-transom-window | 1.52 x 1.22 x 0.12 | 1.52 x 0.535 x 0.107 | 56% |
-| fail | windows | wall | modern-square-awning-window | 1.22 x 0.82 x 0.13 | 1.22 x 1.173 x 0.14 | 43% |
-| ok | windows | wall | modern-sliding-window | 1.82 x 1.36 x 0.12 | 1.82 x 1.146 x 0.144 | 20% |
-| ok | windows | wall | modern-tall-casement-window | 0.92 x 1.54 x 0.13 | 0.88 x 1.54 x 0.155 | 19% |
-| ok | windows | wall | modern-wide-picture-window | 1.82 x 1.34 x 0.12 | 1.82 x 1.129 x 0.114 | 16% |
 | ok | doors | wall | modern-sliding-glass-door | 1.86 x 2.12 x 0.13 | 1.86 x 2.12 x 0.15 | 15% |
 | ok | shell | wall | hanging_picture_frame_02 | 0.52 x 0.35 x 0.02 | 0.52 x 0.346 x 0.023 | 14% |
 | ok | shell | wall | fancy_picture_frame_01 | 0.52 x 0.4 x 0.02 | 0.52 x 0.4 x 0.017 | 14% |
@@ -34,6 +29,15 @@ This compares catalog dimensions against the size that `FurnitureModel` actually
 | ok | decor | floor | ceramic_vase_02 | 0.44 x 0.62 x 0.44 | 0.438 x 0.62 x 0.438 | 0% |
 | ok | decor | floor | ceramic_vase_04 | 0.33 x 0.62 x 0.33 | 0.328 x 0.62 x 0.328 | 0% |
 | ok | decor | floor | planter_box_01 | 0.62 x 0.29 x 0.28 | 0.62 x 0.289 x 0.281 | 0% |
+| ok | windows | wall | modern-sliding-window | 1.8 x 1.302 x 0.167 | 1.8 x 1.302 x 0.167 | 0% |
+| ok | windows | wall | modern-tall-casement-window | 0.98 x 1.54 x 0.189 | 0.98 x 1.54 x 0.189 | 0% |
+| ok | windows | wall | modern-upper-transom-window | 1.22 x 0.782 x 0.17 | 1.22 x 0.782 x 0.17 | 0% |
+| ok | windows | wall | modern-dynamic-window | 1.68 x 1.275 x 0.162 | 1.68 x 1.275 x 0.162 | 0% |
+| ok | windows | wall | modern-casement-slider-window | 1.44 x 1.171 x 0.161 | 1.44 x 1.171 x 0.161 | 0% |
+| ok | windows | wall | modern-wide-picture-window | 1.82 x 1.284 x 0.161 | 1.82 x 1.284 x 0.161 | 0% |
+| ok | windows | wall | modern-sliding-door-window | 2.2 x 2.1 x 0.135 | 2.2 x 2.1 x 0.135 | 0% |
+| ok | windows | wall | modern-pvc-transom-window | 1.38 x 1.46 x 0.168 | 1.38 x 1.46 x 0.168 | 0% |
+| ok | windows | wall | modern-triple-window | 1.64 x 1.157 x 0.145 | 1.64 x 1.157 x 0.145 | 0% |
 
 Risk meanings:
 - `ok`: rendered model proportions are close enough for the current selection box.

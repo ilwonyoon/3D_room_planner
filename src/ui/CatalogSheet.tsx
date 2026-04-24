@@ -101,6 +101,7 @@ const chips: Chip[] = [
   { id: 'saved', label: 'Saved' },
   { id: 'table', label: 'Table', category: 'table' },
   { id: 'storage', label: 'Drawers', category: 'storage' },
+  { id: 'rug', label: 'Rug', category: 'rug' },
   { id: 'decor', label: 'Deco', category: 'decor' },
   { id: 'chair', label: 'Chair', category: 'chair' },
   { id: 'bed', label: 'Bed', category: 'bed' },
@@ -439,12 +440,15 @@ export function CatalogSheet() {
     const targetSize = Math.max(dimensionsM.x, dimensionsM.y, dimensionsM.z)
     const id = `${item.id}-${Date.now()}`
 
+    const isRug = item.category === 'rug' || item.modelUrl.startsWith('/procedural/area-rug/')
+
     addObject({
       id,
       label: item.name,
       url: item.modelUrl,
       catalogItemId: item.id,
       productCategory: item.category,
+      renderKind: isRug ? 'area-rug' : 'model',
       position: { x: 0.15, z: 0.35 },
       placement: 'floor',
       elevationM: 0.02,
@@ -466,12 +470,14 @@ export function CatalogSheet() {
     const dimensionsM = dimensionsToObjectSize(item.dimensionsCm)
     const targetSize = Math.max(dimensionsM.x, dimensionsM.y, dimensionsM.z)
 
+    const isRug = item.category === 'rug' || item.modelUrl.startsWith('/procedural/area-rug/')
+
     replaceObject(selectedProductContext.object.id, {
       label: item.name,
       url: item.modelUrl,
       catalogItemId: item.id,
       productCategory: item.category,
-      renderKind: 'model',
+      renderKind: isRug ? 'area-rug' : 'model',
       targetSize,
       dimensionsM,
     })

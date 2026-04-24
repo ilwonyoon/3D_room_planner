@@ -43,6 +43,20 @@
       camera.position.set(2.45, 1.55, 2.55)
       camera.lookAt(0, 0.55, 0)
 
+      const shadowDisk = new THREE.Mesh(
+        new THREE.CircleGeometry(0.92, 64),
+        new THREE.MeshBasicMaterial({
+          color: 0x000000,
+          transparent: true,
+          opacity: 0.08,
+          depthWrite: false,
+        }),
+      )
+      shadowDisk.rotation.x = -Math.PI / 2
+      shadowDisk.scale.set(1.05, 0.42, 1)
+      shadowDisk.position.set(0, 0.01, 0)
+      scene.add(shadowDisk)
+
       scene.add(new THREE.AmbientLight(0xffffff, 1.15))
 
       const hemisphere = new THREE.HemisphereLight(0xffffff, 0xd6d1c8, 1.35)

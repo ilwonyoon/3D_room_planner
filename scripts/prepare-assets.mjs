@@ -68,10 +68,14 @@ const objaverseFurnitureModels = [
 const architecturalEnvironmentModels = {
   windows: [
     'modern-wide-picture-window',
+    'modern-triple-window',
     'modern-sliding-window',
+    'modern-sliding-door-window',
     'modern-tall-casement-window',
-    'modern-square-awning-window',
-    'modern-transom-window',
+    'modern-upper-transom-window',
+    'modern-dynamic-window',
+    'modern-casement-slider-window',
+    'modern-pvc-transom-window',
   ],
   doors: [
     'modern-flush-white-door',

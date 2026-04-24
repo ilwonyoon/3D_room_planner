@@ -3,19 +3,21 @@ import {
   manualModelSeedsByCategory,
   manualRetailAliasById,
 } from './manualProductCatalog.generated'
+import { RUG_CATALOG } from './rugCatalog'
 
 export type ProductCategory =
   | 'sofa'
   | 'chair'
   | 'table'
   | 'storage'
+  | 'rug'
   | 'decor'
   | 'lighting'
   | 'appliance'
   | 'bed'
   | 'pets'
 
-export type ProductAssetSource = 'polyhaven' | 'khronos' | 'sharetextures' | 'objaverse' | 'manual'
+export type ProductAssetSource = 'polyhaven' | 'khronos' | 'sharetextures' | 'objaverse' | 'manual' | 'procedural'
 export type ProductRenderCost = 'standard' | 'heavy'
 
 export type ProductCatalogItem = {
@@ -46,6 +48,7 @@ const dimensionByCategory: Record<ProductCategory, [number, number, number]> = {
   chair: [82, 78, 88],
   table: [120, 68, 42],
   storage: [120, 44, 92],
+  rug: [240, 160, 2],
   decor: [46, 34, 62],
   lighting: [36, 36, 82],
   appliance: [84, 32, 72],
@@ -147,6 +150,7 @@ const baseModelSeedsByCategory: Record<ProductCategory, ProductCatalogSeed[]> = 
     { id: 'modern_wooden_cabinet' },
     { id: 'chinese_commode' },
   ],
+  rug: [],
   decor: [
     { id: 'chinese_screen_panels', dimensionsCm: [160, 12, 180] },
     { id: 'potted_plant_01' },
@@ -203,6 +207,10 @@ const baseModelSeedsByCategory: Record<ProductCategory, ProductCatalogSeed[]> = 
 
 const highTierOnlyModelIds = new Set([
   'book_encyclopedia_set_01',
+  'polyhaven-caban-boucle-rug',
+  'polyhaven-floral-jacquard-rug',
+  'polyhaven-quatrefoil-jacquard-rug',
+  'polyhaven-wool-boucle-round-rug',
   'industrial_wall_lamp',
   'pachira_aquatica_01',
   'potted_plant_01',
@@ -217,6 +225,7 @@ const brandsByCategory: Record<ProductCategory, string[]> = {
   chair: ['SIDIZ', 'iloom', 'MARKET B', 'DESKER', 'LIVART'],
   table: ['MARKET B', 'LIVART', 'DESKER', 'VILLA RECORDS', 'HANSSEM'],
   storage: ['MARKET B', 'iloom', 'LIVART', 'HANSSEM', 'DESKER'],
+  rug: ['Ferm Living', 'Menu', 'HAY', 'Normann Copenhagen'],
   decor: ['VILLA RECORDS', 'MARKET B', 'Ohouse'],
   lighting: ['MARKET B', 'Jackson Chameleon', 'Ohouse'],
   appliance: ['Ohouse'],
@@ -421,17 +430,49 @@ function modelUrlFor(id: string, source: ProductAssetSource) {
     return `/assets/models/manual/${id}.optimized.glb`
   }
 
+  if (source === 'procedural') {
+    return `/procedural/${id}`
+  }
+
   return `/assets/models/polyhaven/${id}.optimized.glb`
+}
+
+function lightingDimensionsFor(id: string, resolvedName: string): [number, number, number] | null {
+  const text = `${id} ${resolvedName}`.toLowerCase()
+
+  if (text.includes('floor')) {
+    return [48, 48, 160]
+  }
+
+  if (text.includes('wall') || text.includes('sconce')) {
+    return [26, 22, 52]
+  }
+
+  if (text.includes('pendant') || text.includes('suspension') || text.includes('rail') || text.includes('chandelier')) {
+    return [72, 72, 68]
+  }
+
+  if (text.includes('desk') || text.includes('table') || text.includes('lamp')) {
+    return [34, 34, 52]
+  }
+
+  return null
 }
 
 function toItem(category: ProductCategory, seed: ProductCatalogSeed, index: number): ProductCatalogItem {
   const brandPool = brandsByCategory[category]
   const source = seed.source ?? 'polyhaven'
   const retailAlias = productRetailAliasById[seed.id]
+  const resolvedName = retailAlias?.name ?? productNameFor(seed.id)
+  const inferredLightingDimensions = category === 'lighting' ? lightingDimensionsFor(seed.id, resolvedName) : null
+  const resolvedDimensions =
+    category === 'lighting'
+      ? inferredLightingDimensions ?? seed.dimensionsCm ?? dimensionByCategory[category]
+      : seed.dimensionsCm ?? dimensionByCategory[category]
 
   return {
     id: seed.id,
-    name: retailAlias?.name ?? productNameFor(seed.id),
+    name: resolvedName,
     brand:
       retailAlias?.brand ??
       (source === 'khronos'
@@ -442,19 +483,35 @@ function toItem(category: ProductCategory, seed: ProductCatalogSeed, index: numb
             ? 'Objaverse'
             : source === 'manual'
               ? 'Manual Import'
-            : brandPool[index % brandPool.length]),
+              : source === 'procedural'
+                ? 'Pocketroom'
+              : brandPool[index % brandPool.length]),
     category,
     source,
     renderCost: highTierOnlyModelIds.has(seed.id) ? 'heavy' : 'standard',
     modelUrl: modelUrlWithBestVariant(modelUrlFor(seed.id, source)),
     thumbnailUrl: `/assets/model-thumbnails/${seed.id}.png`,
-    dimensionsCm: seed.dimensionsCm ?? dimensionByCategory[category],
+    dimensionsCm: resolvedDimensions,
   }
 }
 
-export const PRODUCT_CATALOG: ProductCatalogItem[] = Object.entries(modelSeedsByCategory).flatMap(
+const generatedProductCatalog: ProductCatalogItem[] = Object.entries(modelSeedsByCategory).flatMap(
   ([category, seeds]) => seeds.map((seed, index) => toItem(category as ProductCategory, seed, index)),
 )
+
+const rugCatalogItems: ProductCatalogItem[] = RUG_CATALOG.map((item) => ({
+  id: item.id,
+  name: item.name,
+  brand: item.brand,
+  category: 'rug',
+  source: 'procedural',
+  renderCost: highTierOnlyModelIds.has(item.id) ? 'heavy' : 'standard',
+  modelUrl: item.modelUrl,
+  thumbnailUrl: item.thumbnailUrl,
+  dimensionsCm: item.dimensionsCm,
+}))
+
+export const PRODUCT_CATALOG: ProductCatalogItem[] = [...generatedProductCatalog, ...rugCatalogItems]
 
 export const PRODUCT_BY_ID = new Map(PRODUCT_CATALOG.map((item) => [item.id, item]))
 export const PRODUCT_BY_MODEL_URL = new Map(PRODUCT_CATALOG.map((item) => [item.modelUrl, item]))

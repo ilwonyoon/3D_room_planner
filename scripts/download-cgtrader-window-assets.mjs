@@ -30,12 +30,29 @@ const defaultTargets = [
   },
   {
     slotId: 'modern-sliding-window',
-    itemId: 5094531,
-    sourceUrl:
-      'https://www.cgtrader.com/free-3d-models/architectural/window/window-14db7deb-ae34-4c21-8cb1-91c67c3e0e63',
-    targetWidthCm: 182,
-    targetHeightCm: 136,
+    itemId: 211108,
+    sourceUrl: 'https://www.cgtrader.com/free-3d-models/architectural/window/slide-window',
+    targetWidthCm: 180,
+    targetHeightCm: 134,
     targetDepthCm: 12,
+  },
+  {
+    slotId: 'modern-triple-window',
+    itemId: 163659,
+    sourceUrl:
+      'https://www.cgtrader.com/free-3d-models/architectural/window/wide-triple-window',
+    targetWidthCm: 164,
+    targetHeightCm: 128,
+    targetDepthCm: 12,
+  },
+  {
+    slotId: 'modern-sliding-door-window',
+    itemId: 6897802,
+    sourceUrl:
+      'https://www.cgtrader.com/free-3d-models/architectural/window/window-with-sliding-door-220x10x210',
+    targetWidthCm: 220,
+    targetHeightCm: 210,
+    targetDepthCm: 10,
   },
   {
     slotId: 'modern-tall-casement-window',
@@ -47,7 +64,7 @@ const defaultTargets = [
     targetDepthCm: 13,
   },
   {
-    slotId: 'modern-square-awning-window',
+    slotId: 'modern-upper-transom-window',
     itemId: 177485,
     sourceUrl: 'https://www.cgtrader.com/free-3d-models/architectural/window/single-window',
     targetWidthCm: 122,
@@ -55,11 +72,29 @@ const defaultTargets = [
     targetDepthCm: 13,
   },
   {
-    slotId: 'modern-transom-window',
-    itemId: 163659,
-    sourceUrl: 'https://www.cgtrader.com/free-3d-models/architectural/window/wide-triple-window',
-    targetWidthCm: 152,
+    slotId: 'modern-dynamic-window',
+    itemId: 211198,
+    sourceUrl: 'https://www.cgtrader.com/free-3d-models/architectural/door/dynamic-window',
+    targetWidthCm: 168,
+    targetHeightCm: 132,
+    targetDepthCm: 12,
+  },
+  {
+    slotId: 'modern-casement-slider-window',
+    itemId: 1924180,
+    sourceUrl:
+      'https://www.cgtrader.com/free-3d-models/architectural/window/casement-window-with-bottom-slider',
+    targetWidthCm: 144,
     targetHeightCm: 122,
+    targetDepthCm: 12,
+  },
+  {
+    slotId: 'modern-pvc-transom-window',
+    itemId: 172829,
+    sourceUrl:
+      'https://www.cgtrader.com/free-3d-models/architectural/window/pvc-casement-window-with-transom-1-below',
+    targetWidthCm: 132,
+    targetHeightCm: 146,
     targetDepthCm: 12,
   },
 ]
@@ -185,7 +220,7 @@ function cookieHeader(cookies) {
 }
 
 function preferredFile(itemFiles) {
-  const order = ['.glb', '.gltf', '.fbx.zip', '.obj.zip', '.obj.rar', '.fbx.rar', '.obj', '.fbx', '.blend']
+  const order = ['.glb', '.fbx.zip', '.obj.zip', '.obj.rar', '.fbx.rar', '.fbx', '.obj', '.gltf', '.blend']
   for (const extension of order) {
     const file = itemFiles.find((entry) => entry.name.toLowerCase().endsWith(extension))
     if (file) {

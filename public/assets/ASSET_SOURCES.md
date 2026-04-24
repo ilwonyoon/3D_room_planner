@@ -112,12 +112,18 @@
   - QA note: `sheen-wood-leather-sofa` is intentionally excluded from KTX2 runtime use because its source textures are already WebP and glTF-Transform cannot convert that path to `KHR_texture_basisu`.
 
 - `models/architectural/*.optimized.glb`
-  - Source: Pocketroom-generated modern architectural runtime set for windows and doors.
-  - License: Pocketroom-generated geometry for this local prototype.
-  - Runtime format: generated `.glb` from `scripts/generate-architectural-assets.mjs` and optimized with glTF-Transform into runtime `.optimized.glb`.
-  - Source of truth: `scripts/generate-architectural-assets.mjs`, `scripts/prepare-assets.mjs`, and `src/constants/environmentCatalog.ts`
-  - Included modern window assets: `modern-wide-picture-window`, `modern-sliding-window`, `modern-tall-casement-window`, `modern-square-awning-window`, `modern-transom-window`
-  - Current window references: white contemporary residential window set with unique wide picture, slider, casement, awning, and multi-lite variants.
+  - Source split:
+    - Windows: official manufacturer `SketchUp` models from Marvin and Pella, converted locally to runtime `GLB`
+    - Doors: Pocketroom-generated modern door runtime set
+  - License:
+    - Windows: manufacturer design-file references used for this local prototype
+    - Doors: Pocketroom-generated geometry for this local prototype
+  - Runtime format: normalized `.glb` and optimized `.optimized.glb`
+  - Source of truth: `scripts/convert-skp-window-to-glb.py`, `scripts/generate-architectural-assets.mjs`, `scripts/prepare-assets.mjs`, and `src/constants/environmentCatalog.ts`
+  - Included modern window assets: `modern-wide-picture-window`, `modern-triple-window`, `modern-sliding-window`, `modern-sliding-door-window`, `modern-tall-casement-window`, `modern-upper-transom-window`, `modern-dynamic-window`, `modern-casement-slider-window`, `modern-pvc-transom-window`
+  - Current window references:
+    - Marvin: `Modern Awning Crank Out`, `Modern Casement Crank Out MultiW 1H`, `Modern Direct Glaze Rectangle`, `Modern Awning Crank Out 2H`, `Modern Casement Crank Out`, `Modern Casement Picture`
+    - Pella: `Impervia Casement Vent`, `Impervia Casement Fixed`, `Impervia Transom`
   - Included modern door assets: `modern-flush-white-door`, `modern-slim-glass-door`, `modern-sliding-glass-door`, `modern-double-glass-door`, `modern-ribbed-oak-door`
   - Replaces the previously exposed Kenney Building Kit door/window pieces in the Room catalog. Kenney Building Kit runtime assets have been removed from the app asset tree.
 

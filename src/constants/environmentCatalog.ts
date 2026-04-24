@@ -75,10 +75,14 @@ const POLYHAVEN_MODEL_IDS = new Set([
 
 const ARCHITECTURAL_MODEL_IDS = new Set([
   'modern-wide-picture-window',
+  'modern-triple-window',
   'modern-sliding-window',
+  'modern-sliding-door-window',
   'modern-tall-casement-window',
-  'modern-square-awning-window',
-  'modern-transom-window',
+  'modern-upper-transom-window',
+  'modern-dynamic-window',
+  'modern-casement-slider-window',
+  'modern-pvc-transom-window',
   'modern-flush-white-door',
   'modern-slim-glass-door',
   'modern-sliding-glass-door',
@@ -331,10 +335,11 @@ function environmentModel(
   dimensionsM: { x: number; y: number; z: number },
   defaultRotationY = 0,
   wallSurfacePlane: 'xy' | 'yz' = 'xy',
+  sourceOverride?: string,
 ): RoomModelItem {
   const isPolyHaven = id.includes('_') || POLYHAVEN_MODEL_IDS.has(id)
   const isArchitectural = ARCHITECTURAL_MODEL_IDS.has(id)
-  const source = isPolyHaven ? 'Poly Haven' : 'Pocketroom'
+  const source = sourceOverride ?? (isPolyHaven ? 'Poly Haven' : 'Pocketroom')
   const modelUrl = isPolyHaven
     ? `/assets/models/polyhaven/${id}.optimized.glb`
     : isArchitectural
@@ -367,11 +372,15 @@ export const DEFAULT_WALL_MATERIAL = WALL_MATERIALS[6]
 export const DEFAULT_FLOOR_MATERIAL = FLOOR_MATERIALS[1]
 
 const WINDOW_ITEMS = [
-  ['modern-wide-picture-window', 'Wide Triple Window', { x: 1.82, y: 1.34, z: 0.12 }],
-  ['modern-sliding-window', 'Three-Panel Slider Window', { x: 1.82, y: 1.36, z: 0.12 }],
-  ['modern-tall-casement-window', 'Tall Casement Window', { x: 0.92, y: 1.54, z: 0.13 }],
-  ['modern-square-awning-window', 'Compact Multi-Lite Window', { x: 1.22, y: 0.82, z: 0.13 }],
-  ['modern-transom-window', 'Multi-Lite Picture Window', { x: 1.52, y: 1.22, z: 0.12 }],
+  ['modern-wide-picture-window', 'Marvin', 'Modern Awning Crank Out', { x: 1.524, y: 1.0668, z: 0.1143 }],
+  ['modern-triple-window', 'Marvin', 'Modern Casement Crank Out MultiW 1H', { x: 4.1656, y: 1.3716, z: 0.1143 }],
+  ['modern-sliding-window', 'Marvin', 'Modern Direct Glaze Rectangle', { x: 0.9144, y: 1.3716, z: 0.1143 }],
+  ['modern-sliding-door-window', 'Marvin', 'Modern Awning Crank Out 2H', { x: 1.524, y: 1.9812, z: 0.1143 }],
+  ['modern-tall-casement-window', 'Marvin', 'Modern Casement Crank Out', { x: 0.9144, y: 1.3716, z: 0.1143 }],
+  ['modern-upper-transom-window', 'Pella', 'Impervia Transom', { x: 0.6985, y: 0.4445, z: 0.0892 }],
+  ['modern-dynamic-window', 'Pella', 'Impervia Casement Vent', { x: 0.7493, y: 1.2065, z: 0.0892 }],
+  ['modern-casement-slider-window', 'Pella', 'Impervia Casement Fixed', { x: 0.7493, y: 1.2065, z: 0.0892 }],
+  ['modern-pvc-transom-window', 'Marvin', 'Modern Casement Picture', { x: 0.9144, y: 1.3716, z: 0.1143 }],
 ] as const
 
 const DOOR_ITEMS = [
@@ -411,8 +420,8 @@ const DECOR_ITEMS = [
 export const ROOM_SETTINGS_CATALOG: RoomSettingsItem[] = [
   ...WALL_MATERIALS,
   ...FLOOR_MATERIALS,
-  ...WINDOW_ITEMS.map(([id, name, dimensionsM]) =>
-    environmentModel('windows', id, name, name, 'wall', dimensionsM),
+  ...WINDOW_ITEMS.map(([id, source, name, dimensionsM]) =>
+    environmentModel('windows', id, name, name, 'wall', dimensionsM, 0, 'xy', source),
   ),
   ...DOOR_ITEMS.map(([id, name, dimensionsM]) =>
     environmentModel('doors', id, name, name, 'wall', dimensionsM),

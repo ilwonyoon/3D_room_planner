@@ -23,8 +23,8 @@ globalThis.FileReader = class {
 const materials = {
   whiteFrame: new THREE.MeshStandardMaterial({
     name: 'warm white powder-coated frame',
-    color: '#f2f1ec',
-    roughness: 0.55,
+    color: '#ebe8e0',
+    roughness: 0.5,
     metalness: 0.05,
   }),
   darkFrame: new THREE.MeshStandardMaterial({
@@ -35,12 +35,12 @@ const materials = {
   }),
   glass: new THREE.MeshPhysicalMaterial({
     name: 'soft blue architectural glass',
-    color: '#b9d7e3',
-    roughness: 0.08,
+    color: '#b7d4e0',
+    roughness: 0.06,
     metalness: 0,
     transparent: true,
-    opacity: 0.48,
-    transmission: 0.18,
+    opacity: 0.5,
+    transmission: 0.22,
   }),
   whiteDoor: new THREE.MeshStandardMaterial({
     name: 'satin white door slab',
@@ -142,6 +142,37 @@ function createSlidingWindow() {
   return group
 }
 
+function createThreePanelPictureWindow() {
+  const group = createWidePictureWindow()
+  addBox(group, 'left mullion', [0.042, 1.04, 0.08], [-0.46, 0.67, 0.006], materials.whiteFrame, true)
+  addBox(group, 'right mullion', [0.042, 1.04, 0.08], [0.46, 0.67, 0.006], materials.whiteFrame, true)
+  return group
+}
+
+function createFullHeightSlidingWindow() {
+  const group = new THREE.Group()
+  addFrame(group, 2.2, 2.1, 0.11, 0.08, materials.darkFrame, 'sliding frame')
+  addBox(group, 'dual floor track', [2.02, 0.042, 0.12], [0, 0.11, 0.02], materials.darkFrame, true)
+  addBox(group, 'dual head track', [2.02, 0.038, 0.11], [0, 1.99, 0.01], materials.darkFrame, true)
+
+  const fixedPanel = new THREE.Group()
+  addFrame(fixedPanel, 0.98, 1.88, 0.055, 0.045, materials.whiteFrame, 'fixed sash')
+  addGlass(fixedPanel, 'fixed panel glass', 0.84, 1.72, [0, 0.94, -0.012], 0.022)
+  fixedPanel.position.set(-0.52, 0.13, -0.018)
+  group.add(fixedPanel)
+
+  const sliderPanel = new THREE.Group()
+  addFrame(sliderPanel, 0.98, 1.88, 0.055, 0.045, materials.whiteFrame, 'slider sash')
+  addGlass(sliderPanel, 'slider panel glass', 0.84, 1.72, [0, 0.94, -0.012], 0.022)
+  sliderPanel.position.set(0.38, 0.13, 0.008)
+  group.add(sliderPanel)
+
+  addBox(group, 'meeting stile fixed', [0.05, 1.7, 0.07], [-0.06, 1.01, 0], materials.whiteFrame, true)
+  addBox(group, 'meeting stile slider', [0.05, 1.7, 0.07], [0.06, 1.01, 0.018], materials.whiteFrame, true)
+  addBox(group, 'sliding pull', [0.026, 0.34, 0.03], [0.2, 1.02, 0.062], materials.metal, true)
+  return group
+}
+
 function createTallCasementWindow() {
   const group = new THREE.Group()
   addFrame(group, 0.92, 1.54, 0.13, 0.09, materials.whiteFrame, 'outer frame')
@@ -190,6 +221,84 @@ function createNarrowTransomWindow() {
   addFrame(group, 1.36, 1.06, 0.075, 0.03, materials.whiteFrame, 'interior stop')
   addBox(group, 'central mullion vertical', [0.05, 0.98, 0.08], [0, 0.61, 0.004], materials.whiteFrame, true)
   addBox(group, 'central mullion horizontal', [1.28, 0.05, 0.08], [0, 0.61, 0.004], materials.whiteFrame, true)
+  return group
+}
+
+function createUpperTransomWindow() {
+  const group = new THREE.Group()
+  addFrame(group, 1.22, 0.82, 0.13, 0.09, materials.whiteFrame, 'outer frame')
+  addBox(group, 'interior stool', [1.28, 0.05, 0.17], [0, 0.09, 0.028], materials.whiteFrame, true)
+  addFrame(group, 1.08, 0.68, 0.075, 0.038, materials.whiteFrame, 'interior stop')
+  addBox(group, 'transom rail', [0.98, 0.045, 0.08], [0, 0.5, 0.004], materials.whiteFrame, true)
+  addGlass(group, 'upper lite left', 0.42, 0.14, [-0.25, 0.63, -0.02], 0.02)
+  addGlass(group, 'upper lite right', 0.42, 0.14, [0.25, 0.63, -0.02], 0.02)
+  addGlass(group, 'lower awning glass', 0.9, 0.28, [0, 0.28, -0.018], 0.02)
+  addBox(group, 'awning top reveal', [0.86, 0.022, 0.03], [0, 0.45, 0.046], materials.shadowLine, true)
+  addBox(group, 'awning operator', [0.22, 0.018, 0.024], [0, 0.16, 0.07], materials.metal, true)
+  return group
+}
+
+function createPvcTransomWindow() {
+  const group = new THREE.Group()
+  addFrame(group, 1.32, 1.46, 0.12, 0.1, materials.whiteFrame, 'outer frame')
+  addBox(group, 'interior sill apron', [1.38, 0.05, 0.16], [0, 0.08, 0.028], materials.whiteFrame, true)
+  addFrame(group, 1.18, 1.3, 0.075, 0.04, materials.whiteFrame, 'interior stop')
+  addBox(group, 'upper transom rail', [1.1, 0.05, 0.08], [0, 1.03, 0.004], materials.whiteFrame, true)
+  addBox(group, 'vertical mullion left', [0.05, 0.94, 0.08], [-0.22, 0.51, 0.004], materials.whiteFrame, true)
+  addBox(group, 'vertical mullion right', [0.05, 0.94, 0.08], [0.22, 0.51, 0.004], materials.whiteFrame, true)
+  addGlass(group, 'transom glass', 1.02, 0.24, [0, 1.18, -0.02], 0.02)
+  addGlass(group, 'lower left lite', 0.28, 0.78, [-0.42, 0.56, -0.02], 0.02)
+  addGlass(group, 'lower center lite', 0.28, 0.78, [0, 0.56, -0.02], 0.02)
+  addGlass(group, 'lower right lite', 0.28, 0.78, [0.42, 0.56, -0.02], 0.02)
+  return group
+}
+
+function createCasementSliderHybridWindow() {
+  const group = new THREE.Group()
+  addFrame(group, 1.44, 1.22, 0.12, 0.09, materials.whiteFrame, 'outer frame')
+  addBox(group, 'interior sill apron', [1.5, 0.05, 0.16], [0, 0.08, 0.028], materials.whiteFrame, true)
+
+  const leftSash = new THREE.Group()
+  addFrame(leftSash, 0.58, 0.94, 0.06, 0.045, materials.whiteFrame, 'left casement sash')
+  addGlass(leftSash, 'left casement glass', 0.46, 0.82, [0, 0.47, -0.012], 0.02)
+  leftSash.position.set(-0.34, 0.14, 0.008)
+  leftSash.rotation.y = -0.11
+  group.add(leftSash)
+
+  const rightSlider = new THREE.Group()
+  addFrame(rightSlider, 0.62, 0.94, 0.06, 0.045, materials.whiteFrame, 'right slider sash')
+  addGlass(rightSlider, 'right slider glass', 0.5, 0.82, [0, 0.47, -0.012], 0.02)
+  rightSlider.position.set(0.28, 0.14, 0.002)
+  group.add(rightSlider)
+
+  addBox(group, 'slider guide track', [0.62, 0.024, 0.028], [0.28, 0.16, 0.024], materials.darkFrame, true)
+  addBox(group, 'meeting stile', [0.045, 0.88, 0.07], [0.02, 0.61, 0.012], materials.whiteFrame, true)
+  addBox(group, 'slider pull', [0.022, 0.16, 0.028], [0.18, 0.6, 0.058], materials.metal, true)
+  return group
+}
+
+function createDynamicCasementWindow() {
+  const group = new THREE.Group()
+  addFrame(group, 1.68, 1.32, 0.12, 0.09, materials.whiteFrame, 'outer frame')
+  addBox(group, 'interior sill apron', [1.74, 0.05, 0.16], [0, 0.08, 0.028], materials.whiteFrame, true)
+  addBox(group, 'offset mullion', [0.05, 1.06, 0.08], [-0.22, 0.67, 0.004], materials.whiteFrame, true)
+
+  const fixedLite = new THREE.Group()
+  addFrame(fixedLite, 0.58, 1.06, 0.065, 0.042, materials.whiteFrame, 'fixed lite frame')
+  addGlass(fixedLite, 'fixed lite glass', 0.48, 0.92, [0, 0.53, -0.012], 0.02)
+  fixedLite.position.set(-0.52, 0.12, -0.002)
+  group.add(fixedLite)
+
+  const primarySash = new THREE.Group()
+  addFrame(primarySash, 0.76, 1.06, 0.065, 0.045, materials.whiteFrame, 'primary casement sash')
+  addGlass(primarySash, 'primary casement glass', 0.64, 0.92, [0, 0.53, -0.012], 0.02)
+  primarySash.position.set(0.26, 0.12, 0.008)
+  primarySash.rotation.y = -0.09
+  group.add(primarySash)
+
+  addCylinder(group, 'upper hinge', 0.01, 0.05, [-0.08, 1.12, 0.056], materials.metal)
+  addCylinder(group, 'lower hinge', 0.01, 0.05, [-0.08, 0.22, 0.056], materials.metal)
+  addBox(group, 'operator handle', [0.13, 0.016, 0.024], [0.38, 0.18, 0.072], materials.metal, true)
   return group
 }
 
@@ -255,8 +364,14 @@ function createRibbedOakDoor() {
 
 const assets = [
   ['modern-wide-picture-window', createWidePictureWindow],
+  ['modern-triple-window', createThreePanelPictureWindow],
   ['modern-sliding-window', createSlidingWindow],
+  ['modern-sliding-door-window', createFullHeightSlidingWindow],
   ['modern-tall-casement-window', createTallCasementWindow],
+  ['modern-upper-transom-window', createUpperTransomWindow],
+  ['modern-dynamic-window', createDynamicCasementWindow],
+  ['modern-casement-slider-window', createCasementSliderHybridWindow],
+  ['modern-pvc-transom-window', createPvcTransomWindow],
   ['modern-square-awning-window', createSquareAwningWindow],
   ['modern-transom-window', createNarrowTransomWindow],
   ['modern-flush-white-door', createFlushWhiteDoor],

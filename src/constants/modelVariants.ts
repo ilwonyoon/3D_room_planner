@@ -9,16 +9,24 @@ const ktx2ModelVariantUrls = new Set([
 ])
 
 const assetUrlRevisions = new Map([
-  ['/assets/models/architectural/modern-wide-picture-window.optimized.glb', '20260423a'],
-  ['/assets/models/architectural/modern-sliding-window.optimized.glb', '20260423a'],
-  ['/assets/models/architectural/modern-tall-casement-window.optimized.glb', '20260423a'],
-  ['/assets/models/architectural/modern-square-awning-window.optimized.glb', '20260423a'],
-  ['/assets/models/architectural/modern-transom-window.optimized.glb', '20260423a'],
-  ['/assets/model-thumbnails/modern-wide-picture-window.png', '20260423a'],
-  ['/assets/model-thumbnails/modern-sliding-window.png', '20260423a'],
-  ['/assets/model-thumbnails/modern-tall-casement-window.png', '20260423a'],
-  ['/assets/model-thumbnails/modern-square-awning-window.png', '20260423a'],
-  ['/assets/model-thumbnails/modern-transom-window.png', '20260423a'],
+  ['/assets/models/architectural/modern-wide-picture-window.optimized.glb', '20260424c'],
+  ['/assets/models/architectural/modern-triple-window.optimized.glb', '20260424c'],
+  ['/assets/models/architectural/modern-sliding-window.optimized.glb', '20260424c'],
+  ['/assets/models/architectural/modern-sliding-door-window.optimized.glb', '20260424c'],
+  ['/assets/models/architectural/modern-tall-casement-window.optimized.glb', '20260424c'],
+  ['/assets/models/architectural/modern-upper-transom-window.optimized.glb', '20260424c'],
+  ['/assets/models/architectural/modern-dynamic-window.optimized.glb', '20260424c'],
+  ['/assets/models/architectural/modern-casement-slider-window.optimized.glb', '20260424c'],
+  ['/assets/models/architectural/modern-pvc-transom-window.optimized.glb', '20260424c'],
+  ['/assets/model-thumbnails/modern-wide-picture-window.png', '20260424c'],
+  ['/assets/model-thumbnails/modern-triple-window.png', '20260424c'],
+  ['/assets/model-thumbnails/modern-sliding-window.png', '20260424c'],
+  ['/assets/model-thumbnails/modern-sliding-door-window.png', '20260424c'],
+  ['/assets/model-thumbnails/modern-tall-casement-window.png', '20260424c'],
+  ['/assets/model-thumbnails/modern-upper-transom-window.png', '20260424c'],
+  ['/assets/model-thumbnails/modern-dynamic-window.png', '20260424c'],
+  ['/assets/model-thumbnails/modern-casement-slider-window.png', '20260424c'],
+  ['/assets/model-thumbnails/modern-pvc-transom-window.png', '20260424c'],
 ])
 
 export function assetUrlWithRevision(assetUrl: string) {

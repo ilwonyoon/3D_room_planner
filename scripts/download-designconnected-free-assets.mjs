@@ -11,6 +11,12 @@ const storageStatePath = join(ROOT, process.env.DESIGNCONNECTED_STATE ?? 'output
 const limit = Number.parseInt(process.env.DESIGNCONNECTED_LIMIT ?? '0', 10)
 const headless = process.env.DESIGNCONNECTED_HEADLESS !== '0'
 const downloadTimeoutMs = Number.parseInt(process.env.DESIGNCONNECTED_DOWNLOAD_TIMEOUT_MS ?? '180000', 10)
+const forcedIds = new Set(
+  (process.env.DESIGNCONNECTED_ID_FILTER ?? '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean),
+)
 
 const includeTerms = [
   'armchair',
@@ -107,6 +113,7 @@ function slugify(value) {
 function inferCategory(product) {
   const text = `${product.name} ${product.url}`.toLowerCase()
 
+  if (text.includes('rug') || text.includes('carpet')) return 'rug'
   if (text.includes('sofa') || text.includes('bench') || text.includes('chaise')) return 'sofa'
   if (text.includes('bed') || text.includes('nightstand')) return 'bed'
   if (text.includes('chair') || text.includes('stool')) return 'chair'
@@ -139,12 +146,18 @@ function dimensionsFor(category) {
       return [120, 45, 92]
     case 'lighting':
       return [42, 42, 120]
+    case 'rug':
+      return [240, 160, 2]
     default:
       return [44, 34, 54]
   }
 }
 
 function isRelevant(product) {
+  if (forcedIds.has(product.sourceProductId)) {
+    return true
+  }
+
   const text = `${product.name} ${product.brand} ${product.url}`.toLowerCase()
 
   if (skipTerms.some((term) => text.includes(term))) {
@@ -317,7 +330,7 @@ async function main() {
     await clickLoadMoreUntilDone(page)
 
     const allProducts = await extractProducts(page)
-    const candidates = allProducts.filter(isRelevant)
+    const candidates = forcedIds.size > 0 ? allProducts.filter((product) => forcedIds.has(product.sourceProductId)) : allProducts.filter(isRelevant)
     const selected = limit > 0 ? candidates.slice(0, limit) : candidates
 
     writeFileSync(join(outputRoot, 'freebies-candidates.json'), `${JSON.stringify(selected, null, 2)}\n`)
