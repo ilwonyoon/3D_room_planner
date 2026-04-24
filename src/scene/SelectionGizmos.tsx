@@ -227,13 +227,15 @@ export function SelectionGizmos() {
 
   const bounds = useMemo(() => {
     if (!selected) return null
-    const size = selected.placement === 'wall'
-      ? { x: selected.dimensionsM.x, z: selected.dimensionsM.z }
+    const boxSize = { x: selected.dimensionsM.x, z: selected.dimensionsM.z }
+    const footprintSize = selected.placement === 'wall'
+      ? boxSize
       : rotatedFootprintSize(selected.dimensionsM, selected.rotationY)
 
     return {
-      size,
-      geometry: makeBoxGeometry(size.x, selected.dimensionsM.y, size.z),
+      boxSize,
+      footprintSize,
+      geometry: makeBoxGeometry(boxSize.x, selected.dimensionsM.y, boxSize.z),
     }
   }, [selected])
 
@@ -290,7 +292,7 @@ export function SelectionGizmos() {
         roomWidth: room.widthM,
         roomDepth: room.depthM,
         position: selected.position,
-        size: bounds.size,
+        size: bounds.footprintSize,
       })
     : []
 

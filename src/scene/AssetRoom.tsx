@@ -1,9 +1,13 @@
 import { useGLTF, useTexture } from '@react-three/drei'
 import { useFrame, useThree } from '@react-three/fiber'
 import type { ThreeEvent } from '@react-three/fiber'
-import { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { KTX2Loader } from 'three/examples/jsm/loaders/KTX2Loader.js'
+import { USDLoader } from 'three/examples/jsm/loaders/USDLoader.js'
 
 import { getRenderMaterialTuning } from '@/constants/renderMaterialOverrides'
 import {
@@ -98,9 +102,12 @@ const DIMENSION_SYNC_EPSILON_M = 0.015
 const RAYCAST_HITBOX_LAYER = 2
 const KTX2_TRANSCODER_PATH = '/basis/'
 let ktx2Loader: KTX2Loader | null = null
+let dracoLoader: DRACOLoader | null = null
+const modelResourceCache = new Map<string, THREE.Object3D>()
+const modelResourcePromiseCache = new Map<string, Promise<THREE.Object3D>>()
 
 type WallSide = 'back' | 'front' | 'left' | 'right'
-type GltfExtendLoader = NonNullable<Parameters<typeof useGLTF>[3]>
+type GltfExtendLoader = (loader: GLTFLoader) => void
 
 function extendGltfLoaderWithKtx2(renderer: THREE.WebGLRenderer): GltfExtendLoader {
   return (loader) => {
@@ -113,12 +120,53 @@ function extendGltfLoaderWithKtx2(renderer: THREE.WebGLRenderer): GltfExtendLoad
   }
 }
 
+function extendGltfLoaderWithCompression(renderer: THREE.WebGLRenderer): GltfExtendLoader {
+  const extendKtx2 = extendGltfLoaderWithKtx2(renderer)
+
+  return (loader) => {
+    extendKtx2(loader)
+
+    if (!dracoLoader) {
+      dracoLoader = new DRACOLoader()
+      dracoLoader.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.5/')
+    }
+
+    loader.setDRACOLoader(dracoLoader)
+    loader.setMeshoptDecoder(MeshoptDecoder)
+  }
+}
+
 function setRaycastHitboxLayer(object: THREE.Object3D) {
   object.layers.set(RAYCAST_HITBOX_LAYER)
 }
 
 function disableRaycast(object: THREE.Object3D) {
   object.raycast = () => {}
+}
+
+function stripEmbeddedLights(root: THREE.Object3D) {
+  const lights: THREE.Light[] = []
+  const targets = new Set<THREE.Object3D>()
+
+  root.traverse((node) => {
+    if (!(node instanceof THREE.Light)) {
+      return
+    }
+
+    lights.push(node)
+
+    if ('target' in node && node.target instanceof THREE.Object3D && node.target.parent) {
+      targets.add(node.target)
+    }
+  })
+
+  lights.forEach((light) => {
+    light.parent?.remove(light)
+  })
+
+  targets.forEach((target) => {
+    target.parent?.remove(target)
+  })
 }
 
 function renderedDimensionsFromRawSize(rawSize: THREE.Vector3, targetSize: number) {
@@ -216,6 +264,16 @@ function configureTexture(
   return texture
 }
 
+function repeatFromSampleSize(
+  surfaceSizeM: readonly [number, number],
+  sampleSizeM: readonly [number, number],
+): readonly [number, number] {
+  return [
+    Math.max(1, surfaceSizeM[0] / Math.max(sampleSizeM[0], 0.001)),
+    Math.max(1, surfaceSizeM[1] / Math.max(sampleSizeM[1], 0.001)),
+  ] as const
+}
+
 function configureBakedMaskTexture(texture: THREE.Texture) {
   texture.wrapS = THREE.ClampToEdgeWrapping
   texture.wrapT = THREE.ClampToEdgeWrapping
@@ -258,14 +316,23 @@ function useBakedRoomLightingTextures() {
 }
 
 function usePbrRoomMaterials() {
+  const room = useRoomStore((s) => s.room)
   const floorMaterial = useRoomSettingsStore((s) => s.floorMaterial)
   const wallMaterial = useRoomSettingsStore((s) => s.wallMaterial)
+  const floorRepeat = useMemo(
+    () =>
+      floorMaterial.sampleSizeM
+        ? repeatFromSampleSize([room.widthM, room.depthM], floorMaterial.sampleSizeM)
+        : (floorMaterial.repeat ?? TEXTURE_REPEAT.floor),
+    [floorMaterial.repeat, floorMaterial.sampleSizeM, room.depthM, room.widthM],
+  )
 
   const floorTexturePaths = useMemo(
     () => ({
       map: floorMaterial.maps.color,
       normalMap: floorMaterial.maps.normal,
       roughnessMap: floorMaterial.maps.roughness,
+      displacementMap: floorMaterial.maps.displacement ?? floorMaterial.maps.roughness,
       ...(floorMaterial.maps.ao ? { aoMap: floorMaterial.maps.ao } : {}),
     }),
     [floorMaterial],
@@ -286,6 +353,7 @@ function usePbrRoomMaterials() {
     map: THREE.Texture
     normalMap: THREE.Texture
     roughnessMap: THREE.Texture
+    displacementMap: THREE.Texture
     aoMap?: THREE.Texture
   }
 
@@ -298,11 +366,12 @@ function usePbrRoomMaterials() {
   }
 
   useMemo(() => {
-    configureTexture(floorTextures.map, floorMaterial.repeat ?? TEXTURE_REPEAT.floor, true)
-    configureTexture(floorTextures.normalMap, floorMaterial.repeat ?? TEXTURE_REPEAT.floor)
-    configureTexture(floorTextures.roughnessMap, floorMaterial.repeat ?? TEXTURE_REPEAT.floor)
+    configureTexture(floorTextures.map, floorRepeat, true)
+    configureTexture(floorTextures.normalMap, floorRepeat)
+    configureTexture(floorTextures.roughnessMap, floorRepeat)
+    configureTexture(floorTextures.displacementMap, floorRepeat)
     if (floorTextures.aoMap) {
-      configureTexture(floorTextures.aoMap, floorMaterial.repeat ?? TEXTURE_REPEAT.floor)
+      configureTexture(floorTextures.aoMap, floorRepeat)
     }
 
     configureTexture(wallTextures.map, wallMaterial.repeat ?? TEXTURE_REPEAT.wall, true)
@@ -312,42 +381,48 @@ function usePbrRoomMaterials() {
     if (wallTextures.aoMap) {
       configureTexture(wallTextures.aoMap, wallMaterial.repeat ?? TEXTURE_REPEAT.wall)
     }
-  }, [floorMaterial, floorTextures, wallMaterial, wallTextures])
+  }, [floorRepeat, floorTextures, wallMaterial, wallTextures])
 
   return useMemo(
     () => ({
       floor: new THREE.MeshStandardMaterial({
         ...floorTextures,
-        roughness: 0.7,
+        color: '#ece2d4',
+        roughness: 0.62,
         metalness: 0,
-        normalScale: new THREE.Vector2(0.12, 0.12),
-        aoMapIntensity: 0.72,
+        normalScale: new THREE.Vector2(
+          floorMaterial.relief?.normalScale ?? 0.1,
+          floorMaterial.relief?.normalScale ?? 0.1,
+        ),
+        aoMapIntensity: floorMaterial.relief?.aoIntensity ?? 0.62,
+        displacementScale: floorMaterial.relief?.displacementScale ?? 0.002,
+        displacementBias: floorMaterial.relief?.displacementBias ?? -0.0008,
       }),
       wall: new THREE.MeshStandardMaterial({
         ...wallTextures,
-        color: '#faf6f1',
-        roughness: 0.88,
+        color: '#fdfcf9',
+        roughness: 0.98,
         metalness: 0,
-        normalScale: new THREE.Vector2(0.14, 0.14),
-        aoMapIntensity: 0.46,
-        displacementScale: 0.004,
-        displacementBias: -0.0015,
+        normalScale: new THREE.Vector2(0.025, 0.025),
+        aoMapIntensity: 0.12,
+        displacementScale: 0.0007,
+        displacementBias: -0.0002,
       }),
-      trim: new THREE.MeshStandardMaterial({ color: '#f8f2ea', roughness: 0.62 }),
+      trim: new THREE.MeshStandardMaterial({ color: '#fffdfa', roughness: 0.7 }),
       glass: new THREE.MeshPhysicalMaterial({
-        color: '#edf5fb',
-        emissive: '#bfe7ff',
-        emissiveIntensity: 0.06,
-        roughness: 0.08,
-        transmission: 0.1,
+        color: '#f2f8fb',
+        emissive: '#d7edf7',
+        emissiveIntensity: 0.04,
+        roughness: 0.06,
+        transmission: 0.14,
         transparent: true,
-        opacity: 0.62,
+        opacity: 0.5,
       }),
       curtain: new THREE.MeshStandardMaterial({
-        color: '#efe7dc',
-        roughness: 0.9,
+        color: '#fcfbf7',
+        roughness: 0.96,
         transparent: true,
-        opacity: 0.72,
+        opacity: 0.86,
       }),
       mattress: new THREE.MeshStandardMaterial({
         color: '#7d8299',
@@ -355,25 +430,25 @@ function usePbrRoomMaterials() {
         metalness: 0,
       }),
       fabricLight: new THREE.MeshStandardMaterial({
-        color: '#f2eee6',
-        roughness: 0.92,
+        color: '#f7f3ed',
+        roughness: 0.94,
       }),
       brass: new THREE.MeshStandardMaterial({
-        color: '#b88437',
-        roughness: 0.34,
-        metalness: 0.72,
+        color: '#c7b49a',
+        roughness: 0.44,
+        metalness: 0.58,
       }),
-      plant: new THREE.MeshStandardMaterial({ color: '#476e3f', roughness: 0.7 }),
-      plantDark: new THREE.MeshStandardMaterial({ color: '#243f2a', roughness: 0.78 }),
-      pot: new THREE.MeshStandardMaterial({ color: '#272322', roughness: 0.72 }),
+      plant: new THREE.MeshStandardMaterial({ color: '#628267', roughness: 0.74 }),
+      plantDark: new THREE.MeshStandardMaterial({ color: '#3d5d45', roughness: 0.82 }),
+      pot: new THREE.MeshStandardMaterial({ color: '#d8d1c8', roughness: 0.88 }),
       shadow: new THREE.MeshBasicMaterial({
         color: '#000000',
         transparent: true,
-        opacity: 0.17,
+        opacity: 0.14,
         depthWrite: false,
       }),
     }),
-    [floorTextures, wallTextures],
+    [floorMaterial.relief, floorTextures, wallTextures],
   )
 }
 
@@ -417,9 +492,18 @@ function RoomShell({ materials }: { materials: ReturnType<typeof usePbrRoomMater
   const leftOpenEdgeRef = useRef<THREE.Mesh>(null)
   const rightOpenEdgeRef = useRef<THREE.Mesh>(null)
 
-  const floorGeometry = useMemo(() => makePlaneGeometry(width, depth, 1), [width, depth])
+  const floorSegments = useMemo(
+    () => Math.min(192, Math.max(96, Math.ceil(Math.max(width, depth) * 24))),
+    [depth, width],
+  )
+  const floorGeometry = useMemo(() => makePlaneGeometry(width, depth, floorSegments), [floorSegments, width, depth])
   const widthWallGeometry = useMemo(() => makePlaneGeometry(width, height, 32), [width, height])
   const depthWallGeometry = useMemo(() => makePlaneGeometry(depth, height, 32), [depth, height])
+  const baseboardHeight = 0.065
+  const baseboardDepth = 0.048
+  const crownHeight = 0.042
+  const crownDepth = 0.038
+  const cornerPostSize = 0.045
 
   useFrame(({ camera }) => {
     const visibleSides = visibleWallSidesForMode(camera.position, cameraMode)
@@ -510,11 +594,11 @@ function RoomShell({ materials }: { materials: ReturnType<typeof usePbrRoomMater
             toneMapped={false}
           />
         </mesh>
-        <mesh position={[0, 0.045, -depth / 2 + 0.035]} material={materials.trim}>
-          <boxGeometry args={[width + 0.08, 0.09, 0.07]} />
+        <mesh position={[0, baseboardHeight / 2, -depth / 2 + baseboardDepth / 2]} material={materials.trim}>
+          <boxGeometry args={[width + 0.04, baseboardHeight, baseboardDepth]} />
         </mesh>
-        <mesh position={[0, height - 0.035, -depth / 2 + 0.028]} material={materials.trim}>
-          <boxGeometry args={[width + 0.08, 0.07, 0.056]} />
+        <mesh position={[0, height - crownHeight / 2, -depth / 2 + crownDepth / 2]} material={materials.trim}>
+          <boxGeometry args={[width + 0.04, crownHeight, crownDepth]} />
         </mesh>
       </group>
 
@@ -541,11 +625,11 @@ function RoomShell({ materials }: { materials: ReturnType<typeof usePbrRoomMater
             toneMapped={false}
           />
         </mesh>
-        <mesh position={[0, 0.045, depth / 2 - 0.035]} material={materials.trim}>
-          <boxGeometry args={[width + 0.08, 0.09, 0.07]} />
+        <mesh position={[0, baseboardHeight / 2, depth / 2 - baseboardDepth / 2]} material={materials.trim}>
+          <boxGeometry args={[width + 0.04, baseboardHeight, baseboardDepth]} />
         </mesh>
-        <mesh position={[0, height - 0.035, depth / 2 - 0.028]} material={materials.trim}>
-          <boxGeometry args={[width + 0.08, 0.07, 0.056]} />
+        <mesh position={[0, height - crownHeight / 2, depth / 2 - crownDepth / 2]} material={materials.trim}>
+          <boxGeometry args={[width + 0.04, crownHeight, crownDepth]} />
         </mesh>
       </group>
 
@@ -572,11 +656,11 @@ function RoomShell({ materials }: { materials: ReturnType<typeof usePbrRoomMater
             toneMapped={false}
           />
         </mesh>
-        <mesh position={[-width / 2 + 0.035, 0.045, 0]} material={materials.trim}>
-          <boxGeometry args={[0.07, 0.09, depth + 0.08]} />
+        <mesh position={[-width / 2 + baseboardDepth / 2, baseboardHeight / 2, 0]} material={materials.trim}>
+          <boxGeometry args={[baseboardDepth, baseboardHeight, depth + 0.04]} />
         </mesh>
-        <mesh position={[-width / 2 + 0.028, height - 0.035, 0]} material={materials.trim}>
-          <boxGeometry args={[0.056, 0.07, depth + 0.08]} />
+        <mesh position={[-width / 2 + crownDepth / 2, height - crownHeight / 2, 0]} material={materials.trim}>
+          <boxGeometry args={[crownDepth, crownHeight, depth + 0.04]} />
         </mesh>
       </group>
 
@@ -603,81 +687,86 @@ function RoomShell({ materials }: { materials: ReturnType<typeof usePbrRoomMater
             toneMapped={false}
           />
         </mesh>
-        <mesh position={[width / 2 - 0.035, 0.045, 0]} material={materials.trim}>
-          <boxGeometry args={[0.07, 0.09, depth + 0.08]} />
+        <mesh position={[width / 2 - baseboardDepth / 2, baseboardHeight / 2, 0]} material={materials.trim}>
+          <boxGeometry args={[baseboardDepth, baseboardHeight, depth + 0.04]} />
         </mesh>
-        <mesh position={[width / 2 - 0.028, height - 0.035, 0]} material={materials.trim}>
-          <boxGeometry args={[0.056, 0.07, depth + 0.08]} />
+        <mesh position={[width / 2 - crownDepth / 2, height - crownHeight / 2, 0]} material={materials.trim}>
+          <boxGeometry args={[crownDepth, crownHeight, depth + 0.04]} />
         </mesh>
       </group>
 
       {[
-        [-width / 2 + 0.03, height / 2, -depth / 2 + 0.03],
-        [width / 2 - 0.03, height / 2, -depth / 2 + 0.03],
-        [-width / 2 + 0.03, height / 2, depth / 2 - 0.03],
-        [width / 2 - 0.03, height / 2, depth / 2 - 0.03],
+        [-width / 2 + cornerPostSize / 2, height / 2, -depth / 2 + cornerPostSize / 2],
+        [width / 2 - cornerPostSize / 2, height / 2, -depth / 2 + cornerPostSize / 2],
+        [-width / 2 + cornerPostSize / 2, height / 2, depth / 2 - cornerPostSize / 2],
+        [width / 2 - cornerPostSize / 2, height / 2, depth / 2 - cornerPostSize / 2],
       ].map((position) => (
         <mesh key={position.join(',')} position={position as [number, number, number]} material={materials.trim}>
-          <boxGeometry args={[0.06, height, 0.06]} />
+          <boxGeometry args={[cornerPostSize, height, cornerPostSize]} />
         </mesh>
       ))}
 
       <mesh
         ref={backOpenEdgeRef}
-        position={[0, 0.045, -depth / 2 + 0.035]}
+        position={[0, baseboardHeight / 2, -depth / 2 + baseboardDepth / 2]}
         material={materials.trim}
         renderOrder={3}
       >
-        <boxGeometry args={[width + 0.08, 0.09, 0.07]} />
+        <boxGeometry args={[width + 0.04, baseboardHeight, baseboardDepth]} />
       </mesh>
       <mesh
         ref={frontOpenEdgeRef}
-        position={[0, 0.045, depth / 2 - 0.035]}
+        position={[0, baseboardHeight / 2, depth / 2 - baseboardDepth / 2]}
         material={materials.trim}
         renderOrder={3}
       >
-        <boxGeometry args={[width + 0.08, 0.09, 0.07]} />
+        <boxGeometry args={[width + 0.04, baseboardHeight, baseboardDepth]} />
       </mesh>
       <mesh
         ref={leftOpenEdgeRef}
-        position={[-width / 2 + 0.035, 0.045, 0]}
+        position={[-width / 2 + baseboardDepth / 2, baseboardHeight / 2, 0]}
         material={materials.trim}
         renderOrder={3}
       >
-        <boxGeometry args={[0.07, 0.09, depth + 0.08]} />
+        <boxGeometry args={[baseboardDepth, baseboardHeight, depth + 0.04]} />
       </mesh>
       <mesh
         ref={rightOpenEdgeRef}
-        position={[width / 2 - 0.035, 0.045, 0]}
+        position={[width / 2 - baseboardDepth / 2, baseboardHeight / 2, 0]}
         material={materials.trim}
         renderOrder={3}
       >
-        <boxGeometry args={[0.07, 0.09, depth + 0.08]} />
+        <boxGeometry args={[baseboardDepth, baseboardHeight, depth + 0.04]} />
       </mesh>
     </group>
   )
 }
 
-function WindowAndCurtains({ materials }: { materials: ReturnType<typeof usePbrRoomMaterials> }) {
+function WindowAndCurtains({
+  materials,
+  object,
+}: {
+  materials: ReturnType<typeof usePbrRoomMaterials>
+  object: EditorObject
+}) {
+  const width = object.dimensionsM.x
+  const height = object.dimensionsM.y
+  const rodHeight = 0.036
+  const rodDepth = 0.048
+  const panelInset = Math.max(0.12, width * 0.08)
+  const panelWidth = Math.max(0.12, (width - panelInset * 1.4) / 2)
+  const pleatWidth = Math.max(0.036, panelWidth / 4.5)
+
   return (
     <group>
-      <mesh position={[0, 0.63, 0.012]} material={materials.glass}>
-        <planeGeometry args={[1.2, 0.62]} />
+      <mesh position={[0, height - rodHeight / 2, 0.035]} material={materials.trim}>
+        <boxGeometry args={[width, rodHeight, rodDepth]} />
       </mesh>
-      <mesh position={[0, 0.97, 0.035]} material={materials.trim}>
-        <boxGeometry args={[1.42, 0.05, 0.05]} />
-      </mesh>
-      <mesh position={[0, 0.31, 0.035]} material={materials.trim}>
-        <boxGeometry args={[1.34, 0.045, 0.05]} />
-      </mesh>
-      <mesh position={[0, 0.62, 0.035]} material={materials.trim}>
-        <boxGeometry args={[0.04, 0.62, 0.05]} />
-      </mesh>
-      {[-0.63, 0.63].map((x) => (
-        <group key={x} position={[x, 0.58, 0.05]}>
-          {[-0.13, -0.045, 0.045, 0.13].map((offset) => (
+      {[-1, 1].map((side) => (
+        <group key={side} position={[side * (width / 2 - panelInset - panelWidth / 2), height / 2, 0.05]}>
+          {[-1.5, -0.5, 0.5, 1.5].map((offset) => (
             <mesh key={offset} position={[offset, 0, 0]} material={materials.curtain}>
-              <boxGeometry args={[0.055, 1.16, 0.026]} />
+              <boxGeometry args={[pleatWidth, height, 0.024]} />
             </mesh>
           ))}
         </group>
@@ -705,11 +794,11 @@ function WindowOpening({
       new THREE.MeshPhysicalMaterial({
         color: isNight ? '#2e3e4f' : '#e9f6fb',
         emissive: isNight ? '#0e1720' : '#cbeeff',
-        emissiveIntensity: isNight ? 0.008 : 0.1,
+        emissiveIntensity: isNight ? 0.008 : 0.08,
         roughness: 0.08,
         metalness: 0,
         transparent: true,
-        opacity: isNight ? 0.24 : 0.44,
+        opacity: isNight ? 0.22 : 0.38,
       }),
     [isNight],
   )
@@ -718,7 +807,7 @@ function WindowOpening({
       new THREE.MeshBasicMaterial({
         color: isNight ? '#121c27' : '#d7eef7',
         transparent: true,
-        opacity: isNight ? 0.46 : 0.9,
+        opacity: isNight ? 0.42 : 0.82,
         toneMapped: false,
       }),
     [isNight],
@@ -728,7 +817,7 @@ function WindowOpening({
       new THREE.MeshBasicMaterial({
         color: isNight ? '#415a72' : '#e7f7ff',
         transparent: true,
-        opacity: isNight ? 0.008 : cameraMode === 'pov' ? 0.05 : cameraMode === 'bird' ? 0.09 : 0.14,
+        opacity: isNight ? 0.008 : cameraMode === 'pov' ? 0.035 : cameraMode === 'bird' ? 0.065 : 0.1,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
         toneMapped: false,
@@ -736,11 +825,11 @@ function WindowOpening({
     [cameraMode, isNight],
   )
   const frameMaterial = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: isNight ? '#d5d0c8' : '#f4f1e8', roughness: 0.54 }),
+    () => new THREE.MeshStandardMaterial({ color: isNight ? '#d7d4cf' : '#fffdfa', roughness: 0.62 }),
     [isNight],
   )
   const railMaterial = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: '#aeb8c2', roughness: 0.58 }),
+    () => new THREE.MeshStandardMaterial({ color: '#c6ced6', roughness: 0.62 }),
     [],
   )
 
@@ -780,8 +869,8 @@ function AreaRug({ object }: { object: EditorObject }) {
   const rugMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: '#e8e0d6',
-        roughness: 0.94,
+        color: '#f4efe7',
+        roughness: 0.96,
         metalness: 0,
       }),
     [],
@@ -789,8 +878,8 @@ function AreaRug({ object }: { object: EditorObject }) {
   const borderMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
-        color: '#f7f3ee',
-        roughness: 0.88,
+        color: '#ffffff',
+        roughness: 0.9,
         metalness: 0,
       }),
     [],
@@ -967,28 +1056,69 @@ function LampGlow({
   )
 }
 
-function FurnitureModel({
+function isUsdAsset(url: string) {
+  const normalized = url.toLowerCase()
+  return normalized.endsWith('.usdz') || normalized.endsWith('.usd') || normalized.endsWith('.usda') || normalized.endsWith('.usdc')
+}
+
+function loadModelResource(url: string, renderer: THREE.WebGLRenderer) {
+  const cached = modelResourceCache.get(url)
+
+  if (cached) {
+    return Promise.resolve(cached)
+  }
+
+  const pending = modelResourcePromiseCache.get(url)
+
+  if (pending) {
+    return pending
+  }
+
+  const request = (async () => {
+    let scene: THREE.Object3D
+
+    if (isUsdAsset(url)) {
+      const loader = new USDLoader()
+      scene = await loader.loadAsync(url)
+    } else {
+      const loader = new GLTFLoader()
+      extendGltfLoaderWithCompression(renderer)(loader)
+
+      const gltf = await loader.loadAsync(url)
+      scene = gltf.scene
+    }
+
+    modelResourceCache.set(url, scene)
+    modelResourcePromiseCache.delete(url)
+    return scene
+  })().catch((error) => {
+    modelResourcePromiseCache.delete(url)
+    throw error
+  })
+
+  modelResourcePromiseCache.set(url, request)
+  return request
+}
+
+function LoadedFurnitureModel({
   object,
+  sourceScene,
   onSelect,
   interactive = true,
 }: {
   object: EditorObject
+  sourceScene: THREE.Object3D
   onSelect: (id: string) => void
   interactive?: boolean
 }) {
-  const gl = useThree((state) => state.gl)
-  const extendLoader = useMemo(
-    () => (object.url.includes('/models-ktx2/') ? extendGltfLoaderWithKtx2(gl) : undefined),
-    [gl, object.url],
-  )
-  const { scene } = useGLTF(object.url, false, true, extendLoader)
   const room = useRoomStore((s) => s.room)
   const cameraMode = useCameraViewStore((s) => s.mode)
   const updateObject = useEditorObjectsStore((s) => s.updateObject)
   const groupRef = useRef<THREE.Group>(null)
   const hitboxRef = useRef<THREE.Mesh>(null)
   const { model, scale, renderedDimensionsM } = useMemo(() => {
-    const cloned = scene.clone(true)
+    const cloned = sourceScene.clone(true)
+    stripEmbeddedLights(cloned)
     const bounds = new THREE.Box3().setFromObject(cloned)
     const size = bounds.getSize(new THREE.Vector3())
     const center = bounds.getCenter(new THREE.Vector3())
@@ -1000,7 +1130,7 @@ function FurnitureModel({
       scale,
       renderedDimensionsM: renderedDimensionsFromRawSize(size, object.targetSize),
     }
-  }, [object.targetSize, scene])
+  }, [object.targetSize, sourceScene])
   const hitboxArgs = useMemo(
     () => {
       if (object.placement === 'wall' && object.wallSurfacePlane === 'yz') {
@@ -1040,12 +1170,7 @@ function FurnitureModel({
     }
 
     updateObject(object.id, { dimensionsM: renderedDimensionsM })
-  }, [
-    object.dimensionsM,
-    object.id,
-    renderedDimensionsM,
-    updateObject,
-  ])
+  }, [object.dimensionsM, object.id, renderedDimensionsM, updateObject])
 
   useFrame(({ camera }) => {
     if (!groupRef.current) return
@@ -1084,6 +1209,52 @@ function FurnitureModel({
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
     </group>
+  )
+}
+
+function FurnitureModel(props: {
+  object: EditorObject
+  onSelect: (id: string) => void
+  interactive?: boolean
+}) {
+  const gl = useThree((state) => state.gl)
+  const [displayUrl, setDisplayUrl] = useState<string | null>(() => (modelResourceCache.has(props.object.url) ? props.object.url : null))
+  const [sourceScene, setSourceScene] = useState<THREE.Object3D | null>(() => modelResourceCache.get(props.object.url) ?? null)
+  const [displayObject, setDisplayObject] = useState(props.object)
+
+  useEffect(() => {
+    if (displayUrl === props.object.url) {
+      setDisplayObject(props.object)
+      return
+    }
+
+    let cancelled = false
+
+    loadModelResource(props.object.url, gl)
+      .then((scene) => {
+        if (cancelled) {
+          return
+        }
+
+        setSourceScene(scene)
+        setDisplayUrl(props.object.url)
+        setDisplayObject(props.object)
+      })
+      .catch((error) => {
+        console.error('[AssetRoom] Failed to load model resource', props.object.url, error)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [displayUrl, gl, props.object])
+
+  if (!sourceScene) {
+    return null
+  }
+
+  return (
+    <LoadedFurnitureModel object={displayObject} sourceScene={sourceScene} onSelect={props.onSelect} interactive={props.interactive} />
   )
 }
 
@@ -1135,16 +1306,16 @@ function Plant({ materials }: { materials: ReturnType<typeof usePbrRoomMaterials
 
 function WallArt({ variant }: { variant: 'left' | 'right' }) {
   const frameMaterial = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: '#f4ede4', roughness: 0.56 }),
+    () => new THREE.MeshStandardMaterial({ color: '#f2ece4', roughness: 0.62 }),
     [],
   )
   const matMaterial = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: '#fbf8f2', roughness: 0.74 }),
+    () => new THREE.MeshStandardMaterial({ color: '#fdfbf7', roughness: 0.78 }),
     [],
   )
-  const accentPrimary = variant === 'left' ? '#cbb6a5' : '#c7d0bf'
-  const accentSecondary = variant === 'left' ? '#8f6f58' : '#b79f8d'
-  const accentDark = '#4a433d'
+  const accentPrimary = variant === 'left' ? '#ddd5ca' : '#d8ddd7'
+  const accentSecondary = variant === 'left' ? '#b7aa99' : '#c7beb2'
+  const accentDark = '#59544d'
 
   return (
     <group>
@@ -1241,7 +1412,7 @@ function ProceduralObject({
       rotation={[0, object.rotationY, 0]}
       onPointerDown={handlePointerDown}
     >
-      {object.renderKind === 'window-curtains' ? <WindowAndCurtains materials={materials} /> : null}
+      {object.renderKind === 'window-curtains' ? <WindowAndCurtains materials={materials} object={object} /> : null}
       {object.renderKind === 'window-opening' ? <WindowOpening object={object} /> : null}
       {object.renderKind === 'area-rug' ? <AreaRug object={object} /> : null}
       {object.renderKind === 'floor-lamp' ? <FloorLamp materials={materials} /> : null}

@@ -456,4 +456,5 @@ export const PRODUCT_CATALOG: ProductCatalogItem[] = Object.entries(modelSeedsBy
   ([category, seeds]) => seeds.map((seed, index) => toItem(category as ProductCategory, seed, index)),
 )
 
+export const PRODUCT_BY_ID = new Map(PRODUCT_CATALOG.map((item) => [item.id, item]))
 export const PRODUCT_BY_MODEL_URL = new Map(PRODUCT_CATALOG.map((item) => [item.modelUrl, item]))

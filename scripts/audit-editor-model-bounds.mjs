@@ -126,8 +126,14 @@ const objects = extractInitialObjectBlocks(source)
   .filter((object) => !object.url.startsWith('/procedural/'))
 
 const failures = []
+let skippedCount = 0
 
 for (const object of objects) {
+  if (!object.url.endsWith('.glb')) {
+    skippedCount += 1
+    continue
+  }
+
   const rawSize = await loadRawModelSize(object.url)
   const expected = renderedDimensions(rawSize, object.targetSize)
   const delta = maxDimensionDelta(object.dimensionsM, expected)
@@ -152,4 +158,4 @@ if (failures.length > 0) {
   process.exit(1)
 }
 
-console.log(`Model bounds audit passed for ${objects.length} editor objects.`)
+console.log(`Model bounds audit passed for ${objects.length - skippedCount} GLB editor objects. Skipped ${skippedCount} non-GLB assets.`)

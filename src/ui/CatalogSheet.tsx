@@ -9,6 +9,7 @@ import {
   type RoomSettingsItem,
 } from '@/constants/environmentCatalog'
 import {
+  PRODUCT_BY_ID,
   PRODUCT_BY_MODEL_URL,
   PRODUCT_CATALOG,
   type ProductAssetSource,
@@ -60,6 +61,12 @@ type ProductTile = ProductCatalogItem & {
   ariaLabel?: string
 }
 
+type SelectedProductContext = {
+  object: EditorObject
+  item: ProductCatalogItem
+  candidates: ProductCatalogItem[]
+}
+
 type RoomSettingsTile = CardTile & {
   item: RoomSettingsItem
 }
@@ -81,6 +88,12 @@ const CHIPS_HEIGHT = 44
 const TOP_TABS_HEIGHT = 44
 const CHIP_BUTTON_HEIGHT = 32
 const TOP_STACK_HEIGHT = TOP_TABS_HEIGHT + SECTION_GAP + CHIPS_HEIGHT
+const EDIT_CONTEXT_RAIL_TILE_SIZE = 72
+const EDIT_CONTEXT_RAIL_PADDING_Y = 12
+const EDIT_CONTEXT_RAIL_HEIGHT = EDIT_CONTEXT_RAIL_TILE_SIZE + EDIT_CONTEXT_RAIL_PADDING_Y * 2
+const EDIT_CONTEXT_CARD_HEIGHT = 88
+const EDIT_CONTEXT_CARD_BOTTOM = 28
+const EDIT_CONTEXT_MODULE_GAP = 3
 
 const chips: Chip[] = [
   { id: 'search', label: 'Search' },
@@ -122,7 +135,7 @@ function productSourceForRoomSource(source: string): ProductAssetSource {
 }
 
 function objectToTile(object: EditorObject): ProductTile {
-  const catalogItem = PRODUCT_BY_MODEL_URL.get(object.url)
+  const catalogItem = (object.catalogItemId ? PRODUCT_BY_ID.get(object.catalogItemId) : undefined) ?? PRODUCT_BY_MODEL_URL.get(object.url)
 
   if (catalogItem) {
     return {
@@ -200,12 +213,12 @@ function roomSettingToTile(
 
   return {
     id: item.id,
-    brand: item.source,
+    brand: item.kind === 'material' ? (item.brand ?? item.source) : item.source,
     thumbnailUrl: item.thumbnailUrl,
-    displayDimensions: item.kind === 'material' ? (item.target === 'wall' ? 'Wall material' : 'Floor material') : item.displayLabel,
+    displayDimensions: item.kind === 'material' ? item.name : item.displayLabel,
     imageFit: item.kind === 'material' ? 'cover' : 'contain',
     selected,
-    ariaLabel: `${item.name} ${item.kind === 'material' ? item.source : item.displayLabel}`,
+    ariaLabel: `${item.kind === 'material' ? (item.brand ?? item.source) : item.source} ${item.name}${item.kind === 'material' && item.catalogCode ? ` ${item.catalogCode}` : ''}`,
     item,
   }
 }
@@ -229,6 +242,29 @@ function dimensionsToObjectSize(values: [number, number, number]) {
   }
 }
 
+function productPriceMeta(item: ProductCatalogItem) {
+  const baseSeed = item.id.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0)
+  const discount = 12 + (baseSeed % 27)
+  const categoryBase =
+    item.category === 'chair'
+      ? 89000
+      : item.category === 'table'
+        ? 139000
+        : item.category === 'storage'
+          ? 189000
+          : item.category === 'lighting'
+            ? 79000
+            : item.category === 'sofa'
+              ? 429000
+              : 59000
+  const price = Math.round((categoryBase + (baseSeed % 37) * 3000) / 1000) * 1000
+
+  return {
+    discountLabel: `${discount}%`,
+    priceLabel: price.toLocaleString('ko-KR'),
+  }
+}
+
 export function CatalogSheet() {
   const [activeSegment, setActiveSegment] = useState<SheetSegment>('product')
   const [activeFilter, setActiveFilter] = useState<FilterId>('in-room')
@@ -246,10 +282,12 @@ export function CatalogSheet() {
   const renderQuality = useRenderQualityStore((s) => s.quality)
   const room = useRoomStore((s) => s.room)
   const select = useSelectionStore((s) => s.select)
+  const selectedId = useSelectionStore((s) => s.selectedId)
   const cameraMode = useCameraViewStore((s) => s.mode)
   const catalogExpanded = useUiStore((s) => s.catalogExpanded)
   const toggleCatalog = useUiStore((s) => s.toggleCatalog)
   const setCatalog = useUiStore((s) => s.setCatalog)
+  const replaceObject = useEditorObjectsStore((s) => s.replaceObject)
 
   const inRoomTiles = useMemo(() => objects.map(objectToTile), [objects])
   const catalogTiles = useMemo(() => getCatalogTiles(activeFilter, renderQuality), [activeFilter, renderQuality])
@@ -258,14 +296,47 @@ export function CatalogSheet() {
     () => getRoomSettingTiles(activeRoomFilter, wallMaterial.id, floorMaterial.id),
     [activeRoomFilter, floorMaterial.id, wallMaterial.id],
   )
+  const selectedProductContext = useMemo<SelectedProductContext | null>(() => {
+    const selectedObject = objects.find((object) => object.id === selectedId)
+
+    if (!selectedObject) {
+      return null
+    }
+
+    const selectedItem =
+      (selectedObject.catalogItemId ? PRODUCT_BY_ID.get(selectedObject.catalogItemId) : undefined) ??
+      PRODUCT_BY_MODEL_URL.get(selectedObject.url)
+
+    if (!selectedItem) {
+      return null
+    }
+
+    const candidates = PRODUCT_CATALOG.filter(
+      (item) =>
+        item.category === selectedItem.category &&
+        (item.id === selectedItem.id || renderQuality === 'high' || item.renderCost !== 'heavy'),
+    )
+
+    return {
+      object: selectedObject,
+      item: selectedItem,
+      candidates,
+    }
+  }, [objects, renderQuality, selectedId])
+
   if (cameraMode === 'pov') {
     return null
   }
 
+  const showSelectedEditMode = selectedProductContext !== null
   const expandSheet = () => setCatalog(true)
   const collapseSheet = () => setCatalog(false)
 
   const handleSheetClickCapture = (event: MouseEvent<HTMLDivElement>) => {
+    if (showSelectedEditMode) {
+      return
+    }
+
     if (suppressNextClickRef.current) {
       suppressNextClickRef.current = false
       event.preventDefault()
@@ -288,6 +359,10 @@ export function CatalogSheet() {
   }
 
   const handleSheetPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    if (showSelectedEditMode) {
+      return
+    }
+
     if (!event.isPrimary) {
       return
     }
@@ -301,6 +376,10 @@ export function CatalogSheet() {
   }
 
   const handleSheetPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    if (showSelectedEditMode) {
+      return
+    }
+
     const state = pointerRef.current
     if (!state || state.pointerId !== event.pointerId) {
       return
@@ -311,6 +390,10 @@ export function CatalogSheet() {
   }
 
   const handleSheetPointerEnd = (event: PointerEvent<HTMLDivElement>) => {
+    if (showSelectedEditMode) {
+      return
+    }
+
     const state = pointerRef.current
     if (!state || state.pointerId !== event.pointerId) {
       return
@@ -332,6 +415,10 @@ export function CatalogSheet() {
   }
 
   const handleSheetWheelCapture = (event: WheelEvent<HTMLDivElement>) => {
+    if (showSelectedEditMode) {
+      return
+    }
+
     if (!catalogExpanded) {
       event.preventDefault()
       event.stopPropagation()
@@ -354,8 +441,10 @@ export function CatalogSheet() {
 
     addObject({
       id,
-      label: item.brand,
+      label: item.name,
       url: item.modelUrl,
+      catalogItemId: item.id,
+      productCategory: item.category,
       position: { x: 0.15, z: 0.35 },
       placement: 'floor',
       elevationM: 0.02,
@@ -367,6 +456,27 @@ export function CatalogSheet() {
     setEditMode('idle')
     setActiveDragMode(null)
     setCatalog(false)
+  }
+
+  const handleReplacementClick = (item: ProductCatalogItem) => {
+    if (!selectedProductContext) {
+      return
+    }
+
+    const dimensionsM = dimensionsToObjectSize(item.dimensionsCm)
+    const targetSize = Math.max(dimensionsM.x, dimensionsM.y, dimensionsM.z)
+
+    replaceObject(selectedProductContext.object.id, {
+      label: item.name,
+      url: item.modelUrl,
+      catalogItemId: item.id,
+      productCategory: item.category,
+      renderKind: 'model',
+      targetSize,
+      dimensionsM,
+    })
+    setEditMode('idle')
+    setActiveDragMode(null)
   }
 
   const applyRoomMaterial = (item: RoomMaterialItem) => {
@@ -417,6 +527,10 @@ export function CatalogSheet() {
     }
 
     addRoomModel(tile.item)
+  }
+
+  if (showSelectedEditMode && selectedProductContext) {
+    return <SelectedObjectEditOverlay context={selectedProductContext} onReplace={handleReplacementClick} />
   }
 
   return (
@@ -582,6 +696,202 @@ export function CatalogSheet() {
   )
 }
 
+function SelectedObjectEditOverlay({
+  context,
+  onReplace,
+}: {
+  context: SelectedProductContext
+  onReplace: (item: ProductCatalogItem) => void
+}) {
+  const priceMeta = productPriceMeta(context.item)
+
+  return (
+    <>
+      <div
+        className="no-scrollbar"
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          bottom: EDIT_CONTEXT_CARD_BOTTOM + EDIT_CONTEXT_CARD_HEIGHT + EDIT_CONTEXT_MODULE_GAP,
+          zIndex: zIndex.sheet,
+          height: EDIT_CONTEXT_RAIL_HEIGHT,
+          padding: `0 ${SHEET_SIDE_PADDING}px`,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 7,
+          overflowX: 'auto',
+          overflowY: 'hidden',
+        }}
+      >
+        {context.candidates.map((item) => {
+          const active = item.id === context.item.id
+
+          return (
+            <button
+              key={item.id}
+              type="button"
+              aria-label={`${item.brand} ${item.name}`}
+              onClick={() => onReplace(item)}
+              style={{
+                flex: '0 0 auto',
+                width: EDIT_CONTEXT_RAIL_TILE_SIZE,
+                height: EDIT_CONTEXT_RAIL_TILE_SIZE,
+                borderRadius: 9,
+                background: active ? 'rgba(255,255,255,0.11)' : 'rgba(255,255,255,0.07)',
+                backdropFilter: 'blur(2.5px)',
+                WebkitBackdropFilter: 'blur(2.5px)',
+                display: 'grid',
+                placeItems: 'center',
+                overflow: 'hidden',
+              }}
+            >
+              <img
+                src={item.thumbnailUrl}
+                alt=""
+                loading="lazy"
+                draggable={false}
+                style={{
+                  width: 58,
+                  height: 58,
+                  objectFit: 'contain',
+                  display: 'block',
+                }}
+              />
+            </button>
+          )
+        })}
+      </div>
+
+      <div
+        style={{
+          position: 'absolute',
+          left: SHEET_SIDE_PADDING,
+          right: SHEET_SIDE_PADDING,
+          bottom: EDIT_CONTEXT_CARD_BOTTOM,
+          zIndex: zIndex.sheet,
+        }}
+      >
+        <div
+          style={{
+            height: EDIT_CONTEXT_CARD_HEIGHT,
+            boxSizing: 'border-box',
+            borderRadius: 14,
+            background: '#242426',
+            border: '1px solid #2F3036',
+            boxShadow: '0 16px 24px rgba(0,0,0,0.04)',
+            padding: '12px 20px 12px 12px',
+            display: 'grid',
+            gridTemplateColumns: '64px 1fr 24px',
+            alignItems: 'center',
+            gap: 12,
+          }}
+        >
+          <div
+            style={{
+              width: 64,
+              height: 64,
+              borderRadius: 8,
+              background: 'transparent',
+              display: 'grid',
+              placeItems: 'center',
+              overflow: 'hidden',
+            }}
+          >
+            <img
+              src={context.item.thumbnailUrl}
+              alt=""
+              loading="lazy"
+              draggable={false}
+              style={{
+                width: 64,
+                height: 64,
+                objectFit: 'cover',
+                display: 'block',
+              }}
+            />
+          </div>
+
+          <div style={{ minWidth: 0 }}>
+            <div
+              style={{
+                fontFamily: '"SF Pro Text", -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+                fontSize: 12,
+                fontWeight: 400,
+                lineHeight: '20px',
+                letterSpacing: 0,
+                color: '#A7ABB2',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+            >
+              {context.item.brand}
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 4,
+                minWidth: 0,
+                color: '#FFFFFF',
+              }}
+            >
+              <div
+                style={{
+                  fontFamily: '"SF Pro Text", -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+                  fontSize: 14,
+                  fontWeight: 400,
+                  lineHeight: '18px',
+                  letterSpacing: 0,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {context.item.name}
+              </div>
+              <ChevronRightIcon />
+            </div>
+            <div
+              style={{
+                marginTop: 2,
+                display: 'flex',
+                gap: 2,
+                alignItems: 'flex-start',
+                fontFamily: '"SF Pro Display", -apple-system, BlinkMacSystemFont, system-ui, sans-serif',
+                fontSize: 16,
+                fontWeight: 600,
+                lineHeight: '24px',
+                letterSpacing: 0,
+              }}
+            >
+              <span style={{ color: '#35C5F0' }}>{priceMeta.discountLabel}</span>
+              <span style={{ color: '#FFFFFF' }}>{priceMeta.priceLabel}</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            aria-label={`Save ${context.item.brand} ${context.item.name}`}
+            style={{
+              width: 24,
+              height: 24,
+              alignSelf: 'center',
+              display: 'grid',
+              placeItems: 'center',
+              color: '#FFFFFF',
+              padding: 0,
+            }}
+          >
+            <BookmarkIcon />
+          </button>
+        </div>
+      </div>
+    </>
+  )
+}
+
 function TopTabs({
   activeSegment,
   onChange,
@@ -668,7 +978,7 @@ function FilterChips({
           height: CHIPS_HEIGHT,
           padding: `12px ${SHEET_SIDE_PADDING}px 0`,
           display: 'flex',
-          gap: 4,
+          gap: 6,
           overflowX: 'auto',
         }}
       >
@@ -731,7 +1041,7 @@ function RoomFilterChips({
           height: CHIPS_HEIGHT,
           padding: `12px ${SHEET_SIDE_PADDING}px 0`,
           display: 'flex',
-          gap: 4,
+          gap: 6,
           overflowX: 'auto',
         }}
       >
@@ -902,6 +1212,28 @@ function SearchIcon({ active }: { active: boolean }) {
         stroke={active ? '#FFFFFF' : '#2F3438'}
         strokeWidth="1.3"
         strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
+function ChevronRightIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+      <path d="M4.5 2.25 8.25 6 4.5 9.75" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function BookmarkIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M6.8 3.6C6.8 2.93726 7.33726 2.4 8 2.4H16C16.6627 2.4 17.2 2.93726 17.2 3.6V21L12 17.782L6.8 21V3.6Z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       />
     </svg>
   )

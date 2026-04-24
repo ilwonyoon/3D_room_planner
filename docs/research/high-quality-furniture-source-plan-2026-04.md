@@ -195,8 +195,11 @@ For every accepted batch:
 - 3dsky: manufacturer-free bed intake is now wired through `scripts/download-3dsky-free-assets.mjs`. Two bed packages from mebelrika were downloaded; `Cherry Single Bed for Children and Teens` converted, optimized, thumbnailed, and exposed in the app. `Olivia bed with lifting mechanism` shipped a zero-byte OBJ, and `Oscar sofa bed with roll-out drawer` returned a secure download URL whose archive fetch resolved to 404.
 - Muuto: 12 official digital showroom candidates attempted; 11 OBJ packages downloaded, converted through `obj2gltf`, optimized, thumbnailed, and exposed. `muuto-ambit-pendant-943052121460012` failed ZIP extraction because of filename encoding.
 - Vitra: 10 official GLB packages downloaded through the downloads API, optimized, thumbnailed, and exposed.
-- App catalog: 142 manual models are now exposed under `models/manual/*.optimized.glb` with real source brand/product names.
-- Runtime category expansion: 1 sofa, 2 beds, 19 chairs, 40 tables, 4 storage pieces, 26 decor pieces, and 50 lighting pieces.
+- Herman Miller: official configurator export automation is now wired through `scripts/download-herman-miller-configurator-assets.mjs`. `Girard Flower Table` and `Nelson Basic Cabinet Series` now convert, optimize, thumbnail, and expose correctly in the app. `Pawson Drift Sofa Group` still fails intermittently because the configurator iframe does not always attach during browser automation.
+- Zeel: 7 previously staged candidates are already present in the local manual runtime set, but active intake is paused and no further Zeel collection is planned in the current batch.
+- App catalog: 151 manual models are now exposed under `models/manual/*.optimized.glb` with real source brand/product names.
+- Runtime source mix: 79 Design Connected, 41 Dimensiva, 11 Muuto, 10 Vitra, 7 Zeel, 2 Herman Miller, and 1 3dsky runtime assets.
+- Runtime category expansion: 3 sofas, 3 beds, 19 chairs, 43 tables, 7 storage pieces, 26 decor pieces, and 50 lighting pieces.
 - Blocked/failed rows: `designconnected-fuwl-cage-table-8851` did not generate a download after repeated logged-in attempts; `designconnected-rosa-rosa-rosas-wall-light-9791` and `designconnected-shaker-vases-set-9478` exceeded the FBX conversion timeout and remain in raw failure logs; `3dsky-om-oficial-model-krovat-olivia-odnospalnaia-dlia-detei-i-podrostkov` shipped a zero-byte OBJ; `3dsky-om-oficial-model-krovat-divan-oskar-s-vykatnym-iashchikom` exposed a secure download URL but the archive fetch returned 404; several Muuto OBJ packages converted with default materials because their official archives reference missing or mismatched `.mtl`/texture paths.
 
 ## Immediate Next Batch
@@ -212,10 +215,10 @@ The first practical batch should be manual but small enough to validate the pipe
 Recommended source order:
 
 1. 3dsky free manufacturer models: requires browser login; use the daily limit for verified manufacturer entries and prefer GLB/FBX/OBJ.
-2. Zeel: currently blocked by browser verification/account flow; use only if the license note supports app embedding.
+2. Herman Miller/MillerKnoll official libraries: continue the official configurator export lane for stable product pages, prioritizing beds, storage, and lounge furniture.
 3. Chocofur free/CC0: static store pages did not expose direct model archives; use manually after finding explicit free product downloads, or install Blender first for `.blend`.
-4. Herman Miller/MillerKnoll official libraries: strong product naming and shapes, but many files are Revit/SKP/DWG and need a converter or manual export path.
-5. Continue Muuto/Vitra in curated batches, but visually QA Muuto material quality because OBJ archives can be inconsistent.
+4. Continue Muuto/Vitra in curated batches, but visually QA Muuto material quality because OBJ archives can be inconsistent.
+5. Revisit 3dsky when the daily free manufacturer limit resets, focusing on beds and storage first.
 
 ## Source Links
 

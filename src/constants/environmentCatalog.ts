@@ -1,3 +1,5 @@
+import { assetUrlWithRevision } from './modelVariants'
+
 export type RoomSettingsCategory =
   | 'wall-materials'
   | 'floor-materials'
@@ -20,12 +22,31 @@ export type RoomMaterialItem = {
   kind: 'material'
   id: string
   name: string
+  brand?: string
   source: string
+  sourceUrl?: string
+  catalogCode?: string
   category: RoomSettingsCategory
   target: RoomMaterialTarget
   thumbnailUrl: string
   maps: RoomMaterialMaps
-  repeat: readonly [number, number]
+  repeat?: readonly [number, number]
+  sampleSizeM?: readonly [number, number]
+  relief?: {
+    normalScale: number
+    displacementScale?: number
+    displacementBias?: number
+    aoIntensity?: number
+  }
+}
+
+type RoomMaterialCatalogSpec = {
+  id: string
+  brand: string
+  source: string
+  name: string
+  sourceUrl: string
+  catalogCode?: string
 }
 
 export type RoomModelItem = {
@@ -65,30 +86,162 @@ const ARCHITECTURAL_MODEL_IDS = new Set([
   'modern-ribbed-oak-door',
 ])
 
-const wallMaterialIds = [
-  'Wallpaper001A',
-  'Wallpaper002A',
-  'Wallpaper001B',
-  'Wallpaper001C',
-  'Wallpaper002B',
-  'Wallpaper002C',
-  'Plaster001',
-  'Plaster002',
-  'Plaster003',
-  'Plaster007',
+const wallMaterialSpecs: readonly RoomMaterialCatalogSpec[] = [
+  {
+    id: 'Wallpaper001A',
+    brand: 'LX Z:IN',
+    source: 'lxhausys',
+    name: 'Besti Natural Painting White',
+    catalogCode: '82483-01',
+    sourceUrl:
+      'https://cpas.lxhausys.co.kr/rn/productcategory/category3/list.jsp?fin_category=A020406&mid_category=A0204&sup_category=A02&tab=3',
+  },
+  {
+    id: 'Wallpaper002A',
+    brand: 'LX Z:IN',
+    source: 'lxhausys',
+    name: 'Besti Lime Plaster Painting White',
+    catalogCode: '82390-01',
+    sourceUrl:
+      'https://cpas.lxhausys.co.kr/rn/productcategory/category3/list.jsp?fin_category=A020406&mid_category=A0204&sup_category=A02&tab=3',
+  },
+  {
+    id: 'Wallpaper001B',
+    brand: 'LX Z:IN',
+    source: 'lxhausys',
+    name: 'Besti Cross Cotton Cream',
+    catalogCode: '11801',
+    sourceUrl:
+      'https://cpas.lxhausys.co.kr/rn/productcategory/category3/view.jsp?fin_category=A020406&mid_category=A0204&prd_id=11801&sup_category=A02',
+  },
+  {
+    id: 'Wallpaper001C',
+    brand: 'LX Z:IN',
+    source: 'lxhausys',
+    name: 'Besti Real Zeolite White',
+    catalogCode: '82443-01',
+    sourceUrl:
+      'https://cpas.lxhausys.co.kr/rn/productcategory/category3/list.jsp?fin_category=A020406&mid_category=A0204&sup_category=A02&tab=3',
+  },
+  {
+    id: 'Wallpaper002B',
+    brand: 'LX Z:IN',
+    source: 'lxhausys',
+    name: 'Diamant Plaster White',
+    sourceUrl: 'https://www.lxhausys.co.kr/company/pr/news/1101',
+  },
+  {
+    id: 'Wallpaper002C',
+    brand: 'LX Z:IN',
+    source: 'lxhausys',
+    name: 'Diamant Stone White',
+    sourceUrl: 'https://www.lxhausys.co.kr/company/pr/news/1101',
+  },
+  {
+    id: 'Plaster001',
+    brand: 'LX Z:IN',
+    source: 'lxhausys',
+    name: 'Diamant Painting White',
+    sourceUrl: 'https://www.lxhausys.co.kr/company/pr/news/1101',
+  },
+  {
+    id: 'Plaster002',
+    brand: 'LX Z:IN',
+    source: 'lxhausys',
+    name: 'Zia Fabric White Series',
+    sourceUrl:
+      'https://cpas.lxhausys.co.kr/rn/productcategory/category2/list.jsp?mid_category=A0201&sup_category=A02',
+  },
+  {
+    id: 'Plaster003',
+    brand: 'LX Z:IN',
+    source: 'lxhausys',
+    name: 'Sium Tile Sandstone Light Gray',
+    sourceUrl:
+      'https://cpas.lxhausys.co.kr/rn/productcategory/category3/view.jsp?fin_category=A020601&mid_category=A0206&prd_id=13323&sup_category=A02',
+  },
+  {
+    id: 'Plaster007',
+    brand: 'LX Z:IN',
+    source: 'lxhausys',
+    name: 'Diamant Fortis Soft White',
+    sourceUrl: 'https://www.lxhausys.co.kr/company/pr/news/1581',
+  },
 ] as const
 
-const floorMaterialIds = [
-  'WoodFloor051',
-  'WoodFloor064',
-  'Concrete048',
-  'Concrete047A',
-  'Carpet016',
-  'WoodFloor070',
-  'WoodFloor071',
-  'WoodFloor069',
-  'WoodFloor007',
-  'WoodFloor062',
+const floorMaterialSpecs: readonly RoomMaterialCatalogSpec[] = [
+  {
+    id: 'WoodFloor051',
+    brand: 'KCC HOMECC',
+    source: 'homecc',
+    name: 'Soop Gangmaru Modern White',
+    catalogCode: 'J1101',
+    sourceUrl: 'https://www.homecc.co.kr/images/homecc_catalog_livingroom.pdf',
+  },
+  {
+    id: 'WoodFloor064',
+    brand: 'KCC HOMECC',
+    source: 'homecc',
+    name: 'Soop Gangmaru New Smoky Oak',
+    catalogCode: 'J1104',
+    sourceUrl: 'https://www.homecc.co.kr/images/homecc_catalog_livingroom.pdf',
+  },
+  {
+    id: 'Concrete048',
+    brand: 'LX Z:IN',
+    source: 'lxhausys',
+    name: 'ZEA Nature Gray Concrete',
+    sourceUrl: 'https://www.lxhausys.co.kr/company/pr/news/901',
+  },
+  {
+    id: 'Concrete047A',
+    brand: 'LX Z:IN',
+    source: 'lxhausys',
+    name: 'Editone Stone',
+    sourceUrl: 'https://www.lxhausys.co.kr/company/pr/news/1561',
+  },
+  {
+    id: 'Carpet016',
+    brand: 'LX Z:IN',
+    source: 'lxhausys',
+    name: 'XComfort 5.0',
+    sourceUrl: 'https://www.lxhausys.co.kr/company/pr/news/1581',
+  },
+  {
+    id: 'WoodFloor070',
+    brand: 'LX Z:IN',
+    source: 'lxhausys',
+    name: 'Ganggreen Pro Raw Oak',
+    sourceUrl: 'https://www.lxhausys.co.kr/company/pr/news/415',
+  },
+  {
+    id: 'WoodFloor071',
+    brand: 'LX Z:IN',
+    source: 'lxhausys',
+    name: 'Ganggreen Pro Golden Teak',
+    sourceUrl: 'https://www.lxhausys.co.kr/company/pr/news/415',
+  },
+  {
+    id: 'WoodFloor069',
+    brand: 'LX Z:IN',
+    source: 'lxhausys',
+    name: 'Ganggreen Pro Pure Walnut',
+    sourceUrl: 'https://www.lxhausys.co.kr/company/pr/news/415',
+  },
+  {
+    id: 'WoodFloor007',
+    brand: 'LX Z:IN',
+    source: 'lxhausys',
+    name: 'Zia Sarangae Evernin Oak',
+    sourceUrl: 'https://www.lxhausys.co.kr/company/pr/news/431',
+  },
+  {
+    id: 'WoodFloor062',
+    brand: 'LX Z:IN',
+    source: 'lxhausys',
+    name: 'Zia Maru Nature Wood',
+    sourceUrl: 'https://www.lxhausys.co.kr/company/pr/news/289',
+  },
 ] as const
 
 const materialIdsWithAo = new Set<string>([
@@ -112,31 +265,60 @@ function materialMaps(group: 'walls' | 'floors', id: string): RoomMaterialMaps {
   }
 }
 
-function toWallMaterial(id: string): RoomMaterialItem {
+function toWallMaterial(spec: (typeof wallMaterialSpecs)[number]): RoomMaterialItem {
   return {
     kind: 'material',
-    id,
-    name: id.replace(/([a-z])([A-Z])/g, '$1 $2'),
-    source: 'ambientCG',
+    id: spec.id,
+    name: spec.name,
+    brand: spec.brand,
+    source: spec.source,
+    sourceUrl: spec.sourceUrl,
+    catalogCode: spec.catalogCode,
     category: 'wall-materials',
     target: 'wall',
-    thumbnailUrl: materialMaps('walls', id).color,
-    maps: materialMaps('walls', id),
+    thumbnailUrl: materialMaps('walls', spec.id).color,
+    maps: materialMaps('walls', spec.id),
     repeat: [1.15, 0.85],
   }
 }
 
-function toFloorMaterial(id: string): RoomMaterialItem {
+function toFloorMaterial(spec: (typeof floorMaterialSpecs)[number]): RoomMaterialItem {
+  const isWood = spec.id.startsWith('WoodFloor')
+  const isConcrete = spec.id.startsWith('Concrete')
+
   return {
     kind: 'material',
-    id,
-    name: id.replace(/([a-z])([A-Z])/g, '$1 $2'),
-    source: 'ambientCG',
+    id: spec.id,
+    name: spec.name,
+    brand: spec.brand,
+    source: spec.source,
+    sourceUrl: spec.sourceUrl,
+    catalogCode: spec.catalogCode,
     category: 'floor-materials',
     target: 'floor',
-    thumbnailUrl: materialMaps('floors', id).color,
-    maps: materialMaps('floors', id),
-    repeat: [0.36, 0.36],
+    thumbnailUrl: materialMaps('floors', spec.id).color,
+    maps: materialMaps('floors', spec.id),
+    sampleSizeM: isWood ? [1.6, 1.6] : isConcrete ? [1.4, 1.4] : [1.2, 1.2],
+    relief: isWood
+      ? {
+          normalScale: 0.14,
+          displacementScale: 0.0032,
+          displacementBias: -0.0012,
+          aoIntensity: 0.68,
+        }
+      : isConcrete
+        ? {
+            normalScale: 0.1,
+            displacementScale: 0.002,
+            displacementBias: -0.0008,
+            aoIntensity: 0.62,
+          }
+        : {
+            normalScale: 0.08,
+            displacementScale: 0.0012,
+            displacementBias: -0.0004,
+            aoIntensity: 0.54,
+          },
   }
 }
 
@@ -152,6 +334,7 @@ function environmentModel(
 ): RoomModelItem {
   const isPolyHaven = id.includes('_') || POLYHAVEN_MODEL_IDS.has(id)
   const isArchitectural = ARCHITECTURAL_MODEL_IDS.has(id)
+  const source = isPolyHaven ? 'Poly Haven' : 'Pocketroom'
   const modelUrl = isPolyHaven
     ? `/assets/models/polyhaven/${id}.optimized.glb`
     : isArchitectural
@@ -162,10 +345,10 @@ function environmentModel(
     kind: 'model',
     id,
     name,
-    source: isPolyHaven ? 'Poly Haven' : 'Pocketroom',
+    source,
     category,
-    modelUrl,
-    thumbnailUrl: `/assets/model-thumbnails/${id}.png`,
+    modelUrl: assetUrlWithRevision(modelUrl),
+    thumbnailUrl: assetUrlWithRevision(`/assets/model-thumbnails/${id}.png`),
     placement,
     targetSize: Math.max(dimensionsM.x, dimensionsM.y, dimensionsM.z),
     dimensionsM,
@@ -177,18 +360,18 @@ function environmentModel(
   }
 }
 
-export const WALL_MATERIALS = wallMaterialIds.map(toWallMaterial)
-export const FLOOR_MATERIALS = floorMaterialIds.map(toFloorMaterial)
+export const WALL_MATERIALS = wallMaterialSpecs.map(toWallMaterial)
+export const FLOOR_MATERIALS = floorMaterialSpecs.map(toFloorMaterial)
 
-export const DEFAULT_WALL_MATERIAL = WALL_MATERIALS[7]
-export const DEFAULT_FLOOR_MATERIAL = FLOOR_MATERIALS[6]
+export const DEFAULT_WALL_MATERIAL = WALL_MATERIALS[6]
+export const DEFAULT_FLOOR_MATERIAL = FLOOR_MATERIALS[1]
 
 const WINDOW_ITEMS = [
-  ['modern-wide-picture-window', 'Wide Picture Window', { x: 1.58, y: 0.98, z: 0.1 }],
-  ['modern-sliding-window', 'Two-Panel Sliding Window', { x: 1.62, y: 1.02, z: 0.11 }],
-  ['modern-tall-casement-window', 'Tall Casement Window', { x: 0.88, y: 1.54, z: 0.16 }],
-  ['modern-square-awning-window', 'Square Awning Window', { x: 1.04, y: 1, z: 0.11 }],
-  ['modern-transom-window', 'Narrow Transom Window', { x: 1.42, y: 0.5, z: 0.1 }],
+  ['modern-wide-picture-window', 'Wide Triple Window', { x: 1.82, y: 1.34, z: 0.12 }],
+  ['modern-sliding-window', 'Three-Panel Slider Window', { x: 1.82, y: 1.36, z: 0.12 }],
+  ['modern-tall-casement-window', 'Tall Casement Window', { x: 0.92, y: 1.54, z: 0.13 }],
+  ['modern-square-awning-window', 'Compact Multi-Lite Window', { x: 1.22, y: 0.82, z: 0.13 }],
+  ['modern-transom-window', 'Multi-Lite Picture Window', { x: 1.52, y: 1.22, z: 0.12 }],
 ] as const
 
 const DOOR_ITEMS = [

@@ -105,45 +105,91 @@ function addGlass(group, name, width, height, position, depth = 0.018) {
 
 function createWidePictureWindow() {
   const group = new THREE.Group()
-  addGlass(group, 'single fixed glass pane', 1.42, 0.82, [0, 0.55, -0.018])
-  addFrame(group, 1.58, 0.98, 0.09, 0.075, materials.whiteFrame)
-  addBox(group, 'thin black inner reveal', [1.34, 0.035, 0.096], [0, 0.12, 0.006], materials.darkFrame)
-  addBox(group, 'thin black head reveal', [1.34, 0.035, 0.096], [0, 0.88, 0.006], materials.darkFrame)
+  addFrame(group, 1.82, 1.34, 0.12, 0.1, materials.whiteFrame, 'outer frame')
+  addBox(group, 'interior sill apron', [1.9, 0.05, 0.16], [0, 0.08, 0.028], materials.whiteFrame, true)
+  addGlass(group, 'insulated fixed glass unit', 1.58, 1.06, [0, 0.67, -0.022], 0.022)
+  addFrame(group, 1.66, 1.14, 0.075, 0.035, materials.whiteFrame, 'interior stop')
+  addBox(group, 'left gasket', [0.012, 1.04, 0.024], [-0.76, 0.67, 0.006], materials.shadowLine, true)
+  addBox(group, 'right gasket', [0.012, 1.04, 0.024], [0.76, 0.67, 0.006], materials.shadowLine, true)
+  addBox(group, 'head gasket', [1.54, 0.012, 0.024], [0, 1.19, 0.006], materials.shadowLine, true)
+  addBox(group, 'sill gasket', [1.54, 0.012, 0.024], [0, 0.15, 0.006], materials.shadowLine, true)
   return group
 }
 
 function createSlidingWindow() {
   const group = new THREE.Group()
-  addGlass(group, 'left sliding glass pane', 0.66, 0.84, [-0.36, 0.56, -0.018])
-  addGlass(group, 'right sliding glass pane', 0.66, 0.84, [0.36, 0.56, -0.022])
-  addFrame(group, 1.62, 1.02, 0.1, 0.07, materials.whiteFrame)
-  addBox(group, 'center interlock rail', [0.055, 0.9, 0.115], [0, 0.56, 0.01], materials.whiteFrame, true)
-  addBox(group, 'lower sliding track', [1.45, 0.04, 0.12], [0, 0.13, 0.018], materials.darkFrame, true)
+  addFrame(group, 1.82, 1.36, 0.12, 0.09, materials.whiteFrame, 'outer frame')
+  addBox(group, 'interior sill extension', [1.88, 0.05, 0.17], [0, 0.09, 0.03], materials.whiteFrame, true)
+  addBox(group, 'rear track', [1.56, 0.024, 0.028], [0, 0.16, -0.018], materials.darkFrame, true)
+  addBox(group, 'front track', [1.56, 0.024, 0.028], [0, 0.16, 0.018], materials.darkFrame, true)
+
+  const leftSash = new THREE.Group()
+  addFrame(leftSash, 0.83, 1.08, 0.06, 0.05, materials.whiteFrame, 'left sash')
+  addGlass(leftSash, 'left sash glass', 0.68, 0.92, [0, 0.54, -0.012], 0.02)
+  leftSash.position.set(-0.43, 0.14, -0.016)
+  group.add(leftSash)
+
+  const rightSash = new THREE.Group()
+  addFrame(rightSash, 0.83, 1.08, 0.06, 0.05, materials.whiteFrame, 'right sash')
+  addGlass(rightSash, 'right sash glass', 0.68, 0.92, [0, 0.54, -0.012], 0.02)
+  rightSash.position.set(0.33, 0.14, 0.01)
+  group.add(rightSash)
+
+  addBox(group, 'meeting rail left', [0.042, 0.98, 0.068], [-0.04, 0.68, 0.004], materials.whiteFrame, true)
+  addBox(group, 'meeting rail right', [0.042, 0.98, 0.068], [0.04, 0.68, -0.01], materials.whiteFrame, true)
+  addBox(group, 'sliding pull left', [0.028, 0.22, 0.028], [-0.09, 0.66, 0.06], materials.metal, true)
+  addBox(group, 'sliding pull right', [0.028, 0.22, 0.028], [0.09, 0.66, 0.032], materials.metal, true)
   return group
 }
 
 function createTallCasementWindow() {
   const group = new THREE.Group()
-  addGlass(group, 'full height casement glass', 0.68, 1.34, [0, 0.8, -0.018])
-  addFrame(group, 0.88, 1.54, 0.1, 0.07, materials.whiteFrame)
-  addBox(group, 'vertical opening seam', [0.028, 1.26, 0.11], [0.22, 0.8, 0.012], materials.darkFrame, true)
-  addBox(group, 'slim latch', [0.028, 0.16, 0.05], [0.29, 0.75, 0.08], materials.metal, true)
+  addFrame(group, 0.92, 1.54, 0.13, 0.09, materials.whiteFrame, 'outer frame')
+  addBox(group, 'interior stool', [0.98, 0.05, 0.17], [0, 0.09, 0.028], materials.whiteFrame, true)
+
+  const sash = new THREE.Group()
+  addFrame(sash, 0.7, 1.3, 0.065, 0.05, materials.whiteFrame, 'casement sash')
+  addGlass(sash, 'casement insulated glass', 0.56, 1.14, [0, 0.65, -0.012], 0.02)
+  sash.position.set(-0.02, 0.12, 0.004)
+  sash.rotation.y = -0.14
+  group.add(sash)
+
+  addBox(group, 'operator cover', [0.08, 0.03, 0.09], [0.16, 0.14, 0.056], materials.whiteFrame, true)
+  addBox(group, 'folding crank handle', [0.16, 0.018, 0.024], [0.24, 0.14, 0.082], materials.metal, true)
+  addCylinder(group, 'hinge top', 0.012, 0.05, [-0.36, 1.34, 0.058], materials.metal)
+  addCylinder(group, 'hinge bottom', 0.012, 0.05, [-0.36, 0.2, 0.058], materials.metal)
   return group
 }
 
 function createSquareAwningWindow() {
   const group = new THREE.Group()
-  addGlass(group, 'square awning glass', 0.86, 0.82, [0, 0.51, -0.018])
-  addFrame(group, 1.04, 1, 0.1, 0.075, materials.whiteFrame)
-  addBox(group, 'top hinge reveal', [0.84, 0.032, 0.11], [0, 0.88, 0.014], materials.darkFrame, true)
+  addFrame(group, 1.22, 0.82, 0.13, 0.09, materials.whiteFrame, 'outer frame')
+  addBox(group, 'interior stool', [1.28, 0.05, 0.17], [0, 0.09, 0.028], materials.whiteFrame, true)
+
+  const sash = new THREE.Group()
+  addFrame(sash, 1, 0.56, 0.065, 0.05, materials.whiteFrame, 'awning sash')
+  addGlass(sash, 'awning insulated glass', 0.86, 0.42, [0, 0.28, -0.012], 0.02)
+  sash.position.set(0, 0.13, 0.006)
+  sash.rotation.x = -0.12
+  group.add(sash)
+
+  addBox(group, 'top hinge cover', [0.92, 0.026, 0.036], [0, 0.7, 0.044], materials.shadowLine, true)
+  addBox(group, 'left friction stay', [0.018, 0.2, 0.018], [-0.42, 0.32, 0.064], materials.metal, true)
+  addBox(group, 'right friction stay', [0.018, 0.2, 0.018], [0.42, 0.32, 0.064], materials.metal, true)
   return group
 }
 
 function createNarrowTransomWindow() {
   const group = new THREE.Group()
-  addGlass(group, 'horizontal transom glass', 1.26, 0.32, [0, 0.26, -0.018])
-  addFrame(group, 1.42, 0.5, 0.09, 0.06, materials.whiteFrame)
-  addBox(group, 'center mullion', [0.042, 0.36, 0.1], [0, 0.26, 0.004], materials.whiteFrame, true)
+  addFrame(group, 1.52, 1.22, 0.12, 0.09, materials.whiteFrame, 'outer frame')
+  addBox(group, 'interior sill apron', [1.58, 0.05, 0.16], [0, 0.08, 0.028], materials.whiteFrame, true)
+  addGlass(group, 'upper left lite', 0.58, 0.44, [-0.32, 0.84, -0.02], 0.02)
+  addGlass(group, 'upper right lite', 0.58, 0.44, [0.32, 0.84, -0.02], 0.02)
+  addGlass(group, 'lower left lite', 0.58, 0.44, [-0.32, 0.38, -0.02], 0.02)
+  addGlass(group, 'lower right lite', 0.58, 0.44, [0.32, 0.38, -0.02], 0.02)
+  addFrame(group, 1.36, 1.06, 0.075, 0.03, materials.whiteFrame, 'interior stop')
+  addBox(group, 'central mullion vertical', [0.05, 0.98, 0.08], [0, 0.61, 0.004], materials.whiteFrame, true)
+  addBox(group, 'central mullion horizontal', [1.28, 0.05, 0.08], [0, 0.61, 0.004], materials.whiteFrame, true)
   return group
 }
 

@@ -60,6 +60,23 @@
       loader.setMeshoptDecoder(MeshoptDecoder)
       let currentRoot = null
 
+      function stripEmbeddedLights(root) {
+        const lights = []
+        const targets = new Set()
+
+        root.traverse((node) => {
+          if (!node.isLight) return
+          lights.push(node)
+
+          if ('target' in node && node.target?.parent) {
+            targets.add(node.target)
+          }
+        })
+
+        lights.forEach((light) => light.parent?.remove(light))
+        targets.forEach((target) => target.parent?.remove(target))
+      }
+
       function normalizeModel(root) {
         root.updateMatrixWorld(true)
         const box = new THREE.Box3().setFromObject(root)
@@ -94,6 +111,7 @@
 
         const gltf = await loader.loadAsync(modelUrl)
         currentRoot = gltf.scene
+        stripEmbeddedLights(currentRoot)
         normalizeModel(currentRoot)
         scene.add(currentRoot)
 

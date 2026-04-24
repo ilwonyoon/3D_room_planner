@@ -58,9 +58,9 @@ export interface RoomPlan {
 
 export const DEFAULT_ROOM: Room = {
   id: 'default',
-  widthM: 4.2,
-  depthM: 5.0,
-  heightM: 2.4,
-  floor: { material: 'wood', colorHex: '#C9A97E' },
-  wall: { colorHex: '#EAEAEA' },
+  widthM: 5.4,
+  depthM: 5.8,
+  heightM: 2.72,
+  floor: { material: 'wood', colorHex: '#DCCDBA' },
+  wall: { colorHex: '#FAF7F2' },
 }

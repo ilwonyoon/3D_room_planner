@@ -11,6 +11,8 @@
     "assets:download-muuto": "node scripts/download-muuto-3d-assets.mjs",
     "assets:download-3dsky": "node scripts/download-3dsky-free-assets.mjs",
     "assets:download-vitra": "node scripts/download-vitra-glb-assets.mjs",
+    "assets:download-herman-miller": "node scripts/download-herman-miller-configurator-assets.mjs",
+    "assets:download-zeel": "node scripts/download-zeel-free-assets.mjs",
     "assets:update-designconnected-metadata": "node scripts/update-designconnected-metadata.mjs",
     "assets:generate-manual-catalog": "node scripts/generate-manual-product-catalog.mjs",
     "assets:fetch": "node scripts/fetch-assets.mjs",
