@@ -70,6 +70,10 @@ Generated: ${report.generatedAt}
 
 Quality: \`${report.quality}\`
 
+URL: \`${report.url}\`
+
+Render calls and triangles are scene-graph estimates from visible meshes. Texture and geometry counts still come from live \`WebGLRenderer.info.memory\`.
+
 ## Summary
 
 - Max draw calls: ${report.summary.maxCalls}

@@ -6,6 +6,14 @@ export type ModelVariantUrls = {
   heroModelUrl?: string
 }
 
+export type ModelVariantRenderContext = {
+  selected?: boolean
+}
+
+export const enableRuntimeModelVariants =
+  import.meta.env.VITE_DISABLE_RUNTIME_VARIANTS !== 'true' &&
+  import.meta.env.VITE_ENABLE_RUNTIME_VARIANTS !== 'false'
+
 const ktx2ModelVariantUrls = new Set([
   '/assets/models/sheen-chair.optimized.glb',
   '/assets/models/polyhaven/CoffeeTable_01.optimized.glb',
@@ -51,17 +59,19 @@ export function assetUrlWithRevision(assetUrl: string) {
 
 export function modelVariantUrlsFor(sourceModelUrl: string): ModelVariantUrls {
   const runtimeModelUrl = runtimeModelVariantUrls.get(sourceModelUrl)
+  const revisedSourceModelUrl = assetUrlWithRevision(sourceModelUrl)
 
   return {
-    sourceModelUrl: assetUrlWithRevision(sourceModelUrl),
+    sourceModelUrl: revisedSourceModelUrl,
     runtimeModelUrl: runtimeModelUrl ? assetUrlWithRevision(runtimeModelUrl) : undefined,
+    heroModelUrl: runtimeModelUrl ? revisedSourceModelUrl : undefined,
   }
 }
 
 export function modelUrlWithBestVariant(modelUrl: string) {
   const runtimeVariantUrl = runtimeModelVariantUrls.get(modelUrl)
 
-  if (import.meta.env.VITE_ENABLE_RUNTIME_VARIANTS === 'true' && runtimeVariantUrl) {
+  if (enableRuntimeModelVariants && runtimeVariantUrl) {
     return assetUrlWithRevision(runtimeVariantUrl)
   }
 
@@ -70,4 +80,23 @@ export function modelUrlWithBestVariant(modelUrl: string) {
   }
 
   return assetUrlWithRevision(modelUrl.replace('/assets/models/', '/assets/models-ktx2/'))
+}
+
+export function modelUrlForRenderContext(
+  model: {
+    url: string
+    runtimeModelUrl?: string
+    heroModelUrl?: string
+  },
+  context: ModelVariantRenderContext,
+) {
+  if (!enableRuntimeModelVariants) {
+    return model.url
+  }
+
+  if (context.selected && model.heroModelUrl) {
+    return model.heroModelUrl
+  }
+
+  return model.runtimeModelUrl ?? model.url
 }

@@ -12,6 +12,18 @@ export const runtimeModelVariantUrls = new Map<string, string>([
     "/assets/generated/runtime-variants/lotus-vase-runtime-lite.glb"
   ],
   [
+    "/assets/models/manual/dimensiva-plan-chair-by-fredericia.optimized.glb",
+    "/assets/generated/runtime-variants/plan-chair-runtime-lite.glb"
+  ],
+  [
+    "/assets/models/manual/dimensiva-toio-led-floor-lamp-by-flos.optimized.glb",
+    "/assets/generated/runtime-variants/toio-floor-lamp-runtime-lite.glb"
+  ],
+  [
+    "/assets/models/polyhaven/book_encyclopedia_set_01.optimized.glb",
+    "/assets/generated/runtime-variants/book-encyclopedia-set-runtime-lite.glb"
+  ],
+  [
     "/assets/models/polyhaven/vintage_cabinet_01.optimized.glb",
     "/assets/generated/runtime-variants/vintage-cabinet-runtime-lite.glb"
   ]

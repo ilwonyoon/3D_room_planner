@@ -1,5 +1,5 @@
 import { lightingPresetOptions, useCameraViewStore, useEditorObjectsStore, useLightingPresetStore, useUiStore } from '@/store'
-import { zIndex } from '@/constants'
+import { css, text, zIndex } from '@/constants'
 import type { CameraViewMode, LightingPresetId } from '@/store'
 
 interface Props {
@@ -171,12 +171,8 @@ function LightingPresetControl({
               borderRadius: 6,
               background: active ? '#ffffff' : 'transparent',
               color: active ? '#202024' : '#f3f3f3',
-              fontFamily:
-                '"SF Pro Text", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", system-ui, sans-serif',
-              fontSize: 11,
+              ...css(text.detail11_semibold),
               fontWeight: 700,
-              lineHeight: '13px',
-              letterSpacing: 0,
               whiteSpace: 'nowrap',
             }}
           >
@@ -259,12 +255,7 @@ function NavIconButton({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontFamily:
-              '"SF Pro Text", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", system-ui, sans-serif',
-            fontWeight: 600,
-            fontSize: 10,
-            lineHeight: '13px',
-            letterSpacing: 0,
+            ...css(text.detail10_semibold),
           }}
         >
           {badge}

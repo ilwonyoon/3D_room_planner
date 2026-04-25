@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { modelUrlWithBestVariant } from '@/constants/modelVariants'
+import { modelUrlWithBestVariant, modelVariantUrlsFor } from '@/constants/modelVariants'
 import type { ProductCategory } from '@/constants/productCatalog'
 import { normalizeRotation } from '@/domain/placementConstraints'
 import type { Vec2 } from '@/domain/types'
@@ -8,10 +8,14 @@ export type EditorObjectPlacement = 'floor' | 'wall' | 'ceiling'
 export type WallSurfacePlane = 'xy' | 'yz'
 export type EditorObjectRotationMode = 'orthogonal' | 'free'
 export type EditorObjectRenderKind =
+  | 'book-stack'
   | 'model'
   | 'area-rug'
+  | 'desktop-computer'
   | 'floor-lamp'
+  | 'laptop'
   | 'plant'
+  | 'smart-speaker'
   | 'wall-art'
   | 'window-opening'
   | 'window-curtains'
@@ -132,6 +136,13 @@ function normalizeEditorObject(object: EditorObject) {
   }
 }
 
+function modelAsset(sourceModelUrl: string) {
+  return {
+    url: modelUrlWithBestVariant(sourceModelUrl),
+    ...modelVariantUrlsFor(sourceModelUrl),
+  }
+}
+
 function cloneObject(object: EditorObject): EditorObject {
   return normalizeEditorObject({
     ...object,
@@ -218,7 +229,7 @@ const INITIAL_OBJECTS: EditorObject[] = [
   {
     id: 'armchair',
     label: 'Plan Chair',
-    url: '/assets/models/manual/dimensiva-plan-chair-by-fredericia.optimized.glb',
+    ...modelAsset('/assets/models/manual/dimensiva-plan-chair-by-fredericia.optimized.glb'),
     catalogItemId: 'dimensiva-plan-chair-by-fredericia',
     productCategory: 'chair',
     renderKind: 'model',
@@ -248,8 +259,8 @@ const INITIAL_OBJECTS: EditorObject[] = [
   {
     id: 'imac-desk-setup',
     label: 'iMac',
-    url: '/assets/models/apple-official/imac-with-accessories-silver.usdz',
-    renderKind: 'model',
+    url: '/procedural/desktop-computer/imac',
+    renderKind: 'desktop-computer',
     position: { x: 0.56, z: -2.18 },
     placement: 'floor',
     elevationM: 0.555,
@@ -261,8 +272,8 @@ const INITIAL_OBJECTS: EditorObject[] = [
   {
     id: 'macbook-air',
     label: 'MacBook Air',
-    url: '/assets/models/apple-official/macbook-air-13in-starlight.usdz',
-    renderKind: 'model',
+    url: '/procedural/laptop/macbook-air',
+    renderKind: 'laptop',
     position: { x: 0.92, z: -2.04 },
     placement: 'floor',
     elevationM: 0.555,
@@ -274,8 +285,8 @@ const INITIAL_OBJECTS: EditorObject[] = [
   {
     id: 'homepod-mini',
     label: 'HomePod mini',
-    url: '/assets/models/apple-official/homepod-mini-white.usdz',
-    renderKind: 'model',
+    url: '/procedural/smart-speaker/homepod-mini',
+    renderKind: 'smart-speaker',
     position: { x: 0.18, z: -2.06 },
     placement: 'floor',
     elevationM: 0.555,
@@ -287,7 +298,7 @@ const INITIAL_OBJECTS: EditorObject[] = [
   {
     id: 'bookcase-left',
     label: '606 Universal Shelving',
-    url: modelUrlWithBestVariant('/assets/models/polyhaven/wooden_display_shelves_01.optimized.glb'),
+    ...modelAsset('/assets/models/polyhaven/wooden_display_shelves_01.optimized.glb'),
     catalogItemId: 'wooden_display_shelves_01',
     productCategory: 'storage',
     renderKind: 'model',
@@ -331,7 +342,7 @@ const INITIAL_OBJECTS: EditorObject[] = [
   {
     id: 'window-main',
     label: 'Modern Awning Crank Out',
-    url: modelUrlWithBestVariant('/assets/models/architectural/modern-wide-picture-window.optimized.glb'),
+    ...modelAsset('/assets/models/architectural/modern-wide-picture-window.optimized.glb'),
     renderKind: 'model',
     position: { x: 0.32, z: -2.84 },
     placement: 'wall',
@@ -389,10 +400,10 @@ const INITIAL_OBJECTS: EditorObject[] = [
   {
     id: 'bookshelf-books-upper',
     label: 'Decorative Book Set',
-    url: '/assets/models/manual/polyhaven-decorative-book-set-01.optimized.glb',
+    url: '/procedural/book-stack/decorative-hardcover',
     catalogItemId: 'polyhaven-decorative-book-set-01',
     productCategory: 'decor',
-    renderKind: 'model',
+    renderKind: 'book-stack',
     position: { x: -2.18, z: -1.52 },
     placement: 'floor',
     elevationM: 1.08,
@@ -405,10 +416,10 @@ const INITIAL_OBJECTS: EditorObject[] = [
   {
     id: 'bookshelf-books-upper-right',
     label: 'Paperback Book Set',
-    url: '/assets/models/manual/polyhaven-decorative-book-set-01.optimized.glb',
+    url: '/procedural/book-stack/paperback',
     catalogItemId: 'polyhaven-decorative-book-set-01',
     productCategory: 'decor',
-    renderKind: 'model',
+    renderKind: 'book-stack',
     position: { x: -2.18, z: -0.82 },
     placement: 'floor',
     elevationM: 1.08,
@@ -421,7 +432,7 @@ const INITIAL_OBJECTS: EditorObject[] = [
   {
     id: 'bookshelf-vase-top',
     label: 'Shelf Vase',
-    url: modelUrlWithBestVariant('/assets/models/polyhaven/ceramic_vase_02.optimized.glb'),
+    ...modelAsset('/assets/models/polyhaven/ceramic_vase_02.optimized.glb'),
     catalogItemId: 'ceramic_vase_02',
     productCategory: 'decor',
     renderKind: 'model',
@@ -437,7 +448,7 @@ const INITIAL_OBJECTS: EditorObject[] = [
   {
     id: 'bookshelf-books-middle',
     label: 'Encyclopedia Stack',
-    url: modelUrlWithBestVariant('/assets/models/polyhaven/book_encyclopedia_set_01.optimized.glb'),
+    ...modelAsset('/assets/models/polyhaven/book_encyclopedia_set_01.optimized.glb'),
     catalogItemId: 'book_encyclopedia_set_01',
     productCategory: 'decor',
     renderKind: 'model',
@@ -453,10 +464,10 @@ const INITIAL_OBJECTS: EditorObject[] = [
   {
     id: 'bookshelf-books-middle-left',
     label: 'Decorative Hardcover Set',
-    url: '/assets/models/manual/polyhaven-decorative-book-set-01.optimized.glb',
+    url: '/procedural/book-stack/decorative-hardcover',
     catalogItemId: 'polyhaven-decorative-book-set-01',
     productCategory: 'decor',
-    renderKind: 'model',
+    renderKind: 'book-stack',
     position: { x: -2.18, z: -1.42 },
     placement: 'floor',
     elevationM: 0.63,
@@ -485,7 +496,7 @@ const INITIAL_OBJECTS: EditorObject[] = [
   {
     id: 'bookshelf-books-lower',
     label: 'Reference Books',
-    url: modelUrlWithBestVariant('/assets/models/polyhaven/book_encyclopedia_set_01.optimized.glb'),
+    ...modelAsset('/assets/models/polyhaven/book_encyclopedia_set_01.optimized.glb'),
     catalogItemId: 'book_encyclopedia_set_01',
     productCategory: 'decor',
     renderKind: 'model',
@@ -501,7 +512,7 @@ const INITIAL_OBJECTS: EditorObject[] = [
   {
     id: 'bookshelf-vase-lower',
     label: 'Shelf Vase',
-    url: modelUrlWithBestVariant('/assets/models/polyhaven/ceramic_vase_02.optimized.glb'),
+    ...modelAsset('/assets/models/polyhaven/ceramic_vase_02.optimized.glb'),
     catalogItemId: 'ceramic_vase_02',
     productCategory: 'decor',
     renderKind: 'model',
@@ -517,7 +528,7 @@ const INITIAL_OBJECTS: EditorObject[] = [
   {
     id: 'floor-plant',
     label: 'Potted Plant',
-    url: modelUrlWithBestVariant('/assets/models/polyhaven/potted_plant_04.optimized.glb'),
+    ...modelAsset('/assets/models/polyhaven/potted_plant_04.optimized.glb'),
     catalogItemId: 'potted_plant_04',
     productCategory: 'decor',
     renderKind: 'model',
@@ -531,7 +542,7 @@ const INITIAL_OBJECTS: EditorObject[] = [
   {
     id: 'small-plant',
     label: 'Ceramic Vase',
-    url: modelUrlWithBestVariant('/assets/models/polyhaven/ceramic_vase_01.optimized.glb'),
+    ...modelAsset('/assets/models/polyhaven/ceramic_vase_01.optimized.glb'),
     catalogItemId: 'ceramic_vase_01',
     productCategory: 'decor',
     renderKind: 'model',
@@ -573,7 +584,7 @@ const INITIAL_OBJECTS: EditorObject[] = [
   {
     id: 'reading-lamp',
     label: 'Toio Floor Lamp',
-    url: '/assets/models/manual/dimensiva-toio-led-floor-lamp-by-flos.optimized.glb',
+    ...modelAsset('/assets/models/manual/dimensiva-toio-led-floor-lamp-by-flos.optimized.glb'),
     catalogItemId: 'dimensiva-toio-led-floor-lamp-by-flos',
     productCategory: 'lighting',
     renderKind: 'model',

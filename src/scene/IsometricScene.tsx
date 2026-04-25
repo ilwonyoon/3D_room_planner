@@ -209,6 +209,99 @@ function AdaptiveQuality() {
   )
 }
 
+function objectWorldVisible(object: THREE.Object3D) {
+  let current: THREE.Object3D | null = object
+
+  while (current) {
+    if (!current.visible) {
+      return false
+    }
+
+    current = current.parent
+  }
+
+  return true
+}
+
+function geometryTriangleCount(geometry: THREE.BufferGeometry) {
+  const position = geometry.getAttribute('position')
+  const indexCount = geometry.index?.count
+  const vertexCount = typeof indexCount === 'number' ? indexCount : position?.count
+
+  if (!vertexCount) {
+    return 0
+  }
+
+  const drawRangeStart = geometry.drawRange.start
+  const drawRangeCount = geometry.drawRange.count
+  const drawableCount = Number.isFinite(drawRangeCount)
+    ? Math.max(0, Math.min(vertexCount - drawRangeStart, drawRangeCount))
+    : vertexCount
+
+  return Math.floor(drawableCount / 3)
+}
+
+function materialDrawCallCount(mesh: THREE.Mesh) {
+  if (!Array.isArray(mesh.material)) {
+    return 1
+  }
+
+  return Math.max(1, mesh.geometry.groups.length)
+}
+
+function estimateSceneRenderStats(scene: THREE.Scene) {
+  const render = {
+    frame: 0,
+    calls: 0,
+    triangles: 0,
+    points: 0,
+    lines: 0,
+  }
+  const breakdown = new Map<string, { calls: number; triangles: number }>()
+
+  scene.traverse((child) => {
+    if (!(child instanceof THREE.Mesh) || !objectWorldVisible(child)) {
+      return
+    }
+
+    const instanceCount = child instanceof THREE.InstancedMesh ? child.count : 1
+    const calls = materialDrawCallCount(child)
+    const triangles = geometryTriangleCount(child.geometry) * instanceCount
+    render.calls += calls
+    render.triangles += triangles
+
+    const statsOwner = findRenderStatsOwner(child)
+    if (statsOwner) {
+      const current = breakdown.get(statsOwner) ?? { calls: 0, triangles: 0 }
+      current.calls += calls
+      current.triangles += triangles
+      breakdown.set(statsOwner, current)
+    }
+  })
+
+  return {
+    ...render,
+    breakdown: Array.from(breakdown.entries())
+      .map(([id, stats]) => ({ id, ...stats }))
+      .sort((a, b) => b.calls - a.calls || b.triangles - a.triangles)
+      .slice(0, 20),
+  }
+}
+
+function findRenderStatsOwner(object: THREE.Object3D) {
+  let current: THREE.Object3D | null = object
+
+  while (current) {
+    if (typeof current.userData.renderStatsId === 'string') {
+      return current.userData.renderStatsId
+    }
+
+    current = current.parent
+  }
+
+  return null
+}
+
 function RendererStatsBridge({ quality }: { quality: RenderQuality }) {
   const gl = useThree((state) => state.gl)
   const scene = useThree((state) => state.scene)
@@ -236,7 +329,7 @@ function RendererStatsBridge({ quality }: { quality: RenderQuality }) {
         position: [camera.position.x, camera.position.y, camera.position.z],
       },
       memory: { ...gl.info.memory },
-      render: { ...gl.info.render },
+      render: estimateSceneRenderStats(scene),
       sceneChildren: scene.children.length,
     }
   })

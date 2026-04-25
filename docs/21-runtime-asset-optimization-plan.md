@@ -274,9 +274,11 @@ As of 2026-04-24:
 
 - Phase 1 was completed in the preceding render-stability slice.
 - Phase 2 now has a standalone opt-in KTX2 runtime texture path behind `VITE_ENABLE_KTX2_TEXTURES=true`.
-- Phase 3 has a runtime budget audit and four validated opt-in runtime-lite variants behind `VITE_ENABLE_RUNTIME_VARIANTS=true`.
-- Phase 4 has started: product catalog items and placed editor objects now preserve `sourceModelUrl`, `runtimeModelUrl`, and `heroModelUrl` metadata for explicit variant policy work.
-- Browser visual comparison and render-budget measurement still need to be run locally because this sandbox cannot bind the Vite dev server to `127.0.0.1:5190`.
+- Phase 3 has a runtime budget audit and seven validated runtime-lite variants. Runtime variants are now enabled by default and can be disabled with `VITE_DISABLE_RUNTIME_VARIANTS=true`.
+- Phase 4 has started: product catalog items and placed editor objects now preserve `sourceModelUrl`, `runtimeModelUrl`, and `heroModelUrl` metadata, and model loading resolves runtime-lite by default while allowing the selected object to use its hero/source asset.
+- Browser render-budget measurement now runs locally on the default dev server. `VITE_ENABLE_KTX2_TEXTURES=true` remains available as an opt-in texture-compression path.
+- Screenshot-based desktop/mobile smoke checks passed for the flagged runtime path. The remaining visual QA is asset-by-asset comparison for newly simplified variants.
+- Phase 5 first slice is complete: high-draw-call locked Apple USD desk props are replaced with procedural device props, repeated shelf book props use instanced procedural geometry, and the flagged medium render path now passes the current draw-call, triangle, and texture budgets.
 
 See:
 
@@ -336,8 +338,9 @@ Do fourth.
 Status:
 
 - `sourceModelUrl`, `runtimeModelUrl`, and `heroModelUrl` metadata are now available on product catalog entries and carried onto placed editor objects.
-- Runtime-lite loading remains opt-in through `VITE_ENABLE_RUNTIME_VARIANTS=true`.
-- Selection-aware and camera-distance switching is still pending browser visual QA.
+- Runtime-lite loading is enabled by default and can be disabled through `VITE_DISABLE_RUNTIME_VARIANTS=true`.
+- Selection-aware loading is implemented for explicit hero/source fallback on the selected object.
+- Camera-distance switching is still pending browser visual QA.
 
 ## Phase 5. Repeated Decor Optimization
 
@@ -346,6 +349,16 @@ Do fifth.
 1. books and repeated shelf props
 2. instancing or merged variants
 3. preserve selection only where UX requires it
+
+Status:
+
+- Locked iMac, MacBook, and HomePod desk props now use procedural render kinds instead of high-draw-call USD assets.
+- Repeated shelf book props now use one instanced procedural book stack per placed object.
+- Current flagged medium render budget:
+  - max draw calls: `131`
+  - max triangles: `296,241`
+  - max textures: `73`
+- Current default medium render budget also passes these targets after runtime-lite was promoted to default.
 
 ## Deliverables
 

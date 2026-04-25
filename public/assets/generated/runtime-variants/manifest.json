@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-24T18:41:18.182Z",
+  "generatedAt": "2026-04-24T20:40:31.313Z",
   "variants": [
     {
       "id": "beyla-shoe-cabinet-runtime-lite",
@@ -86,6 +86,62 @@
       }
     },
     {
+      "id": "plan-chair-runtime-lite",
+      "source": "public/assets/models/manual/dimensiva-plan-chair-by-fredericia.optimized.glb",
+      "output": "plan-chair-runtime-lite.glb",
+      "simplifyRatio": 0.42,
+      "simplifyError": 0.002,
+      "textureSize": 512,
+      "outputUrl": "/assets/generated/runtime-variants/plan-chair-runtime-lite.glb",
+      "sourceStats": {
+        "bytes": 259396,
+        "renderVertexCount": 118377,
+        "uploadVertexCount": 21387,
+        "textureCount": 2,
+        "textureGpuBytes": 4972488
+      },
+      "runtimeStats": {
+        "bytes": 148788,
+        "renderVertexCount": 49710,
+        "uploadVertexCount": 9419,
+        "textureCount": 2,
+        "textureGpuBytes": 4972488
+      },
+      "deltas": {
+        "transferBytes": "-42.6%",
+        "renderVertexCount": "-58.0%",
+        "textureGpuBytes": "0.0%"
+      }
+    },
+    {
+      "id": "toio-floor-lamp-runtime-lite",
+      "source": "public/assets/models/manual/dimensiva-toio-led-floor-lamp-by-flos.optimized.glb",
+      "output": "toio-floor-lamp-runtime-lite.glb",
+      "simplifyRatio": 0.35,
+      "simplifyError": 0.002,
+      "textureSize": 512,
+      "outputUrl": "/assets/generated/runtime-variants/toio-floor-lamp-runtime-lite.glb",
+      "sourceStats": {
+        "bytes": 282152,
+        "renderVertexCount": 181413,
+        "uploadVertexCount": 33076,
+        "textureCount": 2,
+        "textureGpuBytes": 5593104
+      },
+      "runtimeStats": {
+        "bytes": 116684,
+        "renderVertexCount": 63543,
+        "uploadVertexCount": 12413,
+        "textureCount": 2,
+        "textureGpuBytes": 5593104
+      },
+      "deltas": {
+        "transferBytes": "-58.6%",
+        "renderVertexCount": "-65.0%",
+        "textureGpuBytes": "0.0%"
+      }
+    },
+    {
       "id": "lotus-vase-runtime-lite",
       "source": "public/assets/models/manual/dimensiva-lotus-vase-by-101-copenhagen.optimized.glb",
       "output": "lotus-vase-runtime-lite.glb",
@@ -110,6 +166,34 @@
       "deltas": {
         "transferBytes": "-83.3%",
         "renderVertexCount": "-87.5%",
+        "textureGpuBytes": "0.0%"
+      }
+    },
+    {
+      "id": "book-encyclopedia-set-runtime-lite",
+      "source": "public/assets/models/polyhaven/book_encyclopedia_set_01.optimized.glb",
+      "output": "book-encyclopedia-set-runtime-lite.glb",
+      "simplifyRatio": 0.37,
+      "simplifyError": 0.002,
+      "textureSize": 512,
+      "outputUrl": "/assets/generated/runtime-variants/book-encyclopedia-set-runtime-lite.glb",
+      "sourceStats": {
+        "bytes": 568720,
+        "renderVertexCount": 108963,
+        "uploadVertexCount": 48564,
+        "textureCount": 5,
+        "textureGpuBytes": 27962020
+      },
+      "runtimeStats": {
+        "bytes": 316276,
+        "renderVertexCount": 40305,
+        "uploadVertexCount": 13121,
+        "textureCount": 5,
+        "textureGpuBytes": 27962020
+      },
+      "deltas": {
+        "transferBytes": "-44.4%",
+        "renderVertexCount": "-63.0%",
         "textureGpuBytes": "0.0%"
       }
     }

@@ -11,6 +11,7 @@ import { USDLoader } from 'three/examples/jsm/loaders/USDLoader.js'
 
 import { getRenderMaterialTuning } from '@/constants/renderMaterialOverrides'
 import { RUG_BY_ID, type RugCatalogItem } from '@/constants/rugCatalog'
+import { modelUrlForRenderContext } from '@/constants/modelVariants'
 import { enableKtx2RuntimeTextures, textureUrlWithBestVariant } from '@/constants/textureVariants'
 import {
   useCameraViewStore,
@@ -485,6 +486,25 @@ function usePbrRoomMaterials() {
         color: '#c7b49a',
         roughness: 0.44,
         metalness: 0.58,
+      }),
+      deviceMetal: new THREE.MeshStandardMaterial({
+        color: '#d8d4cc',
+        roughness: 0.32,
+        metalness: 0.68,
+      }),
+      deviceDark: new THREE.MeshStandardMaterial({
+        color: '#101112',
+        roughness: 0.46,
+        metalness: 0.08,
+      }),
+      deviceScreen: new THREE.MeshPhysicalMaterial({
+        color: '#14181c',
+        emissive: '#17222c',
+        emissiveIntensity: 0.05,
+        roughness: 0.18,
+        metalness: 0,
+        clearcoat: 0.5,
+        clearcoatRoughness: 0.18,
       }),
       plant: new THREE.MeshStandardMaterial({ color: '#628267', roughness: 0.74 }),
       plantDark: new THREE.MeshStandardMaterial({ color: '#3d5d45', roughness: 0.82 }),
@@ -1434,6 +1454,7 @@ function LoadedFurnitureModel({
   return (
     <group
       ref={groupRef}
+      userData={{ renderStatsId: object.id }}
       position={[object.position.x, object.elevationM, object.position.z]}
       rotation={[0, object.rotationY, 0]}
       scale={scale}
@@ -1452,44 +1473,61 @@ function LoadedFurnitureModel({
 
 function FurnitureModel(props: {
   object: EditorObject
+  selected?: boolean
   onSelect: (id: string) => void
   interactive?: boolean
 }) {
   const gl = useThree((state) => state.gl)
   const invalidate = useThree((state) => state.invalidate)
-  const [displayUrl, setDisplayUrl] = useState<string | null>(() => (modelResourceCache.has(props.object.url) ? props.object.url : null))
-  const [sourceScene, setSourceScene] = useState<THREE.Object3D | null>(() => modelResourceCache.get(props.object.url) ?? null)
-  const [displayObject, setDisplayObject] = useState(props.object)
-  const [loadError, setLoadError] = useState<unknown | null>(() => modelResourceErrorCache.get(props.object.url) ?? null)
+  const requestedObject = useMemo(() => {
+    const url = modelUrlForRenderContext(props.object, { selected: props.selected })
+
+    if (url === props.object.url) {
+      return props.object
+    }
+
+    return {
+      ...props.object,
+      url,
+    }
+  }, [props.object, props.selected])
+  const [displayUrl, setDisplayUrl] = useState<string | null>(() => (
+    modelResourceCache.has(requestedObject.url) ? requestedObject.url : null
+  ))
+  const [sourceScene, setSourceScene] = useState<THREE.Object3D | null>(() => (
+    modelResourceCache.get(requestedObject.url) ?? null
+  ))
+  const [displayObject, setDisplayObject] = useState(requestedObject)
+  const [loadError, setLoadError] = useState<unknown | null>(() => modelResourceErrorCache.get(requestedObject.url) ?? null)
 
   useEffect(() => {
-    const cached = modelResourceCache.get(props.object.url)
+    const cached = modelResourceCache.get(requestedObject.url)
 
     if (cached) {
       setSourceScene(cached)
-      setDisplayUrl(props.object.url)
-      setDisplayObject(props.object)
+      setDisplayUrl(requestedObject.url)
+      setDisplayObject(requestedObject)
       setLoadError(null)
       invalidate()
       return
     }
 
-    if (displayUrl === props.object.url && sourceScene) {
-      setDisplayObject(props.object)
+    if (displayUrl === requestedObject.url && sourceScene) {
+      setDisplayObject(requestedObject)
       return
     }
 
     let cancelled = false
 
-    loadModelResource(props.object.url, gl)
+    loadModelResource(requestedObject.url, gl)
       .then((scene) => {
         if (cancelled) {
           return
         }
 
         setSourceScene(scene)
-        setDisplayUrl(props.object.url)
-        setDisplayObject(props.object)
+        setDisplayUrl(requestedObject.url)
+        setDisplayObject(requestedObject)
         setLoadError(null)
         invalidate()
       })
@@ -1499,13 +1537,13 @@ function FurnitureModel(props: {
         }
 
         setLoadError(error)
-        console.error('[AssetRoom] Failed to load model resource', props.object.url, error)
+        console.error('[AssetRoom] Failed to load model resource', requestedObject.url, error)
       })
 
     return () => {
       cancelled = true
     }
-  }, [displayUrl, gl, invalidate, props.object, sourceScene])
+  }, [displayUrl, gl, invalidate, requestedObject, sourceScene])
 
   if (!sourceScene) {
     if (loadError) {
@@ -1529,7 +1567,7 @@ function RoomModelPreloader({ objects }: { objects: EditorObject[] }) {
         new Set(
           objects
             .filter((object) => !object.renderKind || object.renderKind === 'model')
-            .map((object) => object.url),
+            .map((object) => modelUrlForRenderContext(object, { selected: false })),
         ),
       ),
     [objects],
@@ -1564,6 +1602,105 @@ function FloorLamp({ materials }: { materials: ReturnType<typeof usePbrRoomMater
         <cylinderGeometry args={[0.25, 0.33, 0.16, 64]} />
       </mesh>
       <pointLight position={[0, 1.34, 0]} intensity={0.75} distance={2.1} color="#ffdca3" />
+    </group>
+  )
+}
+
+function BookStack({ object }: { object: EditorObject }) {
+  const meshRef = useRef<THREE.InstancedMesh>(null)
+  const bookCount = 6
+  const material = useMemo(
+    () => new THREE.MeshStandardMaterial({ roughness: 0.76, metalness: 0, vertexColors: true }),
+    [],
+  )
+
+  useLayoutEffect(() => {
+    const mesh = meshRef.current
+    if (!mesh) {
+      return
+    }
+
+    const matrix = new THREE.Matrix4()
+    const color = new THREE.Color()
+    const colors = ['#785f55', '#d4c2a4', '#3f5661', '#b6a391', '#596755', '#eadfcf']
+    const totalWidth = object.dimensionsM.x
+    const height = Math.max(object.dimensionsM.y, 0.024)
+    const depth = Math.max(object.dimensionsM.z, 0.028)
+
+    for (let index = 0; index < bookCount; index += 1) {
+      const width = totalWidth / bookCount
+      const x = -totalWidth / 2 + width * (index + 0.5)
+      const yJitter = index % 2 === 0 ? 0 : height * 0.08
+      const zJitter = index % 3 === 0 ? depth * 0.05 : 0
+      matrix.compose(
+        new THREE.Vector3(x, height / 2 + yJitter, zJitter),
+        new THREE.Quaternion().setFromEuler(new THREE.Euler(0, 0, (index - 2.5) * 0.018)),
+        new THREE.Vector3(width * 0.9, height * (index % 2 === 0 ? 1 : 0.86), depth),
+      )
+      mesh.setMatrixAt(index, matrix)
+      mesh.setColorAt(index, color.set(colors[index % colors.length]))
+    }
+
+    mesh.instanceMatrix.needsUpdate = true
+    if (mesh.instanceColor) {
+      mesh.instanceColor.needsUpdate = true
+    }
+  }, [object.dimensionsM.x, object.dimensionsM.y, object.dimensionsM.z])
+
+  return (
+    <instancedMesh ref={meshRef} args={[undefined, material, bookCount]} castShadow receiveShadow>
+      <boxGeometry args={[1, 1, 1]} />
+    </instancedMesh>
+  )
+}
+
+function DesktopComputer({ materials }: { materials: ReturnType<typeof usePbrRoomMaterials> }) {
+  return (
+    <group>
+      <mesh position={[0, 0.25, 0]} material={materials.deviceMetal} castShadow receiveShadow>
+        <boxGeometry args={[0.52, 0.34, 0.022]} />
+      </mesh>
+      <mesh position={[0, 0.25, 0.014]} material={materials.deviceScreen}>
+        <planeGeometry args={[0.47, 0.275]} />
+      </mesh>
+      <mesh position={[0, 0.065, -0.002]} material={materials.deviceMetal} castShadow>
+        <boxGeometry args={[0.045, 0.13, 0.026]} />
+      </mesh>
+      <mesh position={[0, 0.006, 0.028]} material={materials.deviceMetal} castShadow receiveShadow>
+        <boxGeometry args={[0.19, 0.012, 0.13]} />
+      </mesh>
+    </group>
+  )
+}
+
+function Laptop({ materials }: { materials: ReturnType<typeof usePbrRoomMaterials> }) {
+  return (
+    <group>
+      <mesh position={[0, 0.016, 0]} material={materials.deviceMetal} castShadow receiveShadow>
+        <boxGeometry args={[0.31, 0.018, 0.21]} />
+      </mesh>
+      <mesh position={[0, 0.032, -0.018]} material={materials.deviceDark}>
+        <boxGeometry args={[0.19, 0.004, 0.105]} />
+      </mesh>
+      <mesh position={[0, 0.13, -0.102]} rotation={[Math.PI / 5, 0, 0]} material={materials.deviceMetal} castShadow>
+        <boxGeometry args={[0.31, 0.19, 0.012]} />
+      </mesh>
+      <mesh position={[0, 0.13, -0.096]} rotation={[Math.PI / 5, 0, 0]} material={materials.deviceScreen}>
+        <planeGeometry args={[0.275, 0.155]} />
+      </mesh>
+    </group>
+  )
+}
+
+function SmartSpeaker({ materials }: { materials: ReturnType<typeof usePbrRoomMaterials> }) {
+  return (
+    <group>
+      <mesh position={[0, 0.046, 0]} material={materials.fabricLight} castShadow receiveShadow>
+        <cylinderGeometry args={[0.048, 0.052, 0.086, 24]} />
+      </mesh>
+      <mesh position={[0, 0.091, 0]} rotation={[-Math.PI / 2, 0, 0]} material={materials.deviceDark}>
+        <circleGeometry args={[0.042, 24]} />
+      </mesh>
     </group>
   )
 }
@@ -1700,6 +1837,7 @@ function ProceduralObject({
   return (
     <group
       ref={groupRef}
+      userData={{ renderStatsId: object.id }}
       position={[object.position.x, object.elevationM, object.position.z]}
       rotation={[0, object.rotationY, 0]}
       onPointerDown={handlePointerDown}
@@ -1707,8 +1845,12 @@ function ProceduralObject({
       {object.renderKind === 'window-curtains' ? <WindowAndCurtains materials={materials} object={object} /> : null}
       {object.renderKind === 'window-opening' ? <WindowOpening object={object} /> : null}
       {object.renderKind === 'area-rug' ? <AreaRug object={object} /> : null}
+      {object.renderKind === 'book-stack' ? <BookStack object={object} /> : null}
+      {object.renderKind === 'desktop-computer' ? <DesktopComputer materials={materials} /> : null}
       {object.renderKind === 'floor-lamp' ? <FloorLamp materials={materials} /> : null}
+      {object.renderKind === 'laptop' ? <Laptop materials={materials} /> : null}
       {object.renderKind === 'plant' ? <Plant materials={materials} /> : null}
+      {object.renderKind === 'smart-speaker' ? <SmartSpeaker materials={materials} /> : null}
       {object.renderKind === 'wall-art' ? (
         <WallArt variant={object.id === 'wall-art-left' ? 'left' : 'right'} />
       ) : null}
@@ -1735,6 +1877,7 @@ export function AssetRoom({
   const objects = useEditorObjectsStore((state) => state.objects)
   const setEditMode = useEditorObjectsStore((state) => state.setEditMode)
   const setActiveDragMode = useEditorObjectsStore((state) => state.setActiveDragMode)
+  const selectedId = useSelectionStore((state) => state.selectedId)
   const select = useSelectionStore((state) => state.select)
 
   const handleBackgroundPointerDown = (event: ThreeEvent<PointerEvent>) => {
@@ -1773,6 +1916,7 @@ export function AssetRoom({
           <FurnitureModel
             key={object.id}
             object={object}
+            selected={object.id === selectedId}
             interactive={interactionEnabled}
             onSelect={handleObjectSelect}
           />

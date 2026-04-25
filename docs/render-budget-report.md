@@ -1,29 +1,33 @@
 # Render Budget Report
 
-Generated: 2026-04-24T06:20:33.542Z
+Generated: 2026-04-24T21:01:21.480Z
 
 Quality: `medium`
 
+URL: `http://127.0.0.1:5175/`
+
+Render calls and triangles are scene-graph estimates from visible meshes. Texture and geometry counts still come from live `WebGLRenderer.info.memory`.
+
 ## Summary
 
-- Max draw calls: 541
-- Max triangles: 1,904,458
-- Max geometries: 388
-- Max textures: 108
+- Max draw calls: 131
+- Max triangles: 296,241
+- Max geometries: 130
+- Max textures: 73
 
 ## Measurements
 
 | View | Preset | Draw calls | Triangles | Geometries | Textures | DPR |
 | --- | --- | ---: | ---: | ---: | ---: | ---: |
-| isometric | daylight-window | 107 | 140,298 | 112 | 28 | 1 |
-| isometric | warm-evening | 106 | 140,286 | 112 | 28 | 1 |
-| isometric | night-room | 236 | 1,018,684 | 197 | 34 | 1 |
-| bird | daylight-window | 518 | 1,461,702 | 355 | 93 | 1 |
-| bird | warm-evening | 536 | 1,746,588 | 380 | 102 | 1 |
-| bird | night-room | 541 | 1,904,458 | 388 | 107 | 1 |
-| pov | daylight-window | 541 | 1,904,458 | 387 | 107 | 1 |
-| pov | warm-evening | 472 | 1,015,992 | 294 | 108 | 1 |
-| pov | night-room | 472 | 1,015,992 | 294 | 108 | 1 |
+| isometric | daylight-window | 119 | 180,821 | 109 | 48 | 1 |
+| isometric | warm-evening | 125 | 279,340 | 113 | 49 | 1 |
+| isometric | night-room | 125 | 288,025 | 130 | 60 | 1 |
+| bird | daylight-window | 131 | 296,241 | 110 | 63 | 1 |
+| bird | warm-evening | 131 | 296,241 | 110 | 63 | 1 |
+| bird | night-room | 131 | 296,241 | 110 | 63 | 1 |
+| pov | daylight-window | 131 | 296,241 | 110 | 60 | 1 |
+| pov | warm-evening | 131 | 296,241 | 110 | 73 | 1 |
+| pov | night-room | 131 | 296,241 | 110 | 73 | 1 |
 
 ## Current Budget Targets
 

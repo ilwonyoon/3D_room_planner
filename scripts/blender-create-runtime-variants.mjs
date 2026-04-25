@@ -36,11 +36,35 @@ const variants = [
     textureSize: 512,
   },
   {
+    id: 'plan-chair-runtime-lite',
+    source: 'public/assets/models/manual/dimensiva-plan-chair-by-fredericia.optimized.glb',
+    output: 'plan-chair-runtime-lite.glb',
+    simplifyRatio: 0.42,
+    simplifyError: 0.002,
+    textureSize: 512,
+  },
+  {
+    id: 'toio-floor-lamp-runtime-lite',
+    source: 'public/assets/models/manual/dimensiva-toio-led-floor-lamp-by-flos.optimized.glb',
+    output: 'toio-floor-lamp-runtime-lite.glb',
+    simplifyRatio: 0.35,
+    simplifyError: 0.002,
+    textureSize: 512,
+  },
+  {
     id: 'lotus-vase-runtime-lite',
     source: 'public/assets/models/manual/dimensiva-lotus-vase-by-101-copenhagen.optimized.glb',
     output: 'lotus-vase-runtime-lite.glb',
     simplifyRatio: 0.125,
     simplifyError: 0.003,
+    textureSize: 512,
+  },
+  {
+    id: 'book-encyclopedia-set-runtime-lite',
+    source: 'public/assets/models/polyhaven/book_encyclopedia_set_01.optimized.glb',
+    output: 'book-encyclopedia-set-runtime-lite.glb',
+    simplifyRatio: 0.37,
+    simplifyError: 0.002,
     textureSize: 512,
   },
 ]
@@ -263,7 +287,8 @@ ${rows}
 
 ## Notes
 
-- All active variants are opt-in through \`VITE_ENABLE_RUNTIME_VARIANTS=true\`.
+- Runtime variants are enabled by default and can be disabled with \`VITE_DISABLE_RUNTIME_VARIANTS=true\`.
+- \`VITE_ENABLE_RUNTIME_VARIANTS=false\` is also treated as disabled for backwards-compatible local testing.
 - Texture GPU size may remain unchanged when source textures are embedded WebP; \`gltf-transform optimize\` currently skips KTX2 conversion for those textures.
 - Validator info for \`EXT_meshopt_compression\` is expected because the validator does not inspect that extension. Warnings such as generated tangent space still need browser visual QA.
 
