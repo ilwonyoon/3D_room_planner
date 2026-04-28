@@ -489,8 +489,8 @@ function toItem(category: ProductCategory, seed: ProductCatalogSeed, index: numb
             ? 'Objaverse'
             : source === 'manual'
               ? 'Manual Import'
-              : source === 'procedural'
-                ? 'Pocketroom'
+            : source === 'procedural'
+                ? 'Product Source'
               : brandPool[index % brandPool.length]),
     category,
     source,

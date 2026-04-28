@@ -111,6 +111,7 @@ const EDIT_CONTEXT_CARD_HEIGHT = 88
 const EDIT_CONTEXT_CARD_BOTTOM = 28
 const EDIT_CONTEXT_MODULE_GAP = 3
 const CHIP_FONT_FAMILY = fontFamily.text
+const EXPLORE_FEED_LETTER_SPACING = '-0.4px'
 
 const chips: Chip[] = [
   { id: 'search', label: 'Search' },
@@ -139,182 +140,183 @@ const roomChips: RoomChip[] = [
 
 const exploreFeedItems: ExploreFeedItem[] = [
   {
-    id: 'atelier-long-room',
-    author: 'Choco Studio',
-    timeAgo: '5h ago',
-    imageUrl: '/assets/explore-feed/explore-room-01.webp',
-    title: 'Hip interior for a long, narrow room',
-    description: 'This is my favorite piece of furniture in the studio. I place my plants on it and store my plant care supplies inside.',
-    likes: 2,
-    comments: 56,
-    views: 14,
-    shares: 1,
-    remixes: 1,
-    commentAuthor: 'docbshakcn',
-    commentText: 'The board cabinet is so beautiful. It really sets the whole mood of the room.',
-    info: '21.8 pyeong (8m x 9m) · Total budget $4,740',
-  },
-  {
     id: 'green-glass-study',
     author: 'Studio Yoon',
     timeAgo: '7h ago',
     imageUrl: '/assets/explore-feed/explore-room-02.webp',
-    title: 'Quiet home office by the glass wall',
-    description: 'I planned the walking path before placing the desk. The low light makes the evening setup feel calmer.',
+    title: 'Riverfront Apt 804, Hannam',
+    description: 'Layout memo for the work corner.',
     likes: 18,
-    comments: 9,
+    comments: 1,
     views: 72,
     shares: 4,
     remixes: 6,
     commentAuthor: 'roomnote',
-    commentText: 'The partition keeps it open. Desk placement feels really stable.',
-    info: '12.4 pyeong (5m x 8m) · Total budget $2,980',
+    commentText: 'Desk placement feels stable.',
+    info: '12.4 pyeong (5m x 8m)',
   },
   {
     id: 'soft-brown-living',
     author: 'Moa',
     timeAgo: 'Yesterday',
     imageUrl: '/assets/explore-feed/explore-room-03.webp',
-    title: 'Soft brown living room corner',
-    description: 'Only the sofa area is bright, while the rest stays muted. The small table made this corner much easier to use.',
+    title: 'Yeonnam House B-302',
+    description: 'Checking the sofa side only.',
     likes: 31,
-    comments: 12,
+    comments: 0,
     views: 98,
     shares: 7,
     remixes: 5,
-    commentAuthor: 'sundayhome',
-    commentText: 'The colors feel easy to live with. That small window light helps a lot.',
-    info: '9.6 pyeong (4m x 7m) · Total budget $2,070',
+    commentAuthor: '',
+    commentText: '',
+    info: '9.6 pyeong (4m x 7m)',
   },
   {
     id: 'compact-loft-bedroom',
     author: 'Haru Layout',
     timeAgo: 'Yesterday',
     imageUrl: '/assets/explore-feed/explore-room-04.webp',
-    title: 'Storage layout under a loft bed',
-    description: 'I split the area under the bed between storage and a small desk. It was the most efficient option for this compact room.',
+    title: 'Mullae Studio 5F',
+    description: 'Bed and storage spacing draft.',
     likes: 44,
-    comments: 18,
+    comments: 1,
     views: 143,
     shares: 11,
     remixes: 8,
     commentAuthor: 'minspace',
-    commentText: 'The storage placement feels realistic. The lighting also softens the small space.',
-    info: '6.2 pyeong (3m x 6m) · Total budget $2,460',
+    commentText: 'Storage placement looks practical.',
+    info: '6.2 pyeong (3m x 6m)',
   },
   {
     id: 'reading-corner',
     author: 'Green Room',
     timeAgo: '2d ago',
     imageUrl: '/assets/explore-feed/explore-room-05.webp',
-    title: 'Small reading room around a low shelf',
-    description: 'Placed the rug and low chairs first, then pushed the shelf to the wall. I wanted the room to stay readable with daily items out.',
+    title: 'Bundang Green Villa 203',
+    description: 'Small room plan around the shelf.',
     likes: 27,
-    comments: 7,
+    comments: 0,
     views: 88,
     shares: 3,
     remixes: 4,
-    commentAuthor: 'booktable',
-    commentText: 'The shelf height looks right. Leaving the center open was a good call.',
-    info: '8.1 pyeong (4m x 6m) · Total budget $1,780',
+    commentAuthor: '',
+    commentText: '',
+    info: '8.1 pyeong (4m x 6m)',
   },
   {
     id: 'white-winter-studio',
     author: 'Light Home',
     timeAgo: '2d ago',
     imageUrl: '/assets/explore-feed/explore-room-06.webp',
-    title: 'White winter workspace',
-    description: 'Since most of the furniture is white, I warmed up the lighting. I try to keep the desk surface almost empty.',
+    title: 'Jamsil L Tower 1611',
+    description: 'White room lighting test.',
     likes: 36,
-    comments: 15,
+    comments: 0,
     views: 121,
     shares: 9,
     remixes: 7,
-    commentAuthor: 'clearroom',
-    commentText: 'It still feels warm for an all-white room. The small objects are nicely edited.',
-    info: '10.7 pyeong (5m x 7m) · Total budget $2,740',
+    commentAuthor: '',
+    commentText: '',
+    info: '10.7 pyeong (5m x 7m)',
   },
   {
     id: 'open-office-plan',
     author: 'Plan Maker',
     timeAgo: '3d ago',
     imageUrl: '/assets/explore-feed/explore-room-07.webp',
-    title: 'Open office spacing check',
-    description: 'Started with seat spacing and the meeting table. This draft is mainly to check whether the aisle feels too tight.',
+    title: 'Nonhyeon Office 2F',
+    description: 'Aisle check before adding desks.',
     likes: 12,
-    comments: 4,
+    comments: 0,
     views: 67,
     shares: 2,
     remixes: 3,
-    commentAuthor: 'deskflow',
-    commentText: 'Good for checking circulation. The entry side has enough breathing room.',
-    info: '34.5 pyeong (11m x 13m) · Total budget $8,990',
+    commentAuthor: '',
+    commentText: '',
+    info: '34.5 pyeong (11m x 13m)',
   },
   {
     id: 'yellow-rug-dining',
     author: 'Yellow Rug',
     timeAgo: '3d ago',
     imageUrl: '/assets/explore-feed/explore-room-08.webp',
-    title: 'Dining zone divided by a yellow rug',
-    description: 'The rug under the table separates the dining area in one move. The curtain keeps the daylight soft.',
+    title: 'Mangwon Terrace 402',
+    description: 'Dining rug zone test.',
     likes: 53,
-    comments: 21,
+    comments: 1,
     views: 188,
     shares: 13,
     remixes: 10,
     commentAuthor: 'diningnote',
-    commentText: 'The rug color is the anchor. Table and light height feel well matched.',
-    info: '11.3 pyeong (4m x 8m) · Total budget $2,180',
+    commentText: 'The rug works well as an anchor.',
+    info: '11.3 pyeong (4m x 8m)',
   },
   {
     id: 'plant-living-room',
     author: 'plantable',
     timeAgo: '4d ago',
     imageUrl: '/assets/explore-feed/explore-room-09.webp',
-    title: 'Living room with a plant-heavy layout',
-    description: 'The large plant and low table set the main axis. I kept the wall plain because there is already enough green in the room.',
+    title: 'Gwanggyo Lake View 907',
+    description: 'Plant placement draft.',
     likes: 41,
-    comments: 16,
+    comments: 0,
     views: 132,
     shares: 5,
     remixes: 9,
-    commentAuthor: 'greenlayout',
-    commentText: 'The density around the sofa is nice. It does not feel busy even with many plants.',
-    info: '14.2 pyeong (5m x 9m) · Total budget $3,820',
+    commentAuthor: '',
+    commentText: '',
+    info: '14.2 pyeong (5m x 9m)',
   },
   {
     id: 'top-view-apartment',
     author: 'Plan Notes',
     timeAgo: '5d ago',
     imageUrl: '/assets/explore-feed/explore-room-10.webp',
-    title: 'Top-view check for a studio path',
-    description: 'Before adding more furniture, I checked the gap between the bed and the table. Saving this for movement planning.',
+    title: 'Sinchon One Room 301',
+    description: 'Top-view path check.',
     likes: 9,
-    comments: 3,
+    comments: 0,
     views: 44,
     shares: 1,
     remixes: 2,
-    commentAuthor: 'layoutcheck',
-    commentText: 'The top view makes the needed clearance clear. Bedside spacing looks comfortable.',
-    info: '7.8 pyeong (4m x 6m) · Total budget $1,440',
+    commentAuthor: '',
+    commentText: '',
+    info: '7.8 pyeong (4m x 6m)',
   },
   {
     id: 'soft-family-room',
     author: 'Warm Room',
     timeAgo: '5d ago',
     imageUrl: '/assets/explore-feed/explore-room-11.webp',
-    title: 'Soft family room draft',
-    description: 'The sofa and table stay low, and the wall decor is minimal. I planned this around relaxed sitting time.',
+    title: 'Pangyo Family Apt 1102',
+    description: 'Low furniture arrangement note.',
     likes: 25,
-    comments: 8,
+    comments: 0,
     views: 94,
     shares: 4,
     remixes: 5,
-    commentAuthor: 'warmchair',
-    commentText: 'The low furniture makes the room feel settled. The colors are easy on the eye.',
-    info: '13.5 pyeong (5m x 8m) · Total budget $3,360',
+    commentAuthor: '',
+    commentText: '',
+    info: '13.5 pyeong (5m x 8m)',
+  },
+  {
+    id: 'atelier-long-room',
+    author: 'Choco Studio',
+    timeAgo: '5h ago',
+    imageUrl: '/assets/explore-feed/explore-room-01.webp',
+    title: 'Maple Tower 1204, Seongsu-dong',
+    description: 'My current room plan. Keeping this note short for reference.',
+    likes: 2,
+    comments: 0,
+    views: 14,
+    shares: 1,
+    remixes: 1,
+    commentAuthor: '',
+    commentText: '',
+    info: '21.8 pyeong (8m x 9m)',
   },
 ]
+
 
 function formatCm(values: [number, number, number]) {
   return `${values[0]} x ${values[1]} x ${values[2]} cm`
@@ -329,6 +331,81 @@ function formatObjectDimensions(object: EditorObject) {
 
 function productSourceForRoomSource(source: string): ProductAssetSource {
   return source === 'ShareTextures' ? 'sharetextures' : 'polyhaven'
+}
+
+const proceduralProductByUrl: Record<string, ProductCatalogItem> = {
+  '/procedural/desktop-computer/imac': {
+    id: 'apple-imac-24-silver',
+    name: 'iMac 24-inch',
+    brand: 'Apple',
+    category: 'appliance',
+    source: 'procedural',
+    renderCost: 'standard',
+    modelUrl: '/procedural/desktop-computer/imac',
+    sourceModelUrl: '/assets/models/apple-official/imac-with-accessories-silver.usdz',
+    thumbnailUrl: '/assets/model-thumbnails/apple-imac-24-silver.svg',
+    dimensionsCm: [55, 24, 46],
+  },
+  '/procedural/laptop/macbook-air': {
+    id: 'apple-macbook-air-13-starlight',
+    name: 'MacBook Air 13-inch',
+    brand: 'Apple',
+    category: 'appliance',
+    source: 'procedural',
+    renderCost: 'standard',
+    modelUrl: '/procedural/laptop/macbook-air',
+    sourceModelUrl: '/assets/models/apple-official/macbook-air-13in-starlight.usdz',
+    thumbnailUrl: '/assets/model-thumbnails/apple-macbook-air-13-starlight.svg',
+    dimensionsCm: [31, 22, 4],
+  },
+  '/procedural/smart-speaker/homepod-mini': {
+    id: 'apple-homepod-mini-white',
+    name: 'HomePod mini',
+    brand: 'Apple',
+    category: 'appliance',
+    source: 'procedural',
+    renderCost: 'standard',
+    modelUrl: '/procedural/smart-speaker/homepod-mini',
+    sourceModelUrl: '/assets/models/apple-official/homepod-mini-white.usdz',
+    thumbnailUrl: '/assets/model-thumbnails/apple-homepod-mini-white.svg',
+    dimensionsCm: [10, 10, 9],
+  },
+  '/procedural/window-curtains': {
+    id: 'ikea-hilja-sheer-curtains',
+    name: 'HILJA Sheer Curtains',
+    brand: 'IKEA',
+    category: 'decor',
+    source: 'procedural',
+    renderCost: 'standard',
+    modelUrl: '/procedural/window-curtains',
+    sourceModelUrl: '/procedural/window-curtains',
+    thumbnailUrl: '/assets/model-thumbnails/ikea-hilja-sheer-curtains.svg',
+    dimensionsCm: [206, 8, 156],
+  },
+  '/procedural/wall-art-left': {
+    id: 'moebe-frame-oak-a3-abstract',
+    name: 'Frame Oak A3',
+    brand: 'Moebe',
+    category: 'decor',
+    source: 'procedural',
+    renderCost: 'standard',
+    modelUrl: '/procedural/wall-art-left',
+    sourceModelUrl: '/procedural/wall-art-left',
+    thumbnailUrl: '/assets/model-thumbnails/hanging_picture_frame_03.png',
+    dimensionsCm: [42, 4, 58],
+  },
+  '/procedural/wall-art-right': {
+    id: 'moebe-frame-black-a4-accent',
+    name: 'Frame Black A4',
+    brand: 'Moebe',
+    category: 'decor',
+    source: 'procedural',
+    renderCost: 'standard',
+    modelUrl: '/procedural/wall-art-right',
+    sourceModelUrl: '/procedural/wall-art-right',
+    thumbnailUrl: '/assets/model-thumbnails/hanging_picture_frame_01.png',
+    dimensionsCm: [30, 4, 44],
+  },
 }
 
 function objectToTile(object: EditorObject): ProductTile {
@@ -369,10 +446,21 @@ function objectToTile(object: EditorObject): ProductTile {
     }
   }
 
+  const proceduralItem = proceduralProductByUrl[object.url]
+
+  if (proceduralItem) {
+    return {
+      ...proceduralItem,
+      placedObjectId: object.id,
+      displayDimensions: proceduralItem.name,
+      ariaLabel: `${proceduralItem.brand} ${proceduralItem.name} ${formatObjectDimensions(object)}`,
+    }
+  }
+
   return {
     id: object.id,
     name: object.label,
-    brand: 'Pocketroom',
+    brand: 'Asset Library',
     category: 'decor',
     source: 'polyhaven',
     renderCost: 'standard',
@@ -951,6 +1039,7 @@ function ExploreFeedCard({ item }: { item: ExploreFeedItem }) {
               alignItems: 'center',
               gap: 8,
               color: '#000000',
+              letterSpacing: EXPLORE_FEED_LETTER_SPACING,
               whiteSpace: 'nowrap',
             }}
           >
@@ -986,39 +1075,44 @@ function ExploreFeedCard({ item }: { item: ExploreFeedItem }) {
       <ExploreTextBlock variant="title">{item.title}</ExploreTextBlock>
       <ExploreTextBlock variant="body">{item.description}</ExploreTextBlock>
 
-      <div style={{ padding: '0 16px 4px' }}>
-        <div
-          style={{
-            ...css(text.body14_tight_semibold),
-            color: '#828C94',
-            marginBottom: 4,
-            whiteSpace: 'nowrap',
-          }}
-        >
-          View all {item.comments} comments
+      {item.comments > 0 ? (
+        <div style={{ padding: '0 16px 4px' }}>
+          <div
+            style={{
+              ...css(text.body14_tight_semibold),
+              color: '#828C94',
+              letterSpacing: EXPLORE_FEED_LETTER_SPACING,
+              marginBottom: 4,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            View all {item.comments} {item.comments === 1 ? 'comment' : 'comments'}
+          </div>
+          <div
+            style={{
+              ...css(text.body15_relaxed_medium),
+              width: '100%',
+              color: '#2F3438',
+              letterSpacing: EXPLORE_FEED_LETTER_SPACING,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+            }}
+          >
+            <span style={{ fontWeight: 600 }}>{item.commentAuthor}</span>
+            <span> {item.commentText}</span>
+          </div>
         </div>
-        <div
-          style={{
-            ...css(text.body15_relaxed_medium),
-            width: '100%',
-            color: '#2F3438',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            display: '-webkit-box',
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: 'vertical',
-          }}
-        >
-          <span style={{ fontWeight: 600 }}>{item.commentAuthor}</span>
-          <span> {item.commentText}</span>
-        </div>
-      </div>
+      ) : null}
 
       <div
         style={{
           ...css(text.detail13_regular),
           padding: '0 16px',
           color: '#828C94',
+          letterSpacing: EXPLORE_FEED_LETTER_SPACING,
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
@@ -1046,6 +1140,7 @@ function ExploreTextBlock({
           ...css(isTitle ? text.body15_relaxed_bold : text.body15_relaxed_medium),
           width: '100%',
           color: '#2F3438',
+          letterSpacing: EXPLORE_FEED_LETTER_SPACING,
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           display: '-webkit-box',
@@ -1088,18 +1183,18 @@ function ExploreReactionBar({ item }: { item: ExploreFeedItem }) {
             </IconFrame>
           </ReactionMetric>
           <ReactionMetric count={item.views} label="Views">
-            <IconFrame label="Views" wrapperSize={24} artworkWidth={13.8} artworkHeight={15.8} left={5.1} top={4.1}>
+            <IconFrame label="Views" wrapperSize={24} artworkWidth={24} artworkHeight={24}>
               <StatIcon />
             </IconFrame>
           </ReactionMetric>
           <ReactionMetric count={item.shares} label="Shares">
-            <IconFrame label="Shares" wrapperSize={24} artworkWidth={17.8} artworkHeight={19.24} left={3.1} top={2.19}>
+            <IconFrame label="Shares" wrapperSize={24} artworkWidth={24} artworkHeight={24}>
               <ExportIcon />
             </IconFrame>
           </ReactionMetric>
         </div>
         <ReactionMetric count={item.remixes} label="Remixes">
-          <IconFrame label="Remixes" wrapperSize={24} artworkWidth={19} artworkHeight={17.73} left={3} top={3}>
+          <IconFrame label="Remixes" wrapperSize={24} artworkWidth={24} artworkHeight={24}>
             <RemixIcon />
           </IconFrame>
         </ReactionMetric>
@@ -1126,6 +1221,7 @@ function ReactionMetric({
         alignItems: 'center',
         gap: 2,
         color: '#2F3438',
+        letterSpacing: EXPLORE_FEED_LETTER_SPACING,
         whiteSpace: 'nowrap',
       }}
     >
@@ -1750,10 +1846,25 @@ function CommentIcon() {
 
 function StatIcon() {
   return (
-    <svg width="100%" height="100%" viewBox="0 0 13.8 15.8" fill="none" aria-hidden="true">
-      <rect x="0.2" y="7.9" width="2.6" height="7.7" rx="1.3" fill="currentColor" />
-      <rect x="5.6" y="3.8" width="2.6" height="11.8" rx="1.3" fill="currentColor" />
-      <rect x="11" y="0.2" width="2.6" height="15.4" rx="1.3" fill="currentColor" />
+    <svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M5.99961 12.0996C6.49667 12.0996 6.89961 12.5026 6.89961 12.9996L6.89961 18.9996C6.89961 19.4967 6.49667 19.8996 5.99961 19.8996C5.50255 19.8996 5.09961 19.4967 5.09961 18.9996L5.09961 12.9996C5.09961 12.5026 5.50255 12.0996 5.99961 12.0996Z"
+        fill="currentColor"
+      />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M11.9996 8.09961C12.4967 8.09961 12.8996 8.50255 12.8996 8.99961L12.8996 18.9996C12.8996 19.4967 12.4967 19.8996 11.9996 19.8996C11.5026 19.8996 11.0996 19.4967 11.0996 18.9996L11.0996 8.99961C11.0996 8.50255 11.5026 8.09961 11.9996 8.09961Z"
+        fill="currentColor"
+      />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M17.9996 4.09961C18.4967 4.09961 18.8996 4.50255 18.8996 4.99961V18.9996C18.8996 19.4967 18.4967 19.8996 17.9996 19.8996C17.5026 19.8996 17.0996 19.4967 17.0996 18.9996V4.99961C17.0996 4.50255 17.5026 4.09961 17.9996 4.09961Z"
+        fill="currentColor"
+      />
     </svg>
   )
 }
@@ -1785,20 +1896,20 @@ function ExportIcon() {
 
 function RemixIcon() {
   return (
-    <svg width="100%" height="100%" viewBox="0 0 19 17.73" fill="none" aria-hidden="true">
+    <svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" aria-hidden="true">
       <path
-        d="M13.2 1.4H17.6V5.8M17.15 1.95L11.65 7.45C10.72 8.38 9.22 8.38 8.3 7.45L7.35 6.5C6.43 5.58 4.93 5.58 4 6.5L1.35 9.15"
+        d="M3 11.8665H10M10 11.8665L13.802 7.48843C14.1818 7.05101 14.7327 6.7998 15.312 6.7998H17.5667M10 11.8665L13.802 16.2445C14.1818 16.6819 14.7327 16.9331 15.312 16.9331H17.5667"
         stroke="currentColor"
-        strokeWidth="1.55"
+        strokeWidth="1.8"
         strokeLinecap="round"
-        strokeLinejoin="round"
       />
       <path
-        d="M13.2 16.33H17.6V11.93M17.15 15.78L11.65 10.28C10.72 9.35 9.22 9.35 8.3 10.28L7.35 11.23C6.43 12.15 4.93 12.15 4 11.23L1.35 8.58"
-        stroke="currentColor"
-        strokeWidth="1.55"
-        strokeLinecap="round"
-        strokeLinejoin="round"
+        d="M21.4068 6.389C21.6938 6.58784 21.6938 7.01216 21.4068 7.211L18.0347 9.54721C17.7031 9.77695 17.25 9.53962 17.25 9.13621L17.25 4.46379C17.25 4.06038 17.7031 3.82305 18.0347 4.05279L21.4068 6.389Z"
+        fill="currentColor"
+      />
+      <path
+        d="M21.4068 16.5228C21.6938 16.7216 21.6938 17.1459 21.4068 17.3448L18.0347 19.681C17.7031 19.9107 17.25 19.6734 17.25 19.27L17.25 14.5976C17.25 14.1942 17.7031 13.9568 18.0347 14.1866L21.4068 16.5228Z"
+        fill="currentColor"
       />
     </svg>
   )

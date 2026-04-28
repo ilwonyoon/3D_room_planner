@@ -559,6 +559,10 @@ function RoomShell({ materials }: { materials: ReturnType<typeof usePbrRoomMater
   const frontOpenEdgeRef = useRef<THREE.Mesh>(null)
   const leftOpenEdgeRef = useRef<THREE.Mesh>(null)
   const rightOpenEdgeRef = useRef<THREE.Mesh>(null)
+  const backLeftCornerRef = useRef<THREE.Mesh>(null)
+  const backRightCornerRef = useRef<THREE.Mesh>(null)
+  const frontLeftCornerRef = useRef<THREE.Mesh>(null)
+  const frontRightCornerRef = useRef<THREE.Mesh>(null)
 
   const floorSegments = useMemo(
     () => Math.min(192, Math.max(96, Math.ceil(Math.max(width, depth) * 24))),
@@ -584,6 +588,10 @@ function RoomShell({ materials }: { materials: ReturnType<typeof usePbrRoomMater
     if (frontOpenEdgeRef.current) frontOpenEdgeRef.current.visible = !visibleSides.front
     if (leftOpenEdgeRef.current) leftOpenEdgeRef.current.visible = !visibleSides.left
     if (rightOpenEdgeRef.current) rightOpenEdgeRef.current.visible = !visibleSides.right
+    if (backLeftCornerRef.current) backLeftCornerRef.current.visible = visibleSides.back && visibleSides.left
+    if (backRightCornerRef.current) backRightCornerRef.current.visible = visibleSides.back && visibleSides.right
+    if (frontLeftCornerRef.current) frontLeftCornerRef.current.visible = visibleSides.front && visibleSides.left
+    if (frontRightCornerRef.current) frontRightCornerRef.current.visible = visibleSides.front && visibleSides.right
   })
 
   return (
@@ -763,16 +771,34 @@ function RoomShell({ materials }: { materials: ReturnType<typeof usePbrRoomMater
         </mesh>
       </group>
 
-      {[
-        [-width / 2 + cornerPostSize / 2, height / 2, -depth / 2 + cornerPostSize / 2],
-        [width / 2 - cornerPostSize / 2, height / 2, -depth / 2 + cornerPostSize / 2],
-        [-width / 2 + cornerPostSize / 2, height / 2, depth / 2 - cornerPostSize / 2],
-        [width / 2 - cornerPostSize / 2, height / 2, depth / 2 - cornerPostSize / 2],
-      ].map((position) => (
-        <mesh key={position.join(',')} position={position as [number, number, number]} material={materials.trim}>
-          <boxGeometry args={[cornerPostSize, height, cornerPostSize]} />
-        </mesh>
-      ))}
+      <mesh
+        ref={backLeftCornerRef}
+        position={[-width / 2 + cornerPostSize / 2, height / 2, -depth / 2 + cornerPostSize / 2]}
+        material={materials.trim}
+      >
+        <boxGeometry args={[cornerPostSize, height, cornerPostSize]} />
+      </mesh>
+      <mesh
+        ref={backRightCornerRef}
+        position={[width / 2 - cornerPostSize / 2, height / 2, -depth / 2 + cornerPostSize / 2]}
+        material={materials.trim}
+      >
+        <boxGeometry args={[cornerPostSize, height, cornerPostSize]} />
+      </mesh>
+      <mesh
+        ref={frontLeftCornerRef}
+        position={[-width / 2 + cornerPostSize / 2, height / 2, depth / 2 - cornerPostSize / 2]}
+        material={materials.trim}
+      >
+        <boxGeometry args={[cornerPostSize, height, cornerPostSize]} />
+      </mesh>
+      <mesh
+        ref={frontRightCornerRef}
+        position={[width / 2 - cornerPostSize / 2, height / 2, depth / 2 - cornerPostSize / 2]}
+        material={materials.trim}
+      >
+        <boxGeometry args={[cornerPostSize, height, cornerPostSize]} />
+      </mesh>
 
       <mesh
         ref={backOpenEdgeRef}

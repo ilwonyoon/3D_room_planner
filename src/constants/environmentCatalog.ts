@@ -339,7 +339,7 @@ function environmentModel(
 ): RoomModelItem {
   const isPolyHaven = id.includes('_') || POLYHAVEN_MODEL_IDS.has(id)
   const isArchitectural = ARCHITECTURAL_MODEL_IDS.has(id)
-  const source = sourceOverride ?? (isPolyHaven ? 'Poly Haven' : 'Pocketroom')
+  const source = sourceOverride ?? (isPolyHaven ? 'Poly Haven' : isArchitectural ? 'Architectural Library' : 'Curated Assets')
   const modelUrl = isPolyHaven
     ? `/assets/models/polyhaven/${id}.optimized.glb`
     : isArchitectural
@@ -384,11 +384,11 @@ const WINDOW_ITEMS = [
 ] as const
 
 const DOOR_ITEMS = [
-  ['modern-flush-white-door', 'Flush White Door', { x: 1.02, y: 2.16, z: 0.16 }],
-  ['modern-slim-glass-door', 'Slim Glass Panel Door', { x: 1.02, y: 2.16, z: 0.16 }],
-  ['modern-sliding-glass-door', 'Sliding Glass Door', { x: 1.86, y: 2.12, z: 0.13 }],
-  ['modern-double-glass-door', 'Double Glass Door', { x: 1.5, y: 2.16, z: 0.16 }],
-  ['modern-ribbed-oak-door', 'Ribbed Oak Door', { x: 1.02, y: 2.16, z: 0.16 }],
+  ['modern-flush-white-door', 'Masonite', 'Flush White Door', { x: 1.02, y: 2.16, z: 0.16 }],
+  ['modern-slim-glass-door', 'Marvin', 'Slim Glass Panel Door', { x: 1.02, y: 2.16, z: 0.16 }],
+  ['modern-sliding-glass-door', 'Marvin', 'Sliding Glass Door', { x: 1.86, y: 2.12, z: 0.13 }],
+  ['modern-double-glass-door', 'Pella', 'Double Glass Door', { x: 1.5, y: 2.16, z: 0.16 }],
+  ['modern-ribbed-oak-door', 'Masonite', 'Ribbed Oak Door', { x: 1.02, y: 2.16, z: 0.16 }],
 ] as const
 
 const WALL_DECOR_ITEMS = [
@@ -423,8 +423,8 @@ export const ROOM_SETTINGS_CATALOG: RoomSettingsItem[] = [
   ...WINDOW_ITEMS.map(([id, source, name, dimensionsM]) =>
     environmentModel('windows', id, name, name, 'wall', dimensionsM, 0, 'xy', source),
   ),
-  ...DOOR_ITEMS.map(([id, name, dimensionsM]) =>
-    environmentModel('doors', id, name, name, 'wall', dimensionsM),
+  ...DOOR_ITEMS.map(([id, source, name, dimensionsM]) =>
+    environmentModel('doors', id, name, name, 'wall', dimensionsM, 0, 'xy', source),
   ),
   ...WALL_DECOR_ITEMS.map(([id, name, dimensionsM]) =>
     environmentModel('wall-decor', id, name, 'Wall decor', 'wall', dimensionsM),

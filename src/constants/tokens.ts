@@ -22,7 +22,7 @@ export const color = {
 
   // 3D scene
   scene: {
-    bg: '#1B1B1B',
+    bg: '#1B1B1D',
     gridHint: 'rgba(255,255,255,0.05)',
     roomShadow: 'rgba(0,0,0,0.25)',
   },
