@@ -1,0 +1,34 @@
+export const bakedFurnitureVariantUrls = new Map<string, string>([
+  [
+    "/assets/models/manual/zeel-by-furniture-simple-table.optimized.glb",
+    "/assets/generated/baked-variants/simple-table-4k-baked.glb"
+  ],
+  [
+    "/assets/models/manual/dimensiva-plan-chair-by-fredericia.optimized.glb",
+    "/assets/generated/baked-variants/plan-chair-4k-baked.glb"
+  ],
+  [
+    "/assets/models/manual/zeel-by-furniture-rounded-commode.optimized.glb",
+    "/assets/generated/baked-variants/rounded-commode-4k-baked.glb"
+  ],
+  [
+    "/assets/models/polyhaven/wooden_display_shelves_01.optimized.glb",
+    "/assets/generated/baked-variants/wooden-display-shelves-4k-baked.glb"
+  ],
+  [
+    "/assets/models/manual/dimensiva-hackney-sofa-by-hay.optimized.glb",
+    "/assets/generated/baked-variants/hackney-sofa-4k-baked.glb"
+  ],
+  [
+    "/assets/models/manual/dimensiva-ibiza-forte-coffee-table-by-ritzwell.optimized.glb",
+    "/assets/generated/baked-variants/ibiza-coffee-table-4k-baked.glb"
+  ],
+  [
+    "/assets/models/manual/zeel-by-furniture-blown-armchair.optimized.glb",
+    "/assets/generated/baked-variants/blown-armchair-4k-baked.glb"
+  ],
+  [
+    "/assets/models/manual/dimensiva-slit-side-table-round-high-by-hay.optimized.glb",
+    "/assets/generated/baked-variants/slit-side-table-4k-baked.glb"
+  ],
+])

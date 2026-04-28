@@ -67,6 +67,20 @@ Commands:
 pnpm render:quality-metrics --url=http://127.0.0.1:5190/ --views=isometric,bird,pov --quality=high --hero-sets=all
 ```
 
+## Phase 4B. Furniture Texture Bake
+
+Acceptance:
+
+- Hero furniture GLBs have generated Blender CLI bake variants.
+- Each baked variant keeps one embedded 4096px atlas texture to avoid material-level texture fanout.
+- Heavy furniture uses runtime-lite geometry as the bake input where needed, so visual quality work does not exceed the medium render budget.
+
+Commands:
+
+```bash
+pnpm blender:bake-furniture-4k
+```
+
 ## Phase 5. Visual Browser Verification
 
 Acceptance:
@@ -123,6 +137,9 @@ Completed:
 - Lounge sofa material을 따뜻한 회색 fabric으로 보정해 isometric에서 큰 검정 덩어리처럼 보이던 문제를 줄였다.
 - 최종 default room 변경 이후 Blender reference object list를 brass vase, Serif Vase, desk styling, sofa textiles, reading floor cushion 상태에 맞춰 갱신했다.
 - Blender CLI로 floor/static AO와 floor/window wash texture bake를 다시 생성했고, 현재 가구 footprint 기반 occlusion을 bake mask에 반영했다.
+- Blender CLI로 8개 hero furniture의 4096px baked texture atlas GLB를 생성했다: simple table, Plan Chair, rounded commode, wooden display shelves, Hackney sofa, Ibiza coffee table, Blown armchair, Slit side table.
+- Plan Chair와 Hackney sofa는 runtime-lite geometry를 bake input으로 사용하고, 모든 baked furniture는 가구당 1개 4K atlas texture로 합쳐 draw call/texture fanout을 줄였다.
+- Runtime model variant resolver가 baked furniture variant를 runtime-lite보다 우선 사용하고, selected/hero 상태에서도 baked variant를 유지하도록 보정했다.
 
 Final verification:
 
@@ -130,6 +147,7 @@ Final verification:
 pnpm build
 pnpm blender:render-reference
 pnpm blender:bake-room-lighting
+pnpm blender:bake-furniture-4k
 pnpm blender:create-runtime-variants
 pnpm blender:validate-runtime-variants
 pnpm render:quality-metrics --url=http://127.0.0.1:5190/ --views=isometric,bird,pov --quality=high --hero-sets=all
@@ -139,19 +157,19 @@ pnpm render:budget --url=http://127.0.0.1:5190/ --quality=medium
 Final render quality:
 
 - Report: `docs/render-quality-report.md`
-- Latest run: `output/render-quality-metrics/2026-04-28T18-48-40-839Z.json`
-- Average perceptual proxy score: `66.3`
-- Baseline average score: `65.0`
+- Latest run: `output/render-quality-metrics/2026-04-28T19-26-21-305Z.json`
+- Average perceptual proxy score: `65.4`
+- Baseline average score: `64.1`
 - Best default decision: keep the improved default composition as baseline. `lounge-accents` still scores higher in aggregate, but the default now carries the core visual upgrades without swapping the room into an A/B decor preset.
 - `darkBlobRatio` stayed below the penalty threshold in all measured views.
 
 Final runtime budget:
 
 - Report: `docs/render-budget-report.md`
-- Latest run: `output/render-budget/2026-04-28T18-50-12-157Z.json`
-- Max draw calls: `177`
-- Max triangles: `425,898`
-- Max textures: `81`
+- Latest run: `output/render-budget/2026-04-28T19-25-46-975Z.json`
+- Max draw calls: `171`
+- Max triangles: `421,350`
+- Max textures: `88`
 - Budget result: pass against current medium targets (`draw calls < 180`, `triangles < 450k`, `textures < 90`).
 
 Visual verification artifacts:
@@ -169,3 +187,8 @@ Visual verification artifacts:
 - `output/playwright/blender-bake-quality-isometric.png`
 - `output/playwright/blender-bake-quality-bird.png`
 - `output/playwright/blender-bake-quality-pov.png`
+- `output/playwright/furniture-4k-bake-isometric.png`
+- `output/playwright/furniture-4k-bake-rotated.png`
+- `output/playwright/furniture-4k-bake-bird.png`
+- `output/playwright/furniture-4k-bake-pov.png`
+- `output/playwright/furniture-4k-bake-verification.json`

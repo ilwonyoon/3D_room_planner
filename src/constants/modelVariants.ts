@@ -1,3 +1,4 @@
+import { bakedFurnitureVariantUrls } from './bakedFurnitureVariants.generated'
 import { runtimeModelVariantUrls } from './runtimeModelVariants.generated'
 
 export type ModelVariantUrls = {
@@ -58,18 +59,23 @@ export function assetUrlWithRevision(assetUrl: string) {
 }
 
 export function modelVariantUrlsFor(sourceModelUrl: string): ModelVariantUrls {
-  const runtimeModelUrl = runtimeModelVariantUrls.get(sourceModelUrl)
+  const bakedModelUrl = bakedFurnitureVariantUrls.get(sourceModelUrl)
+  const runtimeModelUrl = bakedModelUrl ?? runtimeModelVariantUrls.get(sourceModelUrl)
   const revisedSourceModelUrl = assetUrlWithRevision(sourceModelUrl)
 
   return {
     sourceModelUrl: revisedSourceModelUrl,
     runtimeModelUrl: runtimeModelUrl ? assetUrlWithRevision(runtimeModelUrl) : undefined,
-    heroModelUrl: runtimeModelUrl ? revisedSourceModelUrl : undefined,
+    heroModelUrl: bakedModelUrl
+      ? assetUrlWithRevision(bakedModelUrl)
+      : runtimeModelUrl
+        ? revisedSourceModelUrl
+        : undefined,
   }
 }
 
 export function modelUrlWithBestVariant(modelUrl: string) {
-  const runtimeVariantUrl = runtimeModelVariantUrls.get(modelUrl)
+  const runtimeVariantUrl = bakedFurnitureVariantUrls.get(modelUrl) ?? runtimeModelVariantUrls.get(modelUrl)
 
   if (enableRuntimeModelVariants && runtimeVariantUrl) {
     return assetUrlWithRevision(runtimeVariantUrl)
@@ -90,6 +96,8 @@ export function modelUrlForRenderContext(
   },
   context: ModelVariantRenderContext,
 ) {
+  const runtimeVariantUrl = bakedFurnitureVariantUrls.get(model.url) ?? runtimeModelVariantUrls.get(model.url)
+
   if (!enableRuntimeModelVariants) {
     return model.url
   }
@@ -98,5 +106,5 @@ export function modelUrlForRenderContext(
     return model.heroModelUrl
   }
 
-  return model.runtimeModelUrl ?? model.url
+  return model.runtimeModelUrl ?? runtimeVariantUrl ?? model.url
 }

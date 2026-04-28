@@ -1,0 +1,78 @@
+{
+  "generatedAt": "2026-04-28T19:25:20.711Z",
+  "textureSize": 4096,
+  "variants": [
+    {
+      "id": "simple-table-4k-baked",
+      "source": "/assets/models/manual/zeel-by-furniture-simple-table.optimized.glb",
+      "outputUrl": "/assets/generated/baked-variants/simple-table-4k-baked.glb",
+      "textureSize": 4096,
+      "kind": "wood",
+      "bytes": 202736,
+      "sizeLabel": "198.0 KB"
+    },
+    {
+      "id": "plan-chair-4k-baked",
+      "source": "/assets/models/manual/dimensiva-plan-chair-by-fredericia.optimized.glb",
+      "outputUrl": "/assets/generated/baked-variants/plan-chair-4k-baked.glb",
+      "textureSize": 4096,
+      "kind": "wood",
+      "bytes": 569768,
+      "sizeLabel": "556.4 KB"
+    },
+    {
+      "id": "rounded-commode-4k-baked",
+      "source": "/assets/models/manual/zeel-by-furniture-rounded-commode.optimized.glb",
+      "outputUrl": "/assets/generated/baked-variants/rounded-commode-4k-baked.glb",
+      "textureSize": 4096,
+      "kind": "ceramic",
+      "bytes": 605588,
+      "sizeLabel": "591.4 KB"
+    },
+    {
+      "id": "wooden-display-shelves-4k-baked",
+      "source": "/assets/models/polyhaven/wooden_display_shelves_01.optimized.glb",
+      "outputUrl": "/assets/generated/baked-variants/wooden-display-shelves-4k-baked.glb",
+      "textureSize": 4096,
+      "kind": "wood",
+      "bytes": 518040,
+      "sizeLabel": "505.9 KB"
+    },
+    {
+      "id": "hackney-sofa-4k-baked",
+      "source": "/assets/models/manual/dimensiva-hackney-sofa-by-hay.optimized.glb",
+      "outputUrl": "/assets/generated/baked-variants/hackney-sofa-4k-baked.glb",
+      "textureSize": 4096,
+      "kind": "fabric",
+      "bytes": 1131072,
+      "sizeLabel": "1.08 MB"
+    },
+    {
+      "id": "ibiza-coffee-table-4k-baked",
+      "source": "/assets/models/manual/dimensiva-ibiza-forte-coffee-table-by-ritzwell.optimized.glb",
+      "outputUrl": "/assets/generated/baked-variants/ibiza-coffee-table-4k-baked.glb",
+      "textureSize": 4096,
+      "kind": "wood",
+      "bytes": 336920,
+      "sizeLabel": "329.0 KB"
+    },
+    {
+      "id": "blown-armchair-4k-baked",
+      "source": "/assets/models/manual/zeel-by-furniture-blown-armchair.optimized.glb",
+      "outputUrl": "/assets/generated/baked-variants/blown-armchair-4k-baked.glb",
+      "textureSize": 4096,
+      "kind": "fabric",
+      "bytes": 554820,
+      "sizeLabel": "541.8 KB"
+    },
+    {
+      "id": "slit-side-table-4k-baked",
+      "source": "/assets/models/manual/dimensiva-slit-side-table-round-high-by-hay.optimized.glb",
+      "outputUrl": "/assets/generated/baked-variants/slit-side-table-4k-baked.glb",
+      "textureSize": 4096,
+      "kind": "metal",
+      "bytes": 330144,
+      "sizeLabel": "322.4 KB"
+    }
+  ]
+}

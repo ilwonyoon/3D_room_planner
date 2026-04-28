@@ -31,6 +31,7 @@
     "assets:audit-room-settings": "node scripts/audit-room-setting-model-bounds.mjs",
     "blender:audit-hero-assets": "node scripts/blender-audit-hero-assets.mjs",
     "blender:bake-room-lighting": "node scripts/blender-bake-room-lighting.mjs",
+    "blender:bake-furniture-4k": "node scripts/blender-bake-furniture-4k-variants.mjs",
     "blender:create-hero-variants": "node scripts/blender-create-hero-variants.mjs",
     "blender:create-runtime-variants": "node scripts/blender-create-runtime-variants.mjs",
     "blender:validate-runtime-variants": "node scripts/validate-runtime-variants.mjs",

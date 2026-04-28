@@ -1120,6 +1120,7 @@ function tunePbrMaterial(material: THREE.MeshStandardMaterial | THREE.MeshPhysic
     materialName: material.name,
   })
   const hasNormalScale = 'normalScale' in material && material.normalScale instanceof THREE.Vector2
+  const usesBakedFurnitureVariant = object.url.includes('/assets/generated/baked-variants/')
 
   if (tuning.envMapIntensity !== undefined) {
     material.envMapIntensity = tuning.envMapIntensity
@@ -1129,16 +1130,16 @@ function tunePbrMaterial(material: THREE.MeshStandardMaterial | THREE.MeshPhysic
     material.color = new THREE.Color(tuning.baseColor)
   }
 
-  if (tuning.clearColorMap) {
+  if (tuning.clearColorMap && !usesBakedFurnitureVariant) {
     material.map = null
     material.aoMap = null
   }
 
-  if (tuning.clearNormalMap) {
+  if (tuning.clearNormalMap && !usesBakedFurnitureVariant) {
     material.normalMap = null
   }
 
-  if (tuning.clearRoughnessMap) {
+  if (tuning.clearRoughnessMap && !usesBakedFurnitureVariant) {
     material.roughnessMap = null
   }
 
