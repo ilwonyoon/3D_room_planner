@@ -65,7 +65,13 @@ function toFootprint(object: EditorObject): Footprint {
 }
 
 function isFloorCollisionObstacle(object: EditorObject) {
-  return object.placement === 'floor' && !object.anchor && object.elevationM <= 0.08
+  return (
+    object.placement === 'floor' &&
+    object.renderKind !== 'area-rug' &&
+    object.productCategory !== 'rug' &&
+    !object.anchor &&
+    object.elevationM <= 0.08
+  )
 }
 
 function resolveRotationPosition(
@@ -406,7 +412,7 @@ export function PlacementHandlers({
     const rotationY = normalizeRotation(selected.rotationY + deltaRad, selected.rotationMode)
     const constrainedPosition = resolveRotationPosition(
       { ...toFootprint(selected), rotationY },
-      others,
+      selected.renderKind === 'area-rug' || selected.productCategory === 'rug' ? [] : others,
       room,
     )
 
