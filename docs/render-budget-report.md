@@ -1,6 +1,6 @@
 # Render Budget Report
 
-Generated: 2026-04-28T08:46:12.113Z
+Generated: 2026-04-28T17:09:25.946Z
 
 Quality: `medium`
 
@@ -12,7 +12,7 @@ Render calls and triangles are scene-graph estimates from visible meshes. Textur
 
 - Max draw calls: 160
 - Max triangles: 410,490
-- Max geometries: 152
+- Max geometries: 163
 - Max textures: 83
 
 ## Measurements
@@ -20,8 +20,8 @@ Render calls and triangles are scene-graph estimates from visible meshes. Textur
 | View | Preset | Draw calls | Triangles | Geometries | Textures | DPR |
 | --- | --- | ---: | ---: | ---: | ---: | ---: |
 | isometric | daylight-window | 141 | 190,539 | 129 | 48 | 1 |
-| isometric | warm-evening | 143 | 209,939 | 132 | 49 | 1 |
-| isometric | night-room | 151 | 402,238 | 152 | 62 | 1 |
+| isometric | warm-evening | 151 | 402,238 | 136 | 49 | 1 |
+| isometric | night-room | 151 | 402,238 | 163 | 70 | 1 |
 | bird | daylight-window | 160 | 410,490 | 128 | 73 | 1 |
 | bird | warm-evening | 160 | 410,490 | 128 | 73 | 1 |
 | bird | night-room | 160 | 410,490 | 128 | 73 | 1 |

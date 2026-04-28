@@ -114,6 +114,8 @@ Completed:
 - `darkBlobRatio` artifact metric을 render quality harness에 추가했다.
 - 현재 object id 기준의 hero set만 남겼다: `baseline`, `lounge-accents`, `designer-lamps`.
 - Hackney sofa와 potted plant 01 runtime-lite variants를 추가해 medium runtime budget을 target 아래로 낮췄다.
+- Runtime floor/wall material의 displacement, normal, AO 세기를 낮춰 회색 speckle과 지저분한 표면 노이즈를 줄였다.
+- `localContrast`가 표면 노이즈를 과보상하지 않도록 적정 band 기반 scoring으로 보정했다.
 
 Final verification:
 
@@ -130,15 +132,15 @@ pnpm render:budget --url=http://127.0.0.1:5190/ --quality=medium
 Final render quality:
 
 - Report: `docs/render-quality-report.md`
-- Latest run: `output/render-quality-metrics/2026-04-28T08-46-24-657Z.json`
-- Average perceptual proxy score: `58.3`
-- Best default decision: keep `baseline` as the default. `lounge-accents` wins a few daylight crops, but baseline is still stronger across warm/night/POV.
+- Latest run: `output/render-quality-metrics/2026-04-28T17-10-46-706Z.json`
+- Average perceptual proxy score: `65.6`
+- Best default decision: keep `baseline` as the default. `lounge-accents` scores higher after harness recalibration, but screenshot review did not justify changing default decor assets.
 - `darkBlobRatio` stayed below the penalty threshold in all measured views.
 
 Final runtime budget:
 
 - Report: `docs/render-budget-report.md`
-- Latest run: `output/render-budget/2026-04-28T08-45-48-205Z.json`
+- Latest run: `output/render-budget/2026-04-28T17-08-57-738Z.json`
 - Max draw calls: `160`
 - Max triangles: `410,490`
 - Max textures: `83`

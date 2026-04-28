@@ -140,6 +140,7 @@ Warm이 낮게 나온 것은 실패라기보다 의도된 어두운 프리셋의
 
 - 모델 edge, 재질 결, trim, 접지감이 선명해졌는지 보는 데 유용하다.
 - 너무 높으면 oversharpened 또는 noisy하게 보일 수 있다.
+- 그래서 현재 score는 `localContrast`를 높을수록 무조건 좋게 보지 않고 적정 band로 평가한다.
 
 ### shadowRatio
 

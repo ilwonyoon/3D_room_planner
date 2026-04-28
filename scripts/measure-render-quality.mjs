@@ -105,8 +105,8 @@ function scoreMetrics(metrics, presetId) {
     ? scoreBand(metrics.lumaRangeP05P95, 58, 96, 178, 232)
     : scoreRange(metrics.lumaRangeP05P95, 84, 176)
   const localContrastScore = night
-    ? scoreRange(metrics.localContrast, 2.8, 7.2)
-    : scoreRange(metrics.localContrast, 3.4, 10.5)
+    ? scoreBand(metrics.localContrast, 2.4, 3.4, 6.2, 9.8)
+    : scoreBand(metrics.localContrast, 2.8, 4.4, 8.4, 12.4)
   const groundingScore = night
     ? scoreBand(metrics.shadowRatio, 0.16, 0.32, 0.56, 0.82)
     : scoreBand(metrics.shadowRatio, 0.08, 0.18, 0.36, 0.58)
