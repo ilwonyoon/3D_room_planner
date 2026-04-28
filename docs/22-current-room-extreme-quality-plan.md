@@ -116,6 +116,8 @@ Completed:
 - Hackney sofa와 potted plant 01 runtime-lite variants를 추가해 medium runtime budget을 target 아래로 낮췄다.
 - Runtime floor/wall material의 displacement, normal, AO 세기를 낮춰 회색 speckle과 지저분한 표면 노이즈를 줄였다.
 - `localContrast`가 표면 노이즈를 과보상하지 않도록 적정 band 기반 scoring으로 보정했다.
+- Default room이 너무 비어 보이는 문제를 줄이기 위해 sofa textile layer를 추가하고 wall art scale을 키웠다.
+- Area rug material의 roughness를 높이고 normal/displacement/AO 세기를 낮춰 바닥 반사율과 표면 노이즈를 더 차분하게 맞췄다.
 
 Final verification:
 
@@ -132,17 +134,17 @@ pnpm render:budget --url=http://127.0.0.1:5190/ --quality=medium
 Final render quality:
 
 - Report: `docs/render-quality-report.md`
-- Latest run: `output/render-quality-metrics/2026-04-28T17-10-46-706Z.json`
+- Latest run: `output/render-quality-metrics/2026-04-28T17-40-26-482Z.json`
 - Average perceptual proxy score: `65.6`
-- Best default decision: keep `baseline` as the default. `lounge-accents` scores higher after harness recalibration, but screenshot review did not justify changing default decor assets.
+- Best default decision: keep the improved default composition as baseline. `lounge-accents` still scores higher in aggregate, but the default now carries the core visual upgrades without swapping the room into an A/B decor preset.
 - `darkBlobRatio` stayed below the penalty threshold in all measured views.
 
 Final runtime budget:
 
 - Report: `docs/render-budget-report.md`
-- Latest run: `output/render-budget/2026-04-28T17-08-57-738Z.json`
-- Max draw calls: `160`
-- Max triangles: `410,490`
+- Latest run: `output/render-budget/2026-04-28T17-39-36-622Z.json`
+- Max draw calls: `166`
+- Max triangles: `416,386`
 - Max textures: `83`
 - Budget result: pass against current medium targets (`draw calls < 180`, `triangles < 450k`, `textures < 90`).
 
@@ -153,3 +155,5 @@ Visual verification artifacts:
 - `output/playwright/current-room-quality-pov.png`
 - `output/playwright/current-room-rotate-before.png`
 - `output/playwright/current-room-rotate-after.png`
+- `output/playwright/composition-pass-final-isometric.png`
+- `output/playwright/composition-pass-final-pov.png`

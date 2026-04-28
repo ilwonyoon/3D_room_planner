@@ -15,6 +15,7 @@ export type EditorObjectRenderKind =
   | 'floor-lamp'
   | 'laptop'
   | 'plant'
+  | 'sofa-textiles'
   | 'smart-speaker'
   | 'wall-art'
   | 'window-opening'
@@ -356,6 +357,21 @@ const INITIAL_OBJECTS: EditorObject[] = [
     locked: true,
   },
   {
+    id: 'sofa-textiles',
+    label: 'Layered Sofa Textiles',
+    url: '/procedural/sofa-textiles',
+    catalogItemId: 'procedural-layered-sofa-textiles',
+    productCategory: 'decor',
+    renderKind: 'sofa-textiles',
+    position: { x: 0.5, z: 1.28 },
+    placement: 'floor',
+    elevationM: 0.58,
+    rotationY: Math.PI,
+    targetSize: 1.24,
+    dimensionsM: { x: 1.24, y: 0.22, z: 0.58 },
+    locked: true,
+  },
+  {
     id: 'lounge-coffee-table',
     label: 'Ibiza Forte Coffee Table',
     ...modelAsset('/assets/models/manual/dimensiva-ibiza-forte-coffee-table-by-ritzwell.optimized.glb'),
@@ -441,8 +457,8 @@ const INITIAL_OBJECTS: EditorObject[] = [
     rotationY: Math.PI / 2,
     boundsRotationY: Math.PI / 2,
     wallSurfacePlane: 'yz',
-    targetSize: 0.58,
-    dimensionsM: { x: 0.42, y: 0.58, z: 0.04 },
+    targetSize: 0.78,
+    dimensionsM: { x: 0.56, y: 0.78, z: 0.04 },
   },
   {
     id: 'wall-art-right',
@@ -455,8 +471,8 @@ const INITIAL_OBJECTS: EditorObject[] = [
     rotationY: Math.PI / 2,
     boundsRotationY: Math.PI / 2,
     wallSurfacePlane: 'yz',
-    targetSize: 0.44,
-    dimensionsM: { x: 0.3, y: 0.44, z: 0.04 },
+    targetSize: 0.6,
+    dimensionsM: { x: 0.42, y: 0.6, z: 0.04 },
   },
   {
     id: 'bookshelf-books-upper',
@@ -657,8 +673,8 @@ const INITIAL_OBJECTS: EditorObject[] = [
     rotationY: 0,
     boundsRotationY: 0,
     wallSurfacePlane: 'xy',
-    targetSize: 0.56,
-    dimensionsM: { x: 0.38, y: 0.56, z: 0.04 },
+    targetSize: 0.72,
+    dimensionsM: { x: 0.5, y: 0.72, z: 0.04 },
     locked: true,
   },
   {

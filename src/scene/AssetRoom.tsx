@@ -1,4 +1,4 @@
-import { useGLTF, useTexture } from '@react-three/drei'
+import { RoundedBox, useGLTF, useTexture } from '@react-three/drei'
 import { useFrame, useLoader, useThree } from '@react-three/fiber'
 import type { ThreeEvent } from '@react-three/fiber'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
@@ -1059,12 +1059,12 @@ function TexturedAreaRug({ object, variant }: { object: EditorObject; variant: R
       new THREE.MeshStandardMaterial({
         ...textures,
         color: '#fbf8f2',
-        roughness: 0.94,
+        roughness: 0.97,
         metalness: 0,
-        normalScale: new THREE.Vector2(0.22, 0.22),
-        displacementScale: 0.0026,
-        displacementBias: -0.0012,
-        aoMapIntensity: 0.7,
+        normalScale: new THREE.Vector2(0.12, 0.12),
+        displacementScale: 0.0012,
+        displacementBias: -0.0005,
+        aoMapIntensity: 0.5,
       }),
     [textures],
   )
@@ -1760,7 +1760,24 @@ function Plant({ materials }: { materials: ReturnType<typeof usePbrRoomMaterials
   )
 }
 
-function WallArt({ variant }: { variant: 'left' | 'right' }) {
+function SofaTextiles() {
+  const linen = useMemo(() => new THREE.MeshStandardMaterial({ color: '#d9d3c9', roughness: 0.96 }), [])
+  const warmLinen = useMemo(() => new THREE.MeshStandardMaterial({ color: '#d6b896', roughness: 0.94 }), [])
+  const rust = useMemo(() => new THREE.MeshStandardMaterial({ color: '#c86b37', roughness: 0.92 }), [])
+  const charcoal = useMemo(() => new THREE.MeshStandardMaterial({ color: '#57534f', roughness: 0.98 }), [])
+
+  return (
+    <group>
+      <RoundedBox args={[0.38, 0.16, 0.32]} radius={0.035} smoothness={4} position={[-0.34, 0.08, -0.1]} rotation={[0.08, 0.18, -0.04]} material={linen} castShadow receiveShadow />
+      <RoundedBox args={[0.34, 0.17, 0.31]} radius={0.035} smoothness={4} position={[0.06, 0.09, -0.12]} rotation={[0.06, -0.12, 0.05]} material={warmLinen} castShadow receiveShadow />
+      <RoundedBox args={[0.28, 0.14, 0.3]} radius={0.032} smoothness={4} position={[0.42, 0.075, -0.08]} rotation={[0.04, -0.22, 0.08]} material={charcoal} castShadow receiveShadow />
+      <RoundedBox args={[0.68, 0.035, 0.48]} radius={0.02} smoothness={3} position={[0.08, 0.015, 0.18]} rotation={[0, 0.03, 0]} material={rust} castShadow receiveShadow />
+      <RoundedBox args={[0.62, 0.028, 0.34]} radius={0.018} smoothness={3} position={[0.08, 0.04, 0.02]} rotation={[0, 0.03, 0]} material={linen} castShadow receiveShadow />
+    </group>
+  )
+}
+
+function WallArt({ variant, width, height }: { variant: 'left' | 'right'; width: number; height: number }) {
   const frameMaterial = useMemo(
     () => new THREE.MeshStandardMaterial({ color: '#f2ece4', roughness: 0.62 }),
     [],
@@ -1774,7 +1791,7 @@ function WallArt({ variant }: { variant: 'left' | 'right' }) {
   const accentDark = '#59544d'
 
   return (
-    <group>
+    <group scale={[width / 0.34, height / 0.48, 1]}>
       <mesh position={[0, 0.29, 0]} material={frameMaterial}>
         <boxGeometry args={[0.34, 0.48, 0.035]} />
       </mesh>
@@ -1877,9 +1894,14 @@ function ProceduralObject({
       {object.renderKind === 'floor-lamp' ? <FloorLamp materials={materials} /> : null}
       {object.renderKind === 'laptop' ? <Laptop materials={materials} /> : null}
       {object.renderKind === 'plant' ? <Plant materials={materials} /> : null}
+      {object.renderKind === 'sofa-textiles' ? <SofaTextiles /> : null}
       {object.renderKind === 'smart-speaker' ? <SmartSpeaker materials={materials} /> : null}
       {object.renderKind === 'wall-art' ? (
-        <WallArt variant={object.id === 'wall-art-left' ? 'left' : 'right'} />
+        <WallArt
+          variant={object.id === 'wall-art-left' ? 'left' : 'right'}
+          width={object.dimensionsM.x}
+          height={object.dimensionsM.y}
+        />
       ) : null}
       <mesh
         ref={hitboxRef}
