@@ -146,6 +146,42 @@ const materialRules: RenderMaterialRule[] = [
     },
   },
   {
+    id: 'chair-candidate-rey-wood',
+    modelUrlIncludes: ['woodenchair_01'],
+    tuning: {
+      baseColor: '#b98255',
+      envMapIntensity: 0.76,
+      roughnessMin: 0.56,
+      roughnessMax: 0.72,
+      metalnessMax: 0.04,
+      normalScaleMultiplier: 0.78,
+    },
+  },
+  {
+    id: 'chair-candidate-roly-poly-blush',
+    modelUrlIncludes: ['designconnected-roly-poly-chair-8816'],
+    tuning: {
+      baseColor: '#b68f85',
+      envMapIntensity: 0.64,
+      roughnessMin: 0.74,
+      roughnessMax: 0.88,
+      metalnessMax: 0,
+      normalScaleMultiplier: 0.68,
+    },
+  },
+  {
+    id: 'chair-candidate-roly-poly-charcoal',
+    modelUrlIncludes: ['dimensiva-roly-poly-chair-by-driade'],
+    tuning: {
+      baseColor: '#191715',
+      envMapIntensity: 0.54,
+      roughnessMin: 0.76,
+      roughnessMax: 0.9,
+      metalnessMax: 0,
+      normalScaleMultiplier: 0.62,
+    },
+  },
+  {
     id: 'chair-upholstery-oat',
     objectIds: ['armchair', 'lounge-chair'],
     materialNameIncludes: ['pillow', 'seat', 'cushion'],

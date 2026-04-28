@@ -1,4 +1,4 @@
-import { Fragment, useMemo, useRef, useState } from 'react'
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties, MouseEvent, PointerEvent, ReactNode, WheelEvent } from 'react'
 import {
   ROOM_SETTINGS_BY_MODEL_URL,
@@ -1333,9 +1333,14 @@ function SelectedObjectEditOverlay({
   context: SelectedProductContext
   onReplace: (item: ProductCatalogItem) => void
 }) {
-  const priceMeta = productPriceMeta(context.item)
+  const [previewItem, setPreviewItem] = useState(context.item)
+  const priceMeta = productPriceMeta(previewItem)
   const replacementItems = context.candidates.filter((item) => item.id !== context.item.id)
   const railItems = replacementItems.length > 0 ? replacementItems : context.candidates
+
+  useEffect(() => {
+    setPreviewItem(context.item)
+  }, [context.item, context.object.id])
 
   return (
     <>
@@ -1357,14 +1362,17 @@ function SelectedObjectEditOverlay({
         }}
       >
         {railItems.map((item) => {
-          const active = item.id === context.item.id
+          const active = item.id === previewItem.id
 
           return (
             <button
               key={item.id}
               type="button"
               aria-label={`${item.brand} ${item.name}`}
-              onClick={() => onReplace(item)}
+              onClick={() => {
+                setPreviewItem(item)
+                onReplace(item)
+              }}
               style={{
                 flex: '0 0 auto',
                 width: EDIT_CONTEXT_RAIL_TILE_SIZE,
@@ -1431,7 +1439,7 @@ function SelectedObjectEditOverlay({
             }}
           >
             <img
-              src={context.item.thumbnailUrl}
+              src={previewItem.thumbnailUrl}
               alt=""
               loading="lazy"
               draggable={false}
@@ -1444,7 +1452,21 @@ function SelectedObjectEditOverlay({
             />
           </div>
 
-          <div style={{ minWidth: 0 }}>
+          <button
+            type="button"
+            aria-label={`Apply ${previewItem.brand} ${previewItem.name}`}
+            onClick={() => onReplace(previewItem)}
+            style={{
+              minWidth: 0,
+              textAlign: 'left',
+              padding: 0,
+              border: 0,
+              background: 'transparent',
+              color: 'inherit',
+              cursor: 'pointer',
+              display: 'block',
+            }}
+          >
             <div
               style={{
                 ...css(text.detail12_regular),
@@ -1454,7 +1476,7 @@ function SelectedObjectEditOverlay({
                 textOverflow: 'ellipsis',
               }}
             >
-              {context.item.brand}
+              {previewItem.brand}
             </div>
             <div
               style={{
@@ -1473,7 +1495,7 @@ function SelectedObjectEditOverlay({
                   textOverflow: 'ellipsis',
                 }}
               >
-                {context.item.name}
+                {previewItem.name}
               </div>
               <ChevronRightIcon />
             </div>
@@ -1490,11 +1512,11 @@ function SelectedObjectEditOverlay({
               <span style={{ color: '#35C5F0' }}>{priceMeta.discountLabel}</span>
               <span style={{ color: '#FFFFFF' }}>{priceMeta.priceLabel}</span>
             </div>
-          </div>
+          </button>
 
           <button
             type="button"
-            aria-label={`Save ${context.item.brand} ${context.item.name}`}
+            aria-label={`Save ${previewItem.brand} ${previewItem.name}`}
             style={{
               width: 24,
               height: 24,
