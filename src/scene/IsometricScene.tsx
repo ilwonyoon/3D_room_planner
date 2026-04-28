@@ -150,8 +150,8 @@ const contactShadowPresetSettings = {
 >
 
 const SCENE_GRID_SIZE = 18
-const SCENE_GRID_INNER_FADE_RADIUS = 2.55
-const SCENE_GRID_OUTER_FADE_RADIUS = SCENE_GRID_SIZE / 2
+const SCENE_GRID_INNER_FADE_RADIUS = 2.8
+const SCENE_GRID_OUTER_FADE_RADIUS = 5.6
 
 function applyGridFadeMask(material: THREE.Material) {
   material.onBeforeCompile = (shader) => {
@@ -168,7 +168,7 @@ function applyGridFadeMask(material: THREE.Material) {
       '#include <alphatest_fragment>',
       `float gridDistance = length(vGridPosition);
        float gridFadeProgress = smoothstep(${SCENE_GRID_INNER_FADE_RADIUS.toFixed(2)}, ${SCENE_GRID_OUTER_FADE_RADIUS.toFixed(2)}, gridDistance);
-       float gridFade = mix(1.0, 0.04, pow(gridFadeProgress, 1.35));
+       float gridFade = 1.0 - pow(gridFadeProgress, 1.15);
        diffuseColor.a *= gridFade;
        if (diffuseColor.a < 0.01) discard;
        #include <alphatest_fragment>`,
