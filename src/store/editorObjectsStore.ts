@@ -9,9 +9,11 @@ export type WallSurfacePlane = 'xy' | 'yz'
 export type EditorObjectRotationMode = 'orthogonal' | 'free'
 export type EditorObjectRenderKind =
   | 'book-stack'
+  | 'desk-styling'
   | 'model'
   | 'area-rug'
   | 'desktop-computer'
+  | 'floor-cushion-set'
   | 'floor-lamp'
   | 'laptop'
   | 'plant'
@@ -297,6 +299,21 @@ const INITIAL_OBJECTS: EditorObject[] = [
     locked: true,
   },
   {
+    id: 'desk-styling',
+    label: 'Desk Styling Set',
+    url: '/procedural/desk-styling',
+    catalogItemId: 'procedural-desk-styling-set',
+    productCategory: 'decor',
+    renderKind: 'desk-styling',
+    position: { x: 0.24, z: -2.12 },
+    placement: 'floor',
+    elevationM: 0.557,
+    rotationY: -Math.PI / 18,
+    targetSize: 0.52,
+    dimensionsM: { x: 0.52, y: 0.08, z: 0.32 },
+    locked: true,
+  },
+  {
     id: 'bookcase-left',
     label: '606 Universal Shelving',
     ...modelAsset('/assets/models/polyhaven/wooden_display_shelves_01.optimized.glb'),
@@ -403,17 +420,17 @@ const INITIAL_OBJECTS: EditorObject[] = [
   },
   {
     id: 'coffee-table-vase',
-    label: 'Small Vase',
-    ...modelAsset('/assets/models/polyhaven/ceramic_vase_03.optimized.glb'),
-    catalogItemId: 'ceramic_vase_03',
+    label: 'Brass Bud Vase',
+    ...modelAsset('/assets/models/polyhaven/brass_vase_03.optimized.glb'),
+    catalogItemId: 'brass_vase_03',
     productCategory: 'decor',
     renderKind: 'model',
     position: { x: 0.42, z: 0.48 },
     placement: 'floor',
     elevationM: 0.48,
     rotationY: -Math.PI / 8,
-    targetSize: 0.2,
-    dimensionsM: { x: 0.12, y: 0.2, z: 0.12 },
+    targetSize: 0.22,
+    dimensionsM: { x: 0.091, y: 0.22, z: 0.091 },
     locked: true,
   },
   {
@@ -633,9 +650,9 @@ const INITIAL_OBJECTS: EditorObject[] = [
   },
   {
     id: 'small-plant',
-    label: 'Ceramic Vase',
-    ...modelAsset('/assets/models/polyhaven/ceramic_vase_01.optimized.glb'),
-    catalogItemId: 'ceramic_vase_01',
+    label: 'Serif Vase',
+    url: '/assets/models/manual/dimensiva-serif-vase-by-kristina-dam-studio.optimized.glb',
+    catalogItemId: 'dimensiva-serif-vase-by-kristina-dam-studio',
     productCategory: 'decor',
     renderKind: 'model',
     position: { x: 2.22, z: -2.02 },
@@ -643,7 +660,7 @@ const INITIAL_OBJECTS: EditorObject[] = [
     elevationM: 0.96,
     rotationY: 0,
     targetSize: 0.32,
-    dimensionsM: { x: 0.163, y: 0.32, z: 0.163 },
+    dimensionsM: { x: 0.22, y: 0.32, z: 0.22 },
   },
   {
     id: 'storage-books-top',
@@ -704,6 +721,21 @@ const INITIAL_OBJECTS: EditorObject[] = [
     rotationY: 0,
     targetSize: 0.48,
     dimensionsM: { x: 0.357, y: 0.48, z: 0.357 },
+  },
+  {
+    id: 'reading-floor-cushion',
+    label: 'Reading Floor Cushion',
+    url: '/procedural/reading-floor-cushion',
+    catalogItemId: 'procedural-reading-floor-cushion',
+    productCategory: 'decor',
+    renderKind: 'floor-cushion-set',
+    position: { x: -0.96, z: 0.28 },
+    placement: 'floor',
+    elevationM: 0.024,
+    rotationY: Math.PI / 7,
+    targetSize: 0.68,
+    dimensionsM: { x: 0.68, y: 0.22, z: 0.54 },
+    locked: true,
   },
   {
     id: 'reading-lamp',

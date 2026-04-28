@@ -118,6 +118,9 @@ Completed:
 - `localContrast`가 표면 노이즈를 과보상하지 않도록 적정 band 기반 scoring으로 보정했다.
 - Default room이 너무 비어 보이는 문제를 줄이기 위해 sofa textile layer를 추가하고 wall art scale을 키웠다.
 - Area rug material의 roughness를 높이고 normal/displacement/AO 세기를 낮춰 바닥 반사율과 표면 노이즈를 더 차분하게 맞췄다.
+- Desk styling set과 reading floor cushion을 procedural accent로 추가해 데스크/라운지/리딩 영역 사이의 생활감과 밀도를 높였다.
+- 고폴리 Lotus Vase 후보는 runtime budget을 초과시켜 기본값에서 제외하고, budget-safe brass vase와 Serif Vase 조합으로 교체했다.
+- Lounge sofa material을 따뜻한 회색 fabric으로 보정해 isometric에서 큰 검정 덩어리처럼 보이던 문제를 줄였다.
 
 Final verification:
 
@@ -134,18 +137,19 @@ pnpm render:budget --url=http://127.0.0.1:5190/ --quality=medium
 Final render quality:
 
 - Report: `docs/render-quality-report.md`
-- Latest run: `output/render-quality-metrics/2026-04-28T17-40-26-482Z.json`
-- Average perceptual proxy score: `65.6`
+- Latest run: `output/render-quality-metrics/2026-04-28T17-58-33-435Z.json`
+- Average perceptual proxy score: `66.3`
+- Baseline average score: `64.9`
 - Best default decision: keep the improved default composition as baseline. `lounge-accents` still scores higher in aggregate, but the default now carries the core visual upgrades without swapping the room into an A/B decor preset.
 - `darkBlobRatio` stayed below the penalty threshold in all measured views.
 
 Final runtime budget:
 
 - Report: `docs/render-budget-report.md`
-- Latest run: `output/render-budget/2026-04-28T17-39-36-622Z.json`
-- Max draw calls: `166`
-- Max triangles: `416,386`
-- Max textures: `83`
+- Latest run: `output/render-budget/2026-04-28T17-58-33-435Z.json`
+- Max draw calls: `177`
+- Max triangles: `425,898`
+- Max textures: `81`
 - Budget result: pass against current medium targets (`draw calls < 180`, `triangles < 450k`, `textures < 90`).
 
 Visual verification artifacts:
@@ -157,3 +161,6 @@ Visual verification artifacts:
 - `output/playwright/current-room-rotate-after.png`
 - `output/playwright/composition-pass-final-isometric.png`
 - `output/playwright/composition-pass-final-pov.png`
+- `output/playwright/final-quality-isometric.png`
+- `output/playwright/final-quality-bird.png`
+- `output/playwright/final-quality-pov.png`

@@ -27,10 +27,10 @@ const HERO_SETS = [
     description: 'Current-room lounge accent replacements for vase and small tabletop object material signal.',
     patches: {
       'coffee-table-vase': {
-        label: 'Lotus Vase',
-        url: '/assets/models/manual/dimensiva-lotus-vase-by-101-copenhagen.optimized.glb',
+        label: 'Brass Bud Vase',
+        url: '/assets/models/polyhaven/brass_vase_03.optimized.glb',
         targetSize: 0.22,
-        dimensionsM: { x: 0.2, y: 0.22, z: 0.2 },
+        dimensionsM: { x: 0.091, y: 0.22, z: 0.091 },
       },
       'small-plant': {
         label: 'Serif Vase',

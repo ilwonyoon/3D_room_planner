@@ -1732,6 +1732,28 @@ function SmartSpeaker({ materials }: { materials: ReturnType<typeof usePbrRoomMa
   )
 }
 
+function DeskStyling() {
+  const notebook = useMemo(() => new THREE.MeshStandardMaterial({ color: '#e9dfcf', roughness: 0.86 }), [])
+  const paper = useMemo(() => new THREE.MeshStandardMaterial({ color: '#fffaf1', roughness: 0.92 }), [])
+  const graphite = useMemo(() => new THREE.MeshStandardMaterial({ color: '#343638', roughness: 0.62, metalness: 0.08 }), [])
+  const brass = useMemo(() => new THREE.MeshStandardMaterial({ color: '#c3a979', roughness: 0.52, metalness: 0.28 }), [])
+
+  return (
+    <group>
+      <RoundedBox args={[0.32, 0.018, 0.22]} radius={0.012} smoothness={3} position={[-0.08, 0.012, 0.02]} rotation={[0, 0.06, 0]} material={notebook} castShadow receiveShadow />
+      <mesh position={[-0.08, 0.024, 0.02]} rotation={[-Math.PI / 2, 0, 0.06]} material={paper} receiveShadow>
+        <planeGeometry args={[0.27, 0.17]} />
+      </mesh>
+      <mesh position={[0.14, 0.02, -0.08]} rotation={[0, 0, Math.PI / 2]} material={graphite} castShadow>
+        <cylinderGeometry args={[0.008, 0.008, 0.28, 16]} />
+      </mesh>
+      <mesh position={[0.21, 0.026, 0.09]} rotation={[Math.PI / 2, 0, 0]} material={brass} castShadow receiveShadow>
+        <cylinderGeometry args={[0.042, 0.042, 0.026, 28]} />
+      </mesh>
+    </group>
+  )
+}
+
 function Plant({ materials }: { materials: ReturnType<typeof usePbrRoomMaterials> }) {
   const leaves = Array.from({ length: 22 }, (_, index) => ({
     angle: (index / 22) * Math.PI * 2,
@@ -1756,6 +1778,26 @@ function Plant({ materials }: { materials: ReturnType<typeof usePbrRoomMaterials
           <coneGeometry args={[0.045, leaf.height, 5]} />
         </mesh>
       ))}
+    </group>
+  )
+}
+
+function FloorCushionSet() {
+  const cushion = useMemo(() => new THREE.MeshStandardMaterial({ color: '#d5c4ad', roughness: 0.95 }), [])
+  const seam = useMemo(() => new THREE.MeshStandardMaterial({ color: '#b99c7c', roughness: 0.9 }), [])
+  const paper = useMemo(() => new THREE.MeshStandardMaterial({ color: '#f4eadb', roughness: 0.9 }), [])
+  const cover = useMemo(() => new THREE.MeshStandardMaterial({ color: '#6d7567', roughness: 0.88 }), [])
+  const shadow = useMemo(() => new THREE.MeshBasicMaterial({ color: '#000000', transparent: true, opacity: 0.11, depthWrite: false }), [])
+
+  return (
+    <group>
+      <mesh position={[0, 0.006, 0]} rotation={[-Math.PI / 2, 0, 0]} scale={[0.42, 0.32, 1]} material={shadow}>
+        <circleGeometry args={[1, 72]} />
+      </mesh>
+      <RoundedBox args={[0.62, 0.16, 0.48]} radius={0.06} smoothness={5} position={[0, 0.09, 0]} rotation={[0.02, 0, -0.02]} material={cushion} castShadow receiveShadow />
+      <RoundedBox args={[0.56, 0.018, 0.03]} radius={0.008} smoothness={2} position={[0, 0.178, -0.18]} material={seam} castShadow />
+      <RoundedBox args={[0.28, 0.025, 0.2]} radius={0.008} smoothness={2} position={[-0.1, 0.188, 0.02]} rotation={[0, -0.18, 0]} material={paper} castShadow receiveShadow />
+      <RoundedBox args={[0.2, 0.03, 0.16]} radius={0.008} smoothness={2} position={[0.12, 0.205, 0.05]} rotation={[0, 0.22, 0]} material={cover} castShadow receiveShadow />
     </group>
   )
 }
@@ -1890,7 +1932,9 @@ function ProceduralObject({
       {object.renderKind === 'window-opening' ? <WindowOpening object={object} /> : null}
       {object.renderKind === 'area-rug' ? <AreaRug object={object} /> : null}
       {object.renderKind === 'book-stack' ? <BookStack object={object} /> : null}
+      {object.renderKind === 'desk-styling' ? <DeskStyling /> : null}
       {object.renderKind === 'desktop-computer' ? <DesktopComputer materials={materials} /> : null}
+      {object.renderKind === 'floor-cushion-set' ? <FloorCushionSet /> : null}
       {object.renderKind === 'floor-lamp' ? <FloorLamp materials={materials} /> : null}
       {object.renderKind === 'laptop' ? <Laptop materials={materials} /> : null}
       {object.renderKind === 'plant' ? <Plant materials={materials} /> : null}

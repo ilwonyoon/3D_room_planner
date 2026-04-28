@@ -176,6 +176,20 @@ const materialRules: RenderMaterialRule[] = [
     },
   },
   {
+    id: 'lounge-sofa-warm-fabric',
+    objectIds: ['lounge-sofa'],
+    tuning: {
+      baseColor: '#8e8981',
+      envMapIntensity: 0.56,
+      roughnessMin: 0.82,
+      roughnessMax: 0.92,
+      metalnessMax: 0,
+      normalScaleMultiplier: 0.56,
+      clearColorMap: true,
+      clearRoughnessMap: true,
+    },
+  },
+  {
     id: 'ceramic-vase-ivory',
     objectIds: ['small-plant'],
     tuning: {
