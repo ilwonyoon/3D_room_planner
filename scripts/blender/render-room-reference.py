@@ -81,11 +81,11 @@ OBJECTS = [
     },
     {
         "id": "coffee-table-vase",
-        "path": "public/assets/models/polyhaven/ceramic_vase_03.optimized.glb",
+        "path": "public/assets/models/polyhaven/brass_vase_03.optimized.glb",
         "position": (0.42, 0.48),
         "elevation": 0.48,
         "rotation_y": -math.pi / 8,
-        "target_size": 0.2,
+        "target_size": 0.22,
     },
     {
         "id": "window-main",
@@ -145,7 +145,7 @@ OBJECTS = [
     },
     {
         "id": "small-plant",
-        "path": "public/assets/models/polyhaven/ceramic_vase_01.optimized.glb",
+        "path": "public/assets/models/manual/dimensiva-serif-vase-by-kristina-dam-studio.optimized.glb",
         "position": (2.22, -2.02),
         "elevation": 0.96,
         "rotation_y": 0,
@@ -272,17 +272,28 @@ def add_procedural_accents():
     metal_mat = make_mat("brushed dark metal", (0.08, 0.075, 0.07, 1), 0.66, 0.2)
     paper_mat = make_mat("warm art paper", (0.86, 0.80, 0.7, 1), 0.94)
     curtain_mat = make_mat("sheer warm curtain", (0.9, 0.86, 0.78, 1), 0.98)
+    sofa_fabric_mat = make_mat("warm grey sofa fabric", (0.56, 0.54, 0.50, 1), 0.9)
+    linen_mat = make_mat("layered linen pillows", (0.78, 0.72, 0.64, 1), 0.96)
+    rust_mat = make_mat("rust woven throw", (0.74, 0.34, 0.16, 1), 0.94)
+    cushion_mat = make_mat("reading floor cushion", (0.68, 0.58, 0.46, 1), 0.96)
 
     add_plane("iMac screen proxy", (0.5, 0.035, 0.32), (0.58, -2.22, 0.88), (0, 0, 0), black_mat)
     add_plane("iMac lit panel", (0.44, 0.036, 0.26), (0.58, -2.245, 0.89), (0, 0, 0), screen_mat)
     add_plane("iMac stand proxy", (0.08, 0.055, 0.22), (0.58, -2.18, 0.68), (0, 0, 0), metal_mat)
     add_plane("laptop proxy", (0.42, 0.3, 0.025), (0.14, -2.14, 0.59), (0, 0, -0.24), metal_mat)
     add_plane("homepod proxy", (0.16, 0.16, 0.16), (0.92, -2.07, 0.64), (0, 0, 0), black_mat)
+    add_plane("desk notebook proxy", (0.32, 0.22, 0.02), (0.24, -2.12, 0.59), (0, 0, -0.08), paper_mat)
+    add_plane("desk pencil cup proxy", (0.09, 0.09, 0.07), (0.44, -2.04, 0.62), (0, 0, 0), metal_mat)
 
     add_plane("back wall print left", (0.32, 0.025, 0.42), (-1.05, -2.865, 1.48), (0, 0, 0), paper_mat)
     add_plane("back wall print right", (0.36, 0.025, 0.44), (1.86, -2.865, 1.25), (0, 0, 0), paper_mat)
     add_plane("left curtain", (0.48, 0.02, 1.26), (-0.52, -2.83, 1.39), (0, 0, 0), curtain_mat)
     add_plane("right curtain", (0.48, 0.02, 1.26), (1.16, -2.83, 1.39), (0, 0, 0), curtain_mat)
+    add_plane("sofa warm fabric overlay", (2.02, 0.84, 0.08), (0.76, 1.82, 0.48), (0, 0, 0), sofa_fabric_mat)
+    add_plane("sofa linen pillow left", (0.36, 0.28, 0.12), (0.36, 1.26, 0.72), (0, 0, 0.1), linen_mat)
+    add_plane("sofa linen pillow right", (0.32, 0.26, 0.12), (0.76, 1.26, 0.72), (0, 0, -0.08), linen_mat)
+    add_plane("sofa rust throw", (0.68, 0.44, 0.04), (0.66, 1.52, 0.68), (0, 0, 0.04), rust_mat)
+    add_plane("reading cushion proxy", (0.68, 0.54, 0.14), (-0.96, 0.28, 0.09), (0, 0, -math.pi / 7), cushion_mat)
 
 
 def bbox_world(objects):

@@ -121,6 +121,8 @@ Completed:
 - Desk styling set과 reading floor cushion을 procedural accent로 추가해 데스크/라운지/리딩 영역 사이의 생활감과 밀도를 높였다.
 - 고폴리 Lotus Vase 후보는 runtime budget을 초과시켜 기본값에서 제외하고, budget-safe brass vase와 Serif Vase 조합으로 교체했다.
 - Lounge sofa material을 따뜻한 회색 fabric으로 보정해 isometric에서 큰 검정 덩어리처럼 보이던 문제를 줄였다.
+- 최종 default room 변경 이후 Blender reference object list를 brass vase, Serif Vase, desk styling, sofa textiles, reading floor cushion 상태에 맞춰 갱신했다.
+- Blender CLI로 floor/static AO와 floor/window wash texture bake를 다시 생성했고, 현재 가구 footprint 기반 occlusion을 bake mask에 반영했다.
 
 Final verification:
 
@@ -137,16 +139,16 @@ pnpm render:budget --url=http://127.0.0.1:5190/ --quality=medium
 Final render quality:
 
 - Report: `docs/render-quality-report.md`
-- Latest run: `output/render-quality-metrics/2026-04-28T17-58-33-435Z.json`
+- Latest run: `output/render-quality-metrics/2026-04-28T18-48-40-839Z.json`
 - Average perceptual proxy score: `66.3`
-- Baseline average score: `64.9`
+- Baseline average score: `65.0`
 - Best default decision: keep the improved default composition as baseline. `lounge-accents` still scores higher in aggregate, but the default now carries the core visual upgrades without swapping the room into an A/B decor preset.
 - `darkBlobRatio` stayed below the penalty threshold in all measured views.
 
 Final runtime budget:
 
 - Report: `docs/render-budget-report.md`
-- Latest run: `output/render-budget/2026-04-28T17-58-33-435Z.json`
+- Latest run: `output/render-budget/2026-04-28T18-50-12-157Z.json`
 - Max draw calls: `177`
 - Max triangles: `425,898`
 - Max textures: `81`
@@ -164,3 +166,6 @@ Visual verification artifacts:
 - `output/playwright/final-quality-isometric.png`
 - `output/playwright/final-quality-bird.png`
 - `output/playwright/final-quality-pov.png`
+- `output/playwright/blender-bake-quality-isometric.png`
+- `output/playwright/blender-bake-quality-bird.png`
+- `output/playwright/blender-bake-quality-pov.png`

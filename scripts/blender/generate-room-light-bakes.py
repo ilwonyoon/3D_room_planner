@@ -17,6 +17,21 @@ WINDOW = {
     "y": 1.45,
 }
 
+FLOOR_OCCLUDERS = [
+    {"id": "desk", "x": 0.56, "z": -2.08, "rx": 0.64, "rz": 0.92, "strength": 0.2},
+    {"id": "desk-chair", "x": 0.56, "z": -1.42, "rx": 0.42, "rz": 0.42, "strength": 0.16},
+    {"id": "bookcase-left", "x": -2.02, "z": -2.52, "rx": 0.34, "rz": 0.76, "strength": 0.3},
+    {"id": "storage-right", "x": 2.02, "z": -2.22, "rx": 0.78, "rz": 0.34, "strength": 0.24},
+    {"id": "lounge-sofa", "x": 0.76, "z": 1.64, "rx": 1.14, "rz": 0.52, "strength": 0.38},
+    {"id": "coffee-table", "x": 0.24, "z": 0.44, "rx": 0.66, "rz": 0.42, "strength": 0.18},
+    {"id": "reading-chair", "x": -1.38, "z": 0.88, "rx": 0.52, "rz": 0.5, "strength": 0.22},
+    {"id": "reading-side-table", "x": -0.92, "z": 1.22, "rx": 0.22, "rz": 0.22, "strength": 0.12},
+    {"id": "reading-floor-cushion", "x": -0.96, "z": 0.28, "rx": 0.38, "rz": 0.32, "strength": 0.12},
+    {"id": "floor-plant", "x": -2.16, "z": 1.82, "rx": 0.34, "rz": 0.34, "strength": 0.16},
+    {"id": "tall-plant-right", "x": 2.2, "z": 0.34, "rx": 0.34, "rz": 0.34, "strength": 0.16},
+    {"id": "reading-lamp", "x": -2.22, "z": 0.72, "rx": 0.24, "rz": 0.24, "strength": 0.14},
+]
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -42,6 +57,12 @@ def smoothstep(edge0, edge1, value):
 
 def gaussian(value, center, width):
     return math.exp(-((value - center) ** 2) / max(width * width, 0.0001))
+
+
+def elliptical_gaussian(x, z, center_x, center_z, radius_x, radius_z):
+    dx = (x - center_x) / max(radius_x, 0.0001)
+    dz = (z - center_z) / max(radius_z, 0.0001)
+    return math.exp(-(dx * dx + dz * dz))
 
 
 def save_mask(path, width, height, sampler):
@@ -82,7 +103,13 @@ def floor_static_ao(u, v):
     corner = back * left
     perimeter = max(back * 0.72, left * 0.42, right * 0.18, front * 0.1)
     vignette = smoothstep(1.55, 3.05, math.sqrt((x * 0.88) ** 2 + (z * 0.58) ** 2))
-    return clamp(perimeter + corner * 0.38 + vignette * 0.12)
+    furniture = 0.0
+    for occluder in FLOOR_OCCLUDERS:
+        furniture = max(
+            furniture,
+            elliptical_gaussian(x, z, occluder["x"], occluder["z"], occluder["rx"], occluder["rz"]) * occluder["strength"],
+        )
+    return clamp(perimeter + corner * 0.38 + vignette * 0.12 + furniture)
 
 
 def floor_window_wash(u, v):
@@ -93,7 +120,20 @@ def floor_window_wash(u, v):
     beam_width = 0.78 + from_window * 0.92
     beam = gaussian(x, beam_center_x, beam_width) * gaussian(from_window, 0.36, 0.34)
     near_window = gaussian(x, WINDOW["x"], 0.92) * (1.0 - smoothstep(0.0, 1.72, z + depth / 2))
-    return clamp(beam * 0.92 + near_window * 0.38)
+    furniture_shadow = 0.0
+    for occluder in FLOOR_OCCLUDERS:
+        furniture_shadow = max(
+            furniture_shadow,
+            elliptical_gaussian(
+                x,
+                z,
+                occluder["x"] + 0.1,
+                occluder["z"] + 0.14,
+                occluder["rx"] * 1.12,
+                occluder["rz"] * 1.18,
+            ) * occluder["strength"] * 0.52,
+        )
+    return clamp((beam * 0.92 + near_window * 0.38) * (1.0 - furniture_shadow))
 
 
 def back_wall_glow(u, v):
