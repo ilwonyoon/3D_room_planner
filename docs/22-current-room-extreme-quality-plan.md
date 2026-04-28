@@ -74,6 +74,7 @@ Acceptance:
 - Hero furniture GLBs have generated Blender CLI bake variants.
 - Each baked variant keeps one embedded 4096px atlas texture to avoid material-level texture fanout.
 - Heavy furniture uses runtime-lite geometry as the bake input where needed, so visual quality work does not exceed the medium render budget.
+- Baked furniture variants remain opt-in until their visual quality beats the curated runtime/material path.
 
 Commands:
 
@@ -139,7 +140,7 @@ Completed:
 - Blender CLI로 floor/static AO와 floor/window wash texture bake를 다시 생성했고, 현재 가구 footprint 기반 occlusion을 bake mask에 반영했다.
 - Blender CLI로 8개 hero furniture의 4096px baked texture atlas GLB를 생성했다: simple table, Plan Chair, rounded commode, wooden display shelves, Hackney sofa, Ibiza coffee table, Blown armchair, Slit side table.
 - Plan Chair와 Hackney sofa는 runtime-lite geometry를 bake input으로 사용하고, 모든 baked furniture는 가구당 1개 4K atlas texture로 합쳐 draw call/texture fanout을 줄였다.
-- Runtime model variant resolver가 baked furniture variant를 runtime-lite보다 우선 사용하고, selected/hero 상태에서도 baked variant를 유지하도록 보정했다.
+- Procedural 4K baked atlas가 기존 curated runtime/material path보다 화면 품질이 낮게 보여, default에서는 runtime-lite/material tuning을 유지하고 baked furniture는 `VITE_ENABLE_BAKED_FURNITURE_VARIANTS=true`에서만 opt-in으로 사용한다.
 
 Final verification:
 
@@ -158,8 +159,9 @@ Final render quality:
 
 - Report: `docs/render-quality-report.md`
 - Latest run: `output/render-quality-metrics/2026-04-28T19-26-21-305Z.json`
-- Average perceptual proxy score: `65.4`
-- Baseline average score: `64.1`
+- Latest restored default run: `output/render-quality-metrics/2026-04-28T20-30-54-820Z.json`
+- Average perceptual proxy score: `66.3`
+- Baseline average score: `65.0`
 - Best default decision: keep the improved default composition as baseline. `lounge-accents` still scores higher in aggregate, but the default now carries the core visual upgrades without swapping the room into an A/B decor preset.
 - `darkBlobRatio` stayed below the penalty threshold in all measured views.
 
@@ -167,9 +169,10 @@ Final runtime budget:
 
 - Report: `docs/render-budget-report.md`
 - Latest run: `output/render-budget/2026-04-28T19-25-46-975Z.json`
-- Max draw calls: `171`
-- Max triangles: `421,350`
-- Max textures: `88`
+- Latest restored default run: `output/render-budget/2026-04-28T20-31-55-060Z.json`
+- Max draw calls: `177`
+- Max triangles: `425,898`
+- Max textures: `81`
 - Budget result: pass against current medium targets (`draw calls < 180`, `triangles < 450k`, `textures < 90`).
 
 Visual verification artifacts:
@@ -192,3 +195,7 @@ Visual verification artifacts:
 - `output/playwright/furniture-4k-bake-bird.png`
 - `output/playwright/furniture-4k-bake-pov.png`
 - `output/playwright/furniture-4k-bake-verification.json`
+- `output/playwright/restored-default-quality-isometric.png`
+- `output/playwright/restored-default-quality-bird.png`
+- `output/playwright/restored-default-quality-pov.png`
+- `output/playwright/restored-default-quality-verification.json`

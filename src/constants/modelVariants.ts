@@ -14,6 +14,12 @@ export type ModelVariantRenderContext = {
 export const enableRuntimeModelVariants =
   import.meta.env.VITE_DISABLE_RUNTIME_VARIANTS !== 'true' &&
   import.meta.env.VITE_ENABLE_RUNTIME_VARIANTS !== 'false'
+export const enableBakedFurnitureVariants =
+  import.meta.env.VITE_ENABLE_BAKED_FURNITURE_VARIANTS === 'true'
+
+function bakedFurnitureVariantUrlFor(sourceModelUrl: string) {
+  return enableBakedFurnitureVariants ? bakedFurnitureVariantUrls.get(sourceModelUrl) : undefined
+}
 
 const ktx2ModelVariantUrls = new Set([
   '/assets/models/sheen-chair.optimized.glb',
@@ -59,7 +65,7 @@ export function assetUrlWithRevision(assetUrl: string) {
 }
 
 export function modelVariantUrlsFor(sourceModelUrl: string): ModelVariantUrls {
-  const bakedModelUrl = bakedFurnitureVariantUrls.get(sourceModelUrl)
+  const bakedModelUrl = bakedFurnitureVariantUrlFor(sourceModelUrl)
   const runtimeModelUrl = bakedModelUrl ?? runtimeModelVariantUrls.get(sourceModelUrl)
   const revisedSourceModelUrl = assetUrlWithRevision(sourceModelUrl)
 
@@ -75,7 +81,7 @@ export function modelVariantUrlsFor(sourceModelUrl: string): ModelVariantUrls {
 }
 
 export function modelUrlWithBestVariant(modelUrl: string) {
-  const runtimeVariantUrl = bakedFurnitureVariantUrls.get(modelUrl) ?? runtimeModelVariantUrls.get(modelUrl)
+  const runtimeVariantUrl = bakedFurnitureVariantUrlFor(modelUrl) ?? runtimeModelVariantUrls.get(modelUrl)
 
   if (enableRuntimeModelVariants && runtimeVariantUrl) {
     return assetUrlWithRevision(runtimeVariantUrl)
@@ -96,7 +102,7 @@ export function modelUrlForRenderContext(
   },
   context: ModelVariantRenderContext,
 ) {
-  const runtimeVariantUrl = bakedFurnitureVariantUrls.get(model.url) ?? runtimeModelVariantUrls.get(model.url)
+  const runtimeVariantUrl = bakedFurnitureVariantUrlFor(model.url) ?? runtimeModelVariantUrls.get(model.url)
 
   if (!enableRuntimeModelVariants) {
     return model.url
