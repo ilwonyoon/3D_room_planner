@@ -39,7 +39,7 @@ const BAKED_LIGHTING_TEXTURES = {
 const BAKED_LIGHTING_VIEW_SETTINGS = {
   isometric: {
     floorAo: 0.26,
-    floorLight: 0.36,
+    floorLight: 0.18,
     backWallAo: 0.18,
     backWallLight: 0.32,
     leftWallAo: 0.2,
@@ -48,7 +48,7 @@ const BAKED_LIGHTING_VIEW_SETTINGS = {
   },
   bird: {
     floorAo: 0.18,
-    floorLight: 0.34,
+    floorLight: 0.16,
     backWallAo: 0.11,
     backWallLight: 0.28,
     leftWallAo: 0.11,
@@ -57,7 +57,7 @@ const BAKED_LIGHTING_VIEW_SETTINGS = {
   },
   pov: {
     floorAo: 0.3,
-    floorLight: 0.2,
+    floorLight: 0.12,
     backWallAo: 0.22,
     backWallLight: 0.2,
     leftWallAo: 0.24,
@@ -437,8 +437,9 @@ function usePbrRoomMaterials() {
       floor: new THREE.MeshStandardMaterial({
         ...floorTextures,
         color: '#ece2d4',
-        roughness: 0.62,
+        roughness: 0.92,
         metalness: 0,
+        envMapIntensity: 0.08,
         normalScale: new THREE.Vector2(
           floorMaterial.relief?.normalScale ?? 0.1,
           floorMaterial.relief?.normalScale ?? 0.1,
@@ -624,12 +625,12 @@ function RoomShell({ materials }: { materials: ReturnType<typeof usePbrRoomMater
         renderOrder={2}
       >
         <meshBasicMaterial
-          color="#ffe2ad"
+          color="#f1d6aa"
           transparent
           opacity={bakedOpacity('floorLight')}
           alphaMap={bakedLighting.floorLight}
           depthWrite={false}
-          blending={THREE.AdditiveBlending}
+          blending={THREE.NormalBlending}
           toneMapped={false}
         />
       </mesh>
