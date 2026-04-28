@@ -150,8 +150,8 @@ const contactShadowPresetSettings = {
 >
 
 const SCENE_GRID_SIZE = 18
-const SCENE_GRID_INNER_FADE_RADIUS = 2.55
-const SCENE_GRID_OUTER_FADE_RADIUS = 7.1
+const SCENE_GRID_INNER_FADE_RADIUS = 2.6
+const SCENE_GRID_OUTER_FADE_RADIUS = 5.8
 
 function applyGridFadeMask(material: THREE.Material) {
   material.onBeforeCompile = (shader) => {
@@ -171,10 +171,9 @@ function applyGridFadeMask(material: THREE.Material) {
          SCENE_GRID_OUTER_FADE_RADIUS - SCENE_GRID_INNER_FADE_RADIUS
        ).toFixed(2)};
        float gridFadeProgress = clamp((gridDistance - ${SCENE_GRID_INNER_FADE_RADIUS.toFixed(2)}) / gridFadeRange, 0.0, 1.0);
-       float gridFadeSmooth = gridFadeProgress * gridFadeProgress * (3.0 - 2.0 * gridFadeProgress);
-       float gridFade = pow(1.0 - gridFadeSmooth, 1.85);
+       float gridFade = pow(1.0 - gridFadeProgress, 1.6);
+       diffuseColor.rgb *= gridFade;
        diffuseColor.a *= gridFade;
-       if (diffuseColor.a < 0.001) discard;
        #include <alphatest_fragment>`,
     )
   }
@@ -206,7 +205,7 @@ function SceneGrid({
 }) {
   const invalidate = useThree((state) => state.invalidate)
   const grid = useMemo(() => {
-    const helper = new THREE.GridHelper(SCENE_GRID_SIZE, 48, '#3d3d45', '#28282e')
+    const helper = new THREE.GridHelper(SCENE_GRID_SIZE, 48, '#565963', '#343741')
     const material = helper.material
 
     if (Array.isArray(material)) {
@@ -216,13 +215,13 @@ function SceneGrid({
     }
 
     helper.position.y = -0.075
-    setGridOpacity(helper, 0.12)
+    setGridOpacity(helper, 0.22)
 
     return helper
   }, [])
 
   useEffect(() => {
-    setGridOpacity(grid, active ? 0.46 : 0.12)
+    setGridOpacity(grid, active ? 0.52 : 0.22)
     invalidate()
   }, [active, grid, invalidate])
 
