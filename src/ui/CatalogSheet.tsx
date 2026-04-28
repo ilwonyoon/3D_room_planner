@@ -659,10 +659,6 @@ export function CatalogSheet() {
     }
   }, [objects, renderQuality, selectedId])
 
-  if (cameraMode === 'pov') {
-    return null
-  }
-
   const showSelectedEditMode = selectedProductContext !== null
   const expandSheet = () => setCatalog(true)
   const collapseSheet = () => setCatalog(false)
@@ -879,6 +875,10 @@ export function CatalogSheet() {
 
   if (showSelectedEditMode && selectedProductContext) {
     return <SelectedObjectEditOverlay context={selectedProductContext} onReplace={handleReplacementClick} />
+  }
+
+  if (cameraMode === 'pov') {
+    return null
   }
 
   return (

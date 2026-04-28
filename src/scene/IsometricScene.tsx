@@ -663,8 +663,7 @@ export function IsometricScene({ className }: Props) {
     setEditMode('idle')
     setActiveDragMode(null)
     setCatalog(false)
-    select(null)
-  }, [select, setActiveDragMode, setCatalog, setEditMode, viewMode])
+  }, [setActiveDragMode, setCatalog, setEditMode, viewMode])
 
   const clearSelection = () => {
     setEditMode('idle')
