@@ -56,9 +56,8 @@ pnpm render:quality-metrics --views=isometric,bird,pov --quality=medium --hero-s
 현재 hero set:
 
 - `baseline`
-- `material-rich`
+- `lounge-accents`
 - `designer-lamps`
-- `blender-emissive-lamps`
 
 사람 선호 기록:
 
@@ -177,6 +176,16 @@ crop 안에서 의미 있는 밝기를 가진 픽셀 비율이다.
 
 - 빈 화면/너무 어두운 화면/room crop 실패를 잡는다.
 
+### darkBlobRatio
+
+crop 내부에서 border와 연결되지 않은 큰 저명도 덩어리의 최대 비율이다.
+
+체감 연결:
+
+- 특정 GLB가 검정 박스처럼 깨지는 asset artifact를 잡는다.
+- canvas 배경처럼 crop border와 연결된 검정 영역은 제외한다.
+- 정상적인 작은 검정 제품 디테일은 큰 페널티가 되지 않아야 한다.
+
 ## Perceptual Proxy Score
 
 `scripts/measure-render-quality.mjs`는 위 지표를 가중합해 `perceptualProxyScore`를 만든다.
@@ -189,6 +198,7 @@ crop 안에서 의미 있는 밝기를 가진 픽셀 비율이다.
 - highlight control: 14%
 - color separation: 16%
 - occupancy: 14%
+- dark blob artifact: 별도 penalty, 최대 18%
 
 이 가중치는 확정값이 아니다. 앞으로 사람이 실제로 "나아졌다"고 느낀 A/B 결과와 다르면
 가중치를 조정해야 한다.

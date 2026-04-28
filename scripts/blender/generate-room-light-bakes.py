@@ -7,14 +7,14 @@ import bpy
 
 
 ROOM = {
-    "width": 4.2,
-    "depth": 5.0,
-    "height": 2.4,
+    "width": 5.4,
+    "depth": 5.8,
+    "height": 2.72,
 }
 
 WINDOW = {
-    "x": 1.05,
-    "y": 1.67,
+    "x": 0.32,
+    "y": 1.45,
 }
 
 
@@ -89,10 +89,10 @@ def floor_window_wash(u, v):
     x, z = floor_coordinates(u, v)
     depth = ROOM["depth"]
     from_window = clamp((z + depth / 2) / depth)
-    beam_center_x = WINDOW["x"] - from_window * 0.72
-    beam_width = 0.62 + from_window * 0.72
-    beam = gaussian(x, beam_center_x, beam_width) * gaussian(from_window, 0.38, 0.32)
-    near_window = gaussian(x, WINDOW["x"], 0.78) * (1.0 - smoothstep(0.0, 1.55, z + depth / 2))
+    beam_center_x = WINDOW["x"] - from_window * 0.58
+    beam_width = 0.78 + from_window * 0.92
+    beam = gaussian(x, beam_center_x, beam_width) * gaussian(from_window, 0.36, 0.34)
+    near_window = gaussian(x, WINDOW["x"], 0.92) * (1.0 - smoothstep(0.0, 1.72, z + depth / 2))
     return clamp(beam * 0.92 + near_window * 0.38)
 
 

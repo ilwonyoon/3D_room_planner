@@ -1,6 +1,6 @@
 # Runtime Variant Report
 
-Generated: 2026-04-24T20:40:31.323Z
+Generated: 2026-04-28T08:45:17.291Z
 
 These runtime-lite GLBs are generated variants. Source GLBs are not overwritten.
 
@@ -13,6 +13,8 @@ These runtime-lite GLBs are generated variants. Source GLBs are not overwritten.
 | toio-floor-lamp-runtime-lite | `public/assets/models/manual/dimensiva-toio-led-floor-lamp-by-flos.optimized.glb` | `/assets/generated/runtime-variants/toio-floor-lamp-runtime-lite.glb` | 181,413 -> 63,543 (-65.0%) | 5.33 MB -> 5.33 MB (0.0%) | 275.5 KB -> 113.9 KB (-58.6%) |
 | lotus-vase-runtime-lite | `public/assets/models/manual/dimensiva-lotus-vase-by-101-copenhagen.optimized.glb` | `/assets/generated/runtime-variants/lotus-vase-runtime-lite.glb` | 318,954 -> 39,864 (-87.5%) | 5.33 MB -> 5.33 MB (0.0%) | 611.8 KB -> 102.3 KB (-83.3%) |
 | book-encyclopedia-set-runtime-lite | `public/assets/models/polyhaven/book_encyclopedia_set_01.optimized.glb` | `/assets/generated/runtime-variants/book-encyclopedia-set-runtime-lite.glb` | 108,963 -> 40,305 (-63.0%) | 26.67 MB -> 26.67 MB (0.0%) | 555.4 KB -> 308.9 KB (-44.4%) |
+| hackney-sofa-runtime-lite | `public/assets/models/manual/dimensiva-hackney-sofa-by-hay.optimized.glb` | `/assets/generated/runtime-variants/hackney-sofa-runtime-lite.glb` | 541,701 -> 130,002 (-76.0%) | 5.33 MB -> 5.33 MB (0.0%) | 1.35 MB -> 497.3 KB (-64.1%) |
+| potted-plant-01-runtime-lite | `public/assets/models/polyhaven/potted_plant_01.optimized.glb` | `/assets/generated/runtime-variants/potted-plant-01-runtime-lite.glb` | 461,283 -> 82,971 (-82.0%) | 32.00 MB -> 32.00 MB (0.0%) | 1.55 MB -> 745.0 KB (-53.1%) |
 
 ## Notes
 
@@ -30,7 +32,7 @@ These runtime-lite GLBs are generated variants. Source GLBs are not overwritten.
 ## Next Steps
 
 - Visually compare variants against source assets in isometric view.
-- Continue camera-distance variant policy work for POV.
+- Use `runtimeModelUrl` / `heroModelUrl` metadata for selection-aware or camera-distance variant policy.
 - Keep windows on current assets for now; they are under the Phase 3 window budget.
 
 ## Commands

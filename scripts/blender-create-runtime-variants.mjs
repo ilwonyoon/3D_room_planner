@@ -67,6 +67,22 @@ const variants = [
     simplifyError: 0.002,
     textureSize: 512,
   },
+  {
+    id: 'hackney-sofa-runtime-lite',
+    source: 'public/assets/models/manual/dimensiva-hackney-sofa-by-hay.optimized.glb',
+    output: 'hackney-sofa-runtime-lite.glb',
+    simplifyRatio: 0.24,
+    simplifyError: 0.002,
+    textureSize: 512,
+  },
+  {
+    id: 'potted-plant-01-runtime-lite',
+    source: 'public/assets/models/polyhaven/potted_plant_01.optimized.glb',
+    output: 'potted-plant-01-runtime-lite.glb',
+    simplifyRatio: 0.18,
+    simplifyError: 0.0025,
+    textureSize: 512,
+  },
 ]
 
 const deferredVariants = [

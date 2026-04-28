@@ -8,6 +8,10 @@ export const runtimeModelVariantUrls = new Map<string, string>([
     "/assets/generated/runtime-variants/eames-armchair-runtime-lite.glb"
   ],
   [
+    "/assets/models/manual/dimensiva-hackney-sofa-by-hay.optimized.glb",
+    "/assets/generated/runtime-variants/hackney-sofa-runtime-lite.glb"
+  ],
+  [
     "/assets/models/manual/dimensiva-lotus-vase-by-101-copenhagen.optimized.glb",
     "/assets/generated/runtime-variants/lotus-vase-runtime-lite.glb"
   ],
@@ -22,6 +26,10 @@ export const runtimeModelVariantUrls = new Map<string, string>([
   [
     "/assets/models/polyhaven/book_encyclopedia_set_01.optimized.glb",
     "/assets/generated/runtime-variants/book-encyclopedia-set-runtime-lite.glb"
+  ],
+  [
+    "/assets/models/polyhaven/potted_plant_01.optimized.glb",
+    "/assets/generated/runtime-variants/potted-plant-01-runtime-lite.glb"
   ],
   [
     "/assets/models/polyhaven/vintage_cabinet_01.optimized.glb",

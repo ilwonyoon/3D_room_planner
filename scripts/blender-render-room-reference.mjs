@@ -9,14 +9,24 @@ const blender = process.env.BLENDER_BIN || (existsSync(DEFAULT_MACOS_BLENDER) ? 
 const script = join(ROOT, 'scripts/blender/render-room-reference.py')
 const modelRoot = join(ROOT, 'output/blender/models-decompressed')
 const referenceModels = [
-  'public/assets/models/polyhaven/metal_office_desk.optimized.glb',
-  'public/assets/models/polyhaven/modern_arm_chair_01.optimized.glb',
-  'public/assets/models/polyhaven/desk_lamp_arm_01.optimized.glb',
-  'public/assets/models/polyhaven/steel_frame_shelves_03.optimized.glb',
-  'public/assets/models/sharetextures/sharetextures-cabinet-3.optimized.glb',
-  'public/assets/models/polyhaven/industrial_pipe_lamp.optimized.glb',
-  'public/assets/models/polyhaven/side_table_01.optimized.glb',
+  'public/assets/models/manual/zeel-by-furniture-simple-table.optimized.glb',
+  'public/assets/models/manual/dimensiva-plan-chair-by-fredericia.optimized.glb',
+  'public/assets/models/manual/designconnected-hollie-table-lamp-8909.optimized.glb',
+  'public/assets/models/polyhaven/wooden_display_shelves_01.optimized.glb',
+  'public/assets/models/manual/zeel-by-furniture-rounded-commode.optimized.glb',
+  'public/assets/models/manual/dimensiva-hackney-sofa-by-hay.optimized.glb',
+  'public/assets/models/manual/dimensiva-ibiza-forte-coffee-table-by-ritzwell.optimized.glb',
+  'public/assets/models/polyhaven/book_encyclopedia_set_01.optimized.glb',
+  'public/assets/models/polyhaven/ceramic_vase_03.optimized.glb',
+  'public/assets/models/architectural/modern-wide-picture-window.optimized.glb',
+  'public/assets/models/polyhaven/ceramic_vase_02.optimized.glb',
+  'public/assets/models/manual/dimensiva-stop-bookend-by-e15.optimized.glb',
   'public/assets/models/polyhaven/potted_plant_04.optimized.glb',
+  'public/assets/models/polyhaven/potted_plant_01.optimized.glb',
+  'public/assets/models/polyhaven/ceramic_vase_01.optimized.glb',
+  'public/assets/models/manual/zeel-by-furniture-blown-armchair.optimized.glb',
+  'public/assets/models/manual/dimensiva-slit-side-table-round-high-by-hay.optimized.glb',
+  'public/assets/models/manual/dimensiva-toio-led-floor-lamp-by-flos.optimized.glb',
 ]
 
 function needsUpdate(src, dst) {
@@ -64,7 +74,7 @@ const result = spawnSync(
     '--model-root',
     modelRoot,
     '--output',
-    join(ROOT, 'output/blender/reference-daylight.png'),
+    join(ROOT, 'output/blender/current-room-reference-daylight.png'),
   ],
   {
     cwd: ROOT,

@@ -22,21 +22,21 @@ const HERO_SETS = [
     patches: {},
   },
   {
-    id: 'material-rich',
-    label: 'mat',
-    description: 'Higher material-signal replacements for the riskiest table/storage accents.',
+    id: 'lounge-accents',
+    label: 'acc',
+    description: 'Current-room lounge accent replacements for vase and small tabletop object material signal.',
     patches: {
-      'round-side-table': {
-        label: 'Slit Side Table',
-        url: '/assets/models/manual/dimensiva-slit-side-table-round-high-by-hay.optimized.glb',
-        targetSize: 0.5,
-        dimensionsM: { x: 0.35, y: 0.5, z: 0.35 },
-      },
-      'small-plant': {
+      'coffee-table-vase': {
         label: 'Lotus Vase',
         url: '/assets/models/manual/dimensiva-lotus-vase-by-101-copenhagen.optimized.glb',
-        targetSize: 0.34,
-        dimensionsM: { x: 0.24, y: 0.34, z: 0.24 },
+        targetSize: 0.22,
+        dimensionsM: { x: 0.2, y: 0.22, z: 0.2 },
+      },
+      'small-plant': {
+        label: 'Serif Vase',
+        url: '/assets/models/manual/dimensiva-serif-vase-by-kristina-dam-studio.optimized.glb',
+        targetSize: 0.32,
+        dimensionsM: { x: 0.22, y: 0.32, z: 0.22 },
       },
     },
   },
@@ -56,19 +56,6 @@ const HERO_SETS = [
         url: '/assets/models/manual/designconnected-neat-noon-table-lamp-10748.optimized.glb',
         targetSize: 0.5,
         dimensionsM: { x: 0.28, y: 0.5, z: 0.28 },
-      },
-    },
-  },
-  {
-    id: 'blender-emissive-lamps',
-    label: 'emit',
-    description: 'Blender-exported lamp material cleanup with explicit warm emissive bulb/glass materials.',
-    patches: {
-      'desk-lamp': {
-        url: '/assets/generated/blender-variants/desk-lamp-night-emissive.glb',
-      },
-      'reading-lamp': {
-        url: '/assets/generated/blender-variants/industrial-pipe-lamp-night-emissive.glb',
       },
     },
   },
@@ -132,6 +119,7 @@ function scoreMetrics(metrics, presetId) {
   const occupancyScore = night
     ? scoreRange(metrics.sceneOccupancy, 0.32, 0.7)
     : scoreRange(metrics.sceneOccupancy, 0.42, 0.78)
+  const darkBlobPenalty = scoreRange(metrics.darkBlobRatio, 0.018, 0.075)
 
   const weighted =
     contrastScore * 0.2 +
@@ -140,9 +128,10 @@ function scoreMetrics(metrics, presetId) {
     highlightScore * 0.14 +
     colorSeparationScore * 0.16 +
     occupancyScore * 0.14
+  const adjusted = clamp(weighted - darkBlobPenalty * 0.18)
 
   return {
-    perceptualProxyScore: Math.round(weighted * 1000) / 10,
+    perceptualProxyScore: Math.round(adjusted * 1000) / 10,
     profile: night ? 'night-mood' : 'balanced-room',
     components: {
       contrastScore: Math.round(contrastScore * 1000) / 1000,
@@ -151,6 +140,7 @@ function scoreMetrics(metrics, presetId) {
       highlightScore: Math.round(highlightScore * 1000) / 1000,
       colorSeparationScore: Math.round(colorSeparationScore * 1000) / 1000,
       occupancyScore: Math.round(occupancyScore * 1000) / 1000,
+      darkBlobPenalty: Math.round(darkBlobPenalty * 1000) / 1000,
     },
   }
 }
@@ -335,6 +325,7 @@ async function analyzeScreenshot(page, screenshot, crop) {
       let localContrastTotal = 0
       let localContrastSamples = 0
       let edgePixels = 0
+      const darkMask = new Uint8Array(width * height)
 
       const lumaAt = (index) =>
         data[index] * 0.2126 + data[index + 1] * 0.7152 + data[index + 2] * 0.0722
@@ -356,6 +347,7 @@ async function analyzeScreenshot(page, screenshot, crop) {
           if (luma > 28) occupiedPixels += 1
           if (luma >= 22 && luma <= 92) shadowPixels += 1
           if (luma >= 198) highlightPixels += 1
+          if (luma <= 36 && max - min <= 24) darkMask[y * width + x] = 1
 
           if (x + 1 < width && y + 1 < height) {
             const right = lumaAt(index + 4)
@@ -377,6 +369,44 @@ async function analyzeScreenshot(page, screenshot, crop) {
       const p05 = lumas[Math.floor(pixelCount * 0.05)]
       const p50 = lumas[Math.floor(pixelCount * 0.5)]
       const p95 = lumas[Math.floor(pixelCount * 0.95)]
+      const visited = new Uint8Array(pixelCount)
+      const stack = new Int32Array(pixelCount)
+      let largestInteriorDarkBlob = 0
+
+      for (let start = 0; start < pixelCount; start += 1) {
+        if (!darkMask[start] || visited[start]) continue
+
+        let stackLength = 0
+        let componentSize = 0
+        let touchesBorder = false
+        stack[stackLength++] = start
+        visited[start] = 1
+
+        while (stackLength > 0) {
+          const pixel = stack[--stackLength]
+          componentSize += 1
+          const x = pixel % width
+          const y = Math.floor(pixel / width)
+          if (x === 0 || y === 0 || x === width - 1 || y === height - 1) {
+            touchesBorder = true
+          }
+
+          const neighbors = [pixel - 1, pixel + 1, pixel - width, pixel + width]
+          for (const next of neighbors) {
+            if (next < 0 || next >= pixelCount || visited[next] || !darkMask[next]) continue
+            const nextX = next % width
+            if ((next === pixel - 1 && nextX !== x - 1) || (next === pixel + 1 && nextX !== x + 1)) {
+              continue
+            }
+            visited[next] = 1
+            stack[stackLength++] = next
+          }
+        }
+
+        if (!touchesBorder) {
+          largestInteriorDarkBlob = Math.max(largestInteriorDarkBlob, componentSize)
+        }
+      }
 
       return {
         crop: cropRect,
@@ -391,6 +421,7 @@ async function analyzeScreenshot(page, screenshot, crop) {
         shadowRatio: Math.round((shadowPixels / pixelCount) * 10000) / 10000,
         highlightRatio: Math.round((highlightPixels / pixelCount) * 10000) / 10000,
         sceneOccupancy: Math.round((occupiedPixels / pixelCount) * 10000) / 10000,
+        darkBlobRatio: Math.round((largestInteriorDarkBlob / pixelCount) * 10000) / 10000,
         saturationMean: Math.round((saturationTotal / pixelCount) * 10000) / 10000,
         warmCoolMean: Math.round(warmCoolMean * 10000) / 10000,
         warmCoolStdDev: Math.round(Math.sqrt(warmCoolVariance) * 10000) / 10000,
@@ -635,7 +666,7 @@ async function main() {
   }
   for (const preset of presets) {
     console.log(
-      `${preset.label}: score=${preset.score.perceptualProxyScore} contrast=${preset.metrics.lumaRangeP05P95} local=${preset.metrics.localContrast} shadow=${preset.metrics.shadowRatio} highlight=${preset.metrics.highlightRatio} colorSep=${preset.metrics.warmCoolStdDev}`,
+      `${preset.label}: score=${preset.score.perceptualProxyScore} contrast=${preset.metrics.lumaRangeP05P95} local=${preset.metrics.localContrast} shadow=${preset.metrics.shadowRatio} highlight=${preset.metrics.highlightRatio} colorSep=${preset.metrics.warmCoolStdDev} darkBlob=${preset.metrics.darkBlobRatio}`,
     )
   }
 
