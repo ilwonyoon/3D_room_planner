@@ -61,7 +61,7 @@ const lightingPresets: Record<LightingPresetId, LightingPreset> = {
     },
     window: {
       temperatureK: 5600,
-      powerLumens: 38,
+      powerLumens: 56,
       widthScale: 1.22,
       heightScale: 1.12,
       insetM: 0.36,
@@ -76,7 +76,7 @@ const lightingPresets: Record<LightingPresetId, LightingPreset> = {
     },
     sun: {
       temperatureK: 5200,
-      intensity: 0.62,
+      intensity: 0.78,
     },
     practical: {
       temperatureK: 2850,
