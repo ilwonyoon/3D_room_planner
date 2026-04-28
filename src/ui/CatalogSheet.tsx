@@ -129,6 +129,50 @@ const chips: Chip[] = [
   { id: 'pets', label: 'Pets', category: 'pets' },
 ]
 
+const chairScenarioPriority = [
+  'dimensiva-plan-chair-by-fredericia',
+  'GreenChair_01',
+  'designconnected-roly-poly-chair-8816',
+  'dimensiva-roly-poly-chair-by-driade',
+  'zeel-by-furniture-blown-armchair',
+  'mid_century_lounge_chair',
+  'WoodenChair_01',
+  'modern_arm_chair_01',
+  'ArmChair_01',
+  'BarberShopChair_01',
+  'Rockingchair_01',
+  'dining_chair_02',
+  'painted_wooden_chair_01',
+  'painted_wooden_chair_02',
+  'dimensiva-eames-armchair-rocker-rar-by-vitra',
+  'sheen-chair',
+]
+const chairScenarioPriorityRank = new Map(chairScenarioPriority.map((id, index) => [id, index]))
+
+function chairScenarioRank(item: Pick<ProductCatalogItem, 'id' | 'category' | 'source'>) {
+  if (item.category !== 'chair') {
+    return Number.MAX_SAFE_INTEGER
+  }
+
+  const explicitRank = chairScenarioPriorityRank.get(item.id)
+  if (explicitRank !== undefined) {
+    return explicitRank
+  }
+
+  if (item.source === 'manual') {
+    return 200
+  }
+
+  return 300
+}
+
+function sortScenarioProducts<T extends Pick<ProductCatalogItem, 'id' | 'category' | 'source'>>(items: T[]) {
+  return [...items].sort((a, b) => {
+    const rankDelta = chairScenarioRank(a) - chairScenarioRank(b)
+    return rankDelta === 0 ? 0 : rankDelta
+  })
+}
+
 const roomChips: RoomChip[] = [
   { id: 'wall-materials', label: 'Wallpaper', category: 'wall-materials' },
   { id: 'floor-materials', label: 'Flooring', category: 'floor-materials' },
@@ -483,9 +527,9 @@ function getCatalogTiles(filter: FilterId, renderQuality: RenderQuality): Produc
     return []
   }
 
-  return PRODUCT_CATALOG.filter(
+  return sortScenarioProducts(PRODUCT_CATALOG.filter(
     (item) => item.category === selected.category && (renderQuality === 'high' || item.renderCost !== 'heavy'),
-  ).map((item) => ({
+  )).map((item) => ({
     ...item,
     displayDimensions: item.name,
     ariaLabel: `${item.brand} ${item.name} ${formatCm(item.dimensionsCm)}`,
@@ -602,11 +646,11 @@ export function CatalogSheet() {
       return null
     }
 
-    const candidates = PRODUCT_CATALOG.filter(
+    const candidates = sortScenarioProducts(PRODUCT_CATALOG.filter(
       (item) =>
         item.category === selectedItem.category &&
         (item.id === selectedItem.id || renderQuality === 'high' || item.renderCost !== 'heavy'),
-    )
+    ))
 
     return {
       object: selectedObject,
@@ -1290,6 +1334,8 @@ function SelectedObjectEditOverlay({
   onReplace: (item: ProductCatalogItem) => void
 }) {
   const priceMeta = productPriceMeta(context.item)
+  const replacementItems = context.candidates.filter((item) => item.id !== context.item.id)
+  const railItems = replacementItems.length > 0 ? replacementItems : context.candidates
 
   return (
     <>
@@ -1310,7 +1356,7 @@ function SelectedObjectEditOverlay({
           overflowY: 'hidden',
         }}
       >
-        {context.candidates.map((item) => {
+        {railItems.map((item) => {
           const active = item.id === context.item.id
 
           return (
