@@ -2,9 +2,9 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import type { ThreeEvent } from '@react-three/fiber'
 import {
   CameraControls,
-  ContactShadows,
   OrthographicCamera,
   PerspectiveCamera,
+  SoftShadows,
 } from '@react-three/drei'
 import type { CameraControls as CameraControlsImpl } from '@react-three/drei'
 import { useEffect, useMemo, useRef } from 'react'
@@ -37,7 +37,6 @@ const RAYCAST_HITBOX_LAYER = 2
 const POV_EYE_HEIGHT_M = 1.7
 const POV_MOVE_SPEED_MPS = 1.8
 const POV_LOOK_SPEED = 0.0042
-const CONTACT_SHADOW_RESOLUTION = 1024
 const webglLifecycleStats = {
   contextLost: 0,
   contextRestored: 0,
@@ -46,27 +45,23 @@ const webglLifecycleStats = {
 const renderQualitySettings = {
   low: {
     dpr: [1, 1] as [number, number],
-    contactOpacity: 0.18,
     aoIntensity: 0,
     aoRadius: 1.2,
   },
   medium: {
     dpr: [1, 1] as [number, number],
-    contactOpacity: 0.3,
     aoIntensity: 0,
     aoRadius: 1.25,
   },
   high: {
     dpr: [1.5, 2] as [number, number],
-    contactOpacity: 0.34,
     aoIntensity: 0.42,
-    aoRadius: 0.86,
+    aoRadius: 0.92,
   },
 } satisfies Record<
   RenderQuality,
   {
     dpr: [number, number]
-    contactOpacity: number
     aoIntensity: number
     aoRadius: number
   }
@@ -121,12 +116,6 @@ function WebglLifecycleGuard() {
   }, [gl, invalidate])
 
   return null
-}
-
-const contactShadowSettings = {
-  opacityScale: 1.12,
-  blur: 2.85,
-  far: 1.15,
 }
 
 const SCENE_GRID_SIZE = 18
@@ -372,6 +361,7 @@ function CameraRig({
   mode: CameraViewMode
 }) {
   const invalidate = useThree((state) => state.invalidate)
+  const room = useRoomStore((state) => state.room)
   const controlsRef = useRef<CameraControlsImpl | null>(null)
   const orthographicRef = useRef<THREE.OrthographicCamera | null>(null)
   const perspectiveRef = useRef<THREE.PerspectiveCamera | null>(null)
@@ -409,6 +399,25 @@ function CameraRig({
     controls.setLookAt(6.8, 5.9, 6.8, 0, 0.15, 0, true).then(() => invalidate())
   }, [invalidate, mode])
 
+  useEffect(() => {
+    const controls = controlsRef.current
+
+    if (!controls || mode === 'pov') {
+      return
+    }
+
+    const targetMarginX = mode === 'bird' ? room.widthM * 0.38 : room.widthM * 0.12
+    const targetMarginZ = mode === 'bird' ? room.depthM * 0.38 : room.depthM * 0.12
+    controls.boundaryFriction = 0
+    controls.setBoundary(
+      new THREE.Box3(
+        new THREE.Vector3(-targetMarginX, -0.12, -targetMarginZ),
+        new THREE.Vector3(targetMarginX, 0.82, targetMarginZ),
+      ),
+    )
+    invalidate()
+  }, [invalidate, mode, room.depthM, room.widthM])
+
   return (
     <>
       <OrthographicCamera
@@ -436,13 +445,13 @@ function CameraRig({
           minPolarAngle={mode === 'bird' ? 0 : Math.PI / 8}
           maxPolarAngle={mode === 'bird' ? 0.02 : Math.PI / 2.22}
           minZoom={mode === 'bird' ? 34 : 18}
-          maxZoom={mode === 'bird' ? 140 : 180}
+          maxZoom={mode === 'bird' ? 140 : 72}
           minDistance={0.7}
           maxDistance={14}
           draggingSmoothTime={0.08}
           azimuthRotateSpeed={mode === 'bird' ? 0 : 0.72}
           polarRotateSpeed={mode === 'bird' ? 0 : 0.72}
-          truckSpeed={mode === 'bird' ? 1.15 : 0.95}
+          truckSpeed={mode === 'bird' ? 1.15 : 0.25}
           dollySpeed={1.25}
         />
       ) : null}
@@ -620,7 +629,6 @@ export function IsometricScene({ className }: Props) {
   const editControlsEnabled = viewMode !== 'pov'
   const gridActive = editControlsEnabled && (editMode !== 'idle' || activeDragMode !== null)
   const renderSettings = renderQualitySettings[quality]
-  const contactOpacityViewScale = viewMode === 'bird' ? 0.42 : viewMode === 'pov' ? 0.72 : 1
 
   useEffect(() => {
     if (viewMode !== 'pov') {
@@ -642,7 +650,7 @@ export function IsometricScene({ className }: Props) {
     <>
       <Canvas
         className={className}
-        shadows={{ type: THREE.PCFSoftShadowMap }}
+        shadows={{ type: THREE.PCFShadowMap }}
         gl={{
           antialias: true,
           alpha: false,
@@ -678,6 +686,7 @@ export function IsometricScene({ className }: Props) {
         <CameraRig mode={viewMode} cameraEnabled={cameraEnabled} />
         <PovMovementController enabled={viewMode === 'pov'} />
 
+        {quality === 'high' ? <SoftShadows size={32} samples={18} focus={0.22} /> : null}
         <Lighting quality={quality} />
 
         <AssetRoom
@@ -686,16 +695,6 @@ export function IsometricScene({ className }: Props) {
         />
         <SelectionGizmos />
         {editControlsEnabled ? <PlacementHandlers /> : <PlacementHandlers variant="pov-move" />}
-
-        <ContactShadows
-          position={[0, 0.012, 0]}
-          opacity={renderSettings.contactOpacity * contactShadowSettings.opacityScale * contactOpacityViewScale}
-          blur={contactShadowSettings.blur}
-          scale={8}
-          resolution={CONTACT_SHADOW_RESOLUTION}
-          far={contactShadowSettings.far}
-          color="#000000"
-        />
 
         <ScenePostProcessing quality={quality} />
       </Canvas>

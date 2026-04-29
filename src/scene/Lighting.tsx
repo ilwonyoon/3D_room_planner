@@ -53,11 +53,11 @@ type LightingPreset = {
 const lightingPresets: Record<LightingPresetId, LightingPreset> = {
   'afternoon-natural': {
     environmentIntensity: 0.24,
-    ambientIntensity: 0.008,
+    ambientIntensity: 0.012,
     hemisphere: {
       sky: '#fff5e8',
       ground: '#4a443a',
-      intensity: 0.082,
+      intensity: 0.105,
     },
     window: {
       temperatureK: 5450,
@@ -68,7 +68,7 @@ const lightingPresets: Record<LightingPresetId, LightingPreset> = {
     },
     fill: {
       temperatureK: 6800,
-      powerLumens: 1.65,
+      powerLumens: 2.05,
       position: [-1.7, 2.45, 2.05],
       target: [-0.15, 0.58, -0.25],
       width: 3.8,
@@ -76,7 +76,7 @@ const lightingPresets: Record<LightingPresetId, LightingPreset> = {
     },
     sun: {
       temperatureK: 5150,
-      intensity: 0.86,
+      intensity: 0.68,
     },
     practical: {
       temperatureK: 2850,
@@ -84,8 +84,8 @@ const lightingPresets: Record<LightingPresetId, LightingPreset> = {
       floorPowerLumens: 1.25,
     },
     bounce: {
-      floorPowerLumens: 1.85,
-      backWallPowerLumens: 1.22,
+      floorPowerLumens: 2.15,
+      backWallPowerLumens: 1.36,
     },
     exposure: 0.94,
   },
@@ -231,8 +231,8 @@ function DirectionalShadowLight({
         shadow-camera-bottom={-(room.depthM / 2 + 0.8)}
         shadow-camera-near={0.85}
         shadow-camera-far={9.25}
-        shadow-bias={-0.00018}
-        shadow-normalBias={0.035}
+        shadow-bias={-0.00012}
+        shadow-normalBias={0.055}
       />
       <object3D ref={targetRef} position={target} />
     </>
@@ -425,7 +425,7 @@ export function Lighting({ quality }: { quality: RenderQuality }) {
   const presetId = useLightingPresetStore((state) => state.preset)
   const preset = lightingPresets[presetId]
   const dynamicShadows = quality !== 'low'
-  const shadowMapSize = quality === 'high' ? 2048 : quality === 'medium' ? 1024 : 512
+  const shadowMapSize = quality === 'high' ? 3072 : quality === 'medium' ? 1536 : 512
   const windowObject = useEditorObjectsStore((state) =>
     state.objects.find((object) => object.id === 'window-main' || object.renderKind === 'window-opening'),
   )

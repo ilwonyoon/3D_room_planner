@@ -39,7 +39,7 @@ const BAKED_LIGHTING_TEXTURES = {
 }
 const BAKED_LIGHTING_VIEW_SETTINGS = {
   isometric: {
-    floorAo: 0.3,
+    floorAo: 0,
     floorLight: 0.14,
     backWallAo: 0.22,
     backWallLight: 0.36,
@@ -48,7 +48,7 @@ const BAKED_LIGHTING_VIEW_SETTINGS = {
     frontWallAo: 0.2,
   },
   bird: {
-    floorAo: 0.12,
+    floorAo: 0,
     floorLight: 0.04,
     backWallAo: 0.12,
     backWallLight: 0.28,
@@ -57,7 +57,7 @@ const BAKED_LIGHTING_VIEW_SETTINGS = {
     frontWallAo: 0.12,
   },
   pov: {
-    floorAo: 0.34,
+    floorAo: 0,
     floorLight: 0.08,
     backWallAo: 0.26,
     backWallLight: 0.24,
@@ -68,7 +68,7 @@ const BAKED_LIGHTING_VIEW_SETTINGS = {
 } satisfies Record<CameraViewMode, Record<keyof typeof BAKED_LIGHTING_TEXTURES, number>>
 const BAKED_LIGHTING_PRESET_MULTIPLIERS = {
   'afternoon-natural': {
-    floorAo: 0.84,
+    floorAo: 0.5,
     floorLight: 0.52,
     backWallAo: 0.86,
     backWallLight: 0.84,
@@ -81,7 +81,7 @@ const LAMP_EMISSIVE_COLOR = '#ffd79a'
 const MODEL_SHADOW_MATERIAL = new THREE.MeshBasicMaterial({
   color: '#090604',
   transparent: true,
-  opacity: 0.18,
+  opacity: 0.1,
   depthWrite: false,
 })
 const DIMENSION_SYNC_EPSILON_M = 0.015
@@ -622,7 +622,6 @@ function RoomShell({ materials }: { materials: ReturnType<typeof usePbrRoomMater
   const crownHeight = 0.042
   const crownDepth = 0.038
   const cornerPostSize = 0.045
-
   useFrame(({ camera }) => {
     const visibleSides = visibleWallSidesForMode(camera.position, cameraMode)
 
@@ -695,7 +694,6 @@ function RoomShell({ materials }: { materials: ReturnType<typeof usePbrRoomMater
           />
         </mesh>
       ) : null}
-
       <group ref={backWallRef}>
         <mesh
           geometry={widthWallGeometry}
@@ -1251,7 +1249,7 @@ function ModelContactShadow({
   const material = useMemo(() => {
     const cloned = MODEL_SHADOW_MATERIAL.clone()
     const area = object.dimensionsM.x * object.dimensionsM.z
-    cloned.opacity = Math.min(0.24, Math.max(0.1, 0.11 + area * 0.035))
+    cloned.opacity = Math.min(0.09, Math.max(0.028, 0.034 + area * 0.012))
     return cloned
   }, [object.dimensionsM.x, object.dimensionsM.z])
   const radiusX = Math.max(object.dimensionsM.x * 0.48, 0.14) / scale
