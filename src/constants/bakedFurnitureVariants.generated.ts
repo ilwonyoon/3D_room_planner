@@ -12,10 +12,6 @@ export const bakedFurnitureVariantUrls = new Map<string, string>([
     "/assets/generated/baked-variants/rounded-commode-4k-baked.glb"
   ],
   [
-    "/assets/models/polyhaven/wooden_display_shelves_01.optimized.glb",
-    "/assets/generated/baked-variants/wooden-display-shelves-4k-baked.glb"
-  ],
-  [
     "/assets/models/manual/dimensiva-hackney-sofa-by-hay.optimized.glb",
     "/assets/generated/baked-variants/hackney-sofa-4k-baked.glb"
   ],

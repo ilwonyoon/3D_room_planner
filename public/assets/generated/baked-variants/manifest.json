@@ -30,15 +30,6 @@
       "sizeLabel": "591.4 KB"
     },
     {
-      "id": "wooden-display-shelves-4k-baked",
-      "source": "/assets/models/polyhaven/wooden_display_shelves_01.optimized.glb",
-      "outputUrl": "/assets/generated/baked-variants/wooden-display-shelves-4k-baked.glb",
-      "textureSize": 4096,
-      "kind": "wood",
-      "bytes": 518040,
-      "sizeLabel": "505.9 KB"
-    },
-    {
       "id": "hackney-sofa-4k-baked",
       "source": "/assets/models/manual/dimensiva-hackney-sofa-by-hay.optimized.glb",
       "outputUrl": "/assets/generated/baked-variants/hackney-sofa-4k-baked.glb",

@@ -51,119 +51,43 @@ type LightingPreset = {
 }
 
 const lightingPresets: Record<LightingPresetId, LightingPreset> = {
-  'daylight-window': {
-    environmentIntensity: 0.46,
-    ambientIntensity: 0.018,
+  'afternoon-natural': {
+    environmentIntensity: 0.24,
+    ambientIntensity: 0.008,
     hemisphere: {
-      sky: '#fff4e8',
-      ground: '#4c5664',
-      intensity: 0.18,
+      sky: '#fff5e8',
+      ground: '#4a443a',
+      intensity: 0.082,
     },
     window: {
-      temperatureK: 5600,
-      powerLumens: 38,
+      temperatureK: 5450,
+      powerLumens: 24,
       widthScale: 1.22,
       heightScale: 1.12,
       insetM: 0.36,
     },
     fill: {
-      temperatureK: 7400,
-      powerLumens: 9.5,
-      position: [-1.55, 2.5, 2.05],
-      target: [-0.15, 0.62, -0.35],
+      temperatureK: 6800,
+      powerLumens: 1.65,
+      position: [-1.7, 2.45, 2.05],
+      target: [-0.15, 0.58, -0.25],
       width: 3.8,
       height: 2.5,
     },
     sun: {
-      temperatureK: 5200,
-      intensity: 0.62,
+      temperatureK: 5150,
+      intensity: 0.86,
     },
     practical: {
       temperatureK: 2850,
-      deskPowerLumens: 3.2,
-      floorPowerLumens: 4.8,
+      deskPowerLumens: 0.75,
+      floorPowerLumens: 1.25,
     },
     bounce: {
-      floorPowerLumens: 7.2,
-      backWallPowerLumens: 4.2,
+      floorPowerLumens: 1.85,
+      backWallPowerLumens: 1.22,
     },
-    exposure: 1.06,
-  },
-  'warm-evening': {
-    environmentIntensity: 0.26,
-    ambientIntensity: 0.014,
-    hemisphere: {
-      sky: '#ffe3bd',
-      ground: '#34313b',
-      intensity: 0.13,
-    },
-    window: {
-      temperatureK: 3200,
-      powerLumens: 19,
-      widthScale: 1.14,
-      heightScale: 1.05,
-      insetM: 0.34,
-    },
-    fill: {
-      temperatureK: 9000,
-      powerLumens: 6,
-      position: [-1.5, 2.45, 2.15],
-      target: [-0.2, 0.6, -0.2],
-      width: 3.6,
-      height: 2.4,
-    },
-    sun: {
-      temperatureK: 3000,
-      intensity: 0.24,
-    },
-    practical: {
-      temperatureK: 2500,
-      deskPowerLumens: 6.4,
-      floorPowerLumens: 9.6,
-    },
-    bounce: {
-      floorPowerLumens: 5.6,
-      backWallPowerLumens: 3.2,
-    },
-    exposure: 1.16,
-  },
-  'night-room': {
-    environmentIntensity: 0.18,
-    ambientIntensity: 0.01,
-    hemisphere: {
-      sky: '#182035',
-      ground: '#211b22',
-      intensity: 0.08,
-    },
-    window: {
-      temperatureK: 7800,
-      powerLumens: 7.2,
-      widthScale: 1.1,
-      heightScale: 1,
-      insetM: 0.34,
-    },
-    fill: {
-      temperatureK: 9200,
-      powerLumens: 2.8,
-      position: [-1.45, 2.35, 2.05],
-      target: [-0.2, 0.6, -0.25],
-      width: 3.5,
-      height: 2.3,
-    },
-    sun: {
-      temperatureK: 7600,
-      intensity: 0.08,
-    },
-    practical: {
-      temperatureK: 2350,
-      deskPowerLumens: 8.2,
-      floorPowerLumens: 12.4,
-    },
-    bounce: {
-      floorPowerLumens: 3.6,
-      backWallPowerLumens: 1.8,
-    },
-    exposure: 1.08,
+    exposure: 0.94,
   },
 }
 
@@ -270,6 +194,7 @@ function DirectionalShadowLight({
   intensity,
   dynamicShadows,
   shadowMapSize,
+  room,
 }: {
   position: LightTuple
   target: LightTuple
@@ -277,6 +202,7 @@ function DirectionalShadowLight({
   intensity: number
   dynamicShadows: boolean
   shadowMapSize: number
+  room: { widthM: number; depthM: number; heightM: number }
 }) {
   const lightRef = useRef<THREE.DirectionalLight>(null)
   const targetRef = useRef<THREE.Object3D>(null)
@@ -299,13 +225,14 @@ function DirectionalShadowLight({
         castShadow={dynamicShadows}
         shadow-mapSize-width={shadowMapSize}
         shadow-mapSize-height={shadowMapSize}
-        shadow-camera-left={-2.9}
-        shadow-camera-right={2.9}
-        shadow-camera-top={3.2}
-        shadow-camera-bottom={-3.2}
-        shadow-camera-near={1.2}
-        shadow-camera-far={10}
-        shadow-bias={-0.00025}
+        shadow-camera-left={-(room.widthM / 2 + 0.7)}
+        shadow-camera-right={room.widthM / 2 + 0.7}
+        shadow-camera-top={room.depthM / 2 + 0.8}
+        shadow-camera-bottom={-(room.depthM / 2 + 0.8)}
+        shadow-camera-near={0.85}
+        shadow-camera-far={9.25}
+        shadow-bias={-0.00018}
+        shadow-normalBias={0.035}
       />
       <object3D ref={targetRef} position={target} />
     </>
@@ -333,11 +260,11 @@ function WindowKeyLight({
         windowObject.position.z + normal.z * preset.window.insetM,
       ]
     : [2.0, 1.62, -0.35]
-  const target: LightTuple = [0.12, 0.76, -0.18]
+  const target: LightTuple = [-0.12, 0.62, -0.08]
   const shadowPosition: LightTuple = [
-    center[0] - normal.x * 3.4 + 0.65,
-    Math.min(room.heightM + 2.1, 4.5),
-    center[2] - normal.z * 3.4 + 0.65,
+    center[0] - normal.x * 4.35 + 0.35,
+    Math.min(room.heightM + 2.6, 5.25),
+    center[2] - normal.z * 4.35 + 0.42,
   ]
   const width = (windowObject?.dimensionsM.x ?? 1.55) * preset.window.widthScale
   const height = (windowObject?.dimensionsM.y ?? 1.05) * preset.window.heightScale
@@ -359,6 +286,7 @@ function WindowKeyLight({
         intensity={preset.sun.intensity}
         dynamicShadows={dynamicShadows}
         shadowMapSize={shadowMapSize}
+        room={room}
       />
     </>
   )
@@ -490,15 +418,14 @@ function IndirectBounceLights({
 }
 
 /**
- * Photo lighting rig: one motivated window key, one soft fill, practical lamps,
- * inverse-square practical spots, cheap bounce cards, and only one shadow-casting
- * light in high quality.
+ * Current-room natural light rig: one motivated window key, one sun shadow,
+ * restrained fill, cheap bounce cards, and very low practical lamp accents.
  */
 export function Lighting({ quality }: { quality: RenderQuality }) {
   const presetId = useLightingPresetStore((state) => state.preset)
   const preset = lightingPresets[presetId]
-  const dynamicShadows = quality === 'high'
-  const shadowMapSize = quality === 'high' ? 1024 : 512
+  const dynamicShadows = quality !== 'low'
+  const shadowMapSize = quality === 'high' ? 2048 : quality === 'medium' ? 1024 : 512
   const windowObject = useEditorObjectsStore((state) =>
     state.objects.find((object) => object.id === 'window-main' || object.renderKind === 'window-opening'),
   )

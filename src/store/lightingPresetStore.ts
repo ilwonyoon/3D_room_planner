@@ -1,11 +1,9 @@
 import { create } from 'zustand'
 
-export type LightingPresetId = 'daylight-window' | 'warm-evening' | 'night-room'
+export type LightingPresetId = 'afternoon-natural'
 
 export const lightingPresetOptions: Array<{ id: LightingPresetId; label: string }> = [
-  { id: 'daylight-window', label: 'Day' },
-  { id: 'warm-evening', label: 'Warm' },
-  { id: 'night-room', label: 'Night' },
+  { id: 'afternoon-natural', label: 'Natural' },
 ]
 
 interface LightingPresetState {
@@ -14,6 +12,6 @@ interface LightingPresetState {
 }
 
 export const useLightingPresetStore = create<LightingPresetState>((set) => ({
-  preset: 'daylight-window',
+  preset: 'afternoon-natural',
   setPreset: (preset) => set({ preset }),
 }))

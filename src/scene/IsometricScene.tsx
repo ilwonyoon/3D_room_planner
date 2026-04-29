@@ -4,7 +4,6 @@ import {
   CameraControls,
   ContactShadows,
   OrthographicCamera,
-  PerformanceMonitor,
   PerspectiveCamera,
 } from '@react-three/drei'
 import type { CameraControls as CameraControlsImpl } from '@react-three/drei'
@@ -27,7 +26,7 @@ import {
   useSelectionStore,
   useUiStore,
 } from '@/store'
-import type { CameraViewMode, LightingPresetId, RenderQuality } from '@/store'
+import type { CameraViewMode, RenderQuality } from '@/store'
 
 interface Props {
   className?: string
@@ -38,7 +37,7 @@ const RAYCAST_HITBOX_LAYER = 2
 const POV_EYE_HEIGHT_M = 1.7
 const POV_MOVE_SPEED_MPS = 1.8
 const POV_LOOK_SPEED = 0.0042
-const CONTACT_SHADOW_RESOLUTION = 256
+const CONTACT_SHADOW_RESOLUTION = 1024
 const webglLifecycleStats = {
   contextLost: 0,
   contextRestored: 0,
@@ -58,10 +57,10 @@ const renderQualitySettings = {
     aoRadius: 1.25,
   },
   high: {
-    dpr: [1, 1.25] as [number, number],
+    dpr: [1.5, 2] as [number, number],
     contactOpacity: 0.34,
-    aoIntensity: 1.02,
-    aoRadius: 1.4,
+    aoIntensity: 0.42,
+    aoRadius: 0.86,
   },
 } satisfies Record<
   RenderQuality,
@@ -124,30 +123,11 @@ function WebglLifecycleGuard() {
   return null
 }
 
-const contactShadowPresetSettings = {
-  'daylight-window': {
-    opacityScale: 0.92,
-    blur: 2.9,
-    far: 2.15,
-  },
-  'warm-evening': {
-    opacityScale: 1.18,
-    blur: 2.2,
-    far: 1.65,
-  },
-  'night-room': {
-    opacityScale: 1.08,
-    blur: 2.45,
-    far: 1.8,
-  },
-} satisfies Record<
-  LightingPresetId,
-  {
-    opacityScale: number
-    blur: number
-    far: number
-  }
->
+const contactShadowSettings = {
+  opacityScale: 1.12,
+  blur: 2.85,
+  far: 1.15,
+}
 
 const SCENE_GRID_SIZE = 18
 const SCENE_GRID_INNER_FADE_RADIUS = 2.6
@@ -234,18 +214,6 @@ function SceneGrid({
   }
 
   return <primitive object={grid} onPointerDown={handlePointerDown} />
-}
-
-function AdaptiveQuality() {
-  const lowerQuality = useRenderQualityStore((state) => state.lowerQuality)
-
-  return (
-    <PerformanceMonitor
-      bounds={(refreshRate) => (refreshRate > 90 ? [48, 90] : [45, 60])}
-      flipflops={3}
-      onDecline={lowerQuality}
-    />
-  )
 }
 
 function objectWorldVisible(object: THREE.Object3D) {
@@ -645,7 +613,6 @@ export function IsometricScene({ className }: Props) {
   const setEditMode = useEditorObjectsStore((state) => state.setEditMode)
   const setActiveDragMode = useEditorObjectsStore((state) => state.setActiveDragMode)
   const quality = useRenderQualityStore((state) => state.quality)
-  const lightingPreset = useLightingPresetStore((state) => state.preset)
   const viewMode = useCameraViewStore((state) => state.mode)
   const setCatalog = useUiStore((state) => state.setCatalog)
   const select = useSelectionStore((state) => state.select)
@@ -653,7 +620,7 @@ export function IsometricScene({ className }: Props) {
   const editControlsEnabled = viewMode !== 'pov'
   const gridActive = editControlsEnabled && (editMode !== 'idle' || activeDragMode !== null)
   const renderSettings = renderQualitySettings[quality]
-  const contactSettings = contactShadowPresetSettings[lightingPreset]
+  const contactOpacityViewScale = viewMode === 'bird' ? 0.42 : viewMode === 'pov' ? 0.72 : 1
 
   useEffect(() => {
     if (viewMode !== 'pov') {
@@ -675,7 +642,7 @@ export function IsometricScene({ className }: Props) {
     <>
       <Canvas
         className={className}
-        shadows={{ type: THREE.PCFShadowMap }}
+        shadows={{ type: THREE.PCFSoftShadowMap }}
         gl={{
           antialias: true,
           alpha: false,
@@ -704,7 +671,6 @@ export function IsometricScene({ className }: Props) {
       >
         <color attach="background" args={[color.scene.bg]} />
 
-        <AdaptiveQuality />
         <WebglLifecycleGuard />
         <RendererStatsBridge quality={quality} />
         <EditorInteractionLayers />
@@ -723,11 +689,11 @@ export function IsometricScene({ className }: Props) {
 
         <ContactShadows
           position={[0, 0.012, 0]}
-          opacity={renderSettings.contactOpacity * contactSettings.opacityScale}
-          blur={contactSettings.blur}
+          opacity={renderSettings.contactOpacity * contactShadowSettings.opacityScale * contactOpacityViewScale}
+          blur={contactShadowSettings.blur}
           scale={8}
           resolution={CONTACT_SHADOW_RESOLUTION}
-          far={contactSettings.far}
+          far={contactShadowSettings.far}
           color="#000000"
         />
 

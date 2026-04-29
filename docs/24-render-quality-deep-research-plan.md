@@ -199,6 +199,55 @@ Target after Phase 1-3:
 4. Add `ultra` render quality settings and capture A/B screenshots only after Phase 1 lands.
 5. Promote only if screenshot and metrics both improve against current `2026-04-28T21-49-26-791Z` baseline.
 
+## Execution Log
+
+### 2026-04-28 pass 1
+
+Promoted changes:
+
+- Rebalanced `warm-evening` and `night-room` lighting presets so the low-scoring views get more motivated bounce/fill/practical light without adding draw calls.
+- Tightened the Blender-generated room mask script so static AO uses actual default-room footprint sizes instead of manually tuned radius/strength pairs.
+- Regenerated runtime room masks:
+  - `public/assets/generated/blender/floor-static-ao.png`
+  - `public/assets/generated/blender/floor-window-wash.png`
+  - `public/assets/generated/blender/back-wall-window-glow.png`
+
+Rejected experiments:
+
+- Direct Cycles bake into the existing alpha-mask format. It produced noisy AO and nearly black light maps because the current runtime expects normalized overlay masks, not physical lightmap textures.
+- Higher DPR/contact-shadow/N8AO runtime settings. The first run was more expensive and did not improve the proxy score.
+- Overlay strength tuning alone. It moved the image less than the lighting preset rebalance and made some bird/POV metrics worse.
+
+Verification:
+
+```bash
+pnpm blender:bake-room-lighting
+pnpm build
+pnpm render:quality-metrics --url=http://127.0.0.1:5190/ --views=isometric,bird,pov --quality=high --hero-sets=all --baseline=output/render-quality-metrics/2026-04-28T21-49-26-791Z.json
+pnpm render:budget --url=http://127.0.0.1:5190/ --quality=medium
+```
+
+Results:
+
+- Baseline hero set average: `64.8 -> 73.1`
+- All hero set average: `73.6`
+- Best hero set average: `lounge-accents` at `74.1`
+- Largest baseline gains:
+  - `isometric:warm-evening`: `+11.8`
+  - `isometric:night-room`: `+17.0`
+  - `bird:warm-evening`: `+11.2`
+  - `bird:night-room`: `+14.1`
+  - `pov:warm-evening`: `+8.2`
+  - `pov:night-room`: `+4.4`
+- Budget remains inside current medium targets:
+  - Max draw calls: `177`
+  - Max triangles: `425,898`
+  - Max textures: `85`
+
+Conclusion:
+
+This pass improves the runtime image with no budget regression, but it does not complete the original `75+` target. The next meaningful quality step is not more alpha-mask tuning. It should be a real static shell/lightmap path or a material-preserving furniture bake path with screenshot acceptance.
+
 ## Sources
 
 - Three.js color management: https://threejs.org/manual/en/color-management.html

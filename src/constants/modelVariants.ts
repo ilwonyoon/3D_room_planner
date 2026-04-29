@@ -9,6 +9,7 @@ export type ModelVariantUrls = {
 
 export type ModelVariantRenderContext = {
   selected?: boolean
+  quality?: 'low' | 'medium' | 'high'
 }
 
 export const enableRuntimeModelVariants =
@@ -16,9 +17,62 @@ export const enableRuntimeModelVariants =
   import.meta.env.VITE_ENABLE_RUNTIME_VARIANTS !== 'false'
 export const enableBakedFurnitureVariants =
   import.meta.env.VITE_ENABLE_BAKED_FURNITURE_VARIANTS === 'true'
+export const preferSourceRoomModels =
+  import.meta.env.VITE_PREFER_SOURCE_ROOM_MODELS !== 'false'
+
+const disabledBakedFurnitureSourceUrls = new Set([
+  // Current 4K bake has a black atlas artifact that becomes visible on selection.
+  '/assets/models/polyhaven/wooden_display_shelves_01.optimized.glb',
+])
+
+const disabledRuntimeVariantSourceUrls = new Set([
+  // The generated lite shelf collapses part of the mesh into a black block.
+  '/assets/models/polyhaven/wooden_display_shelves_01.optimized.glb',
+])
+
+const disabledRuntimeVariantUrls = new Set([
+  '/assets/generated/runtime-variants/wooden-display-shelves-runtime-lite.glb',
+])
+
+const disabledBakedFurnitureFallbackUrls = new Map([
+  [
+    '/assets/generated/baked-variants/wooden-display-shelves-4k-baked.glb',
+    '/assets/models/polyhaven/wooden_display_shelves_01.optimized.glb',
+  ],
+  [
+    '/assets/generated/runtime-variants/wooden-display-shelves-runtime-lite.glb',
+    '/assets/models/polyhaven/wooden_display_shelves_01.optimized.glb',
+  ],
+])
+
+function sourcePathForVariantLookup(sourceModelUrl: string) {
+  return sourceModelUrl.split('?', 1)[0]
+}
+
+function safeVariantUrl(url: string | undefined) {
+  if (!url) {
+    return undefined
+  }
+
+  const path = sourcePathForVariantLookup(url)
+  return disabledBakedFurnitureFallbackUrls.has(path) || disabledRuntimeVariantUrls.has(path) ? undefined : url
+}
+
+function sourceFallbackUrlFor(model: { url: string; sourceModelUrl?: string }) {
+  const urlPath = sourcePathForVariantLookup(model.url)
+  const sourcePath = model.sourceModelUrl ? sourcePathForVariantLookup(model.sourceModelUrl) : undefined
+
+  return disabledBakedFurnitureFallbackUrls.get(urlPath) ?? sourcePath
+}
 
 function bakedFurnitureVariantUrlFor(sourceModelUrl: string) {
-  return enableBakedFurnitureVariants ? bakedFurnitureVariantUrls.get(sourceModelUrl) : undefined
+  const sourcePath = sourcePathForVariantLookup(sourceModelUrl)
+
+  if (!enableBakedFurnitureVariants || disabledBakedFurnitureSourceUrls.has(sourcePath)) {
+    return undefined
+  }
+
+  return bakedFurnitureVariantUrls.get(sourcePath)
 }
 
 const ktx2ModelVariantUrls = new Set([
@@ -66,7 +120,10 @@ export function assetUrlWithRevision(assetUrl: string) {
 
 export function modelVariantUrlsFor(sourceModelUrl: string): ModelVariantUrls {
   const bakedModelUrl = bakedFurnitureVariantUrlFor(sourceModelUrl)
-  const runtimeModelUrl = bakedModelUrl ?? runtimeModelVariantUrls.get(sourceModelUrl)
+  const sourcePath = sourcePathForVariantLookup(sourceModelUrl)
+  const runtimeModelUrl =
+    bakedModelUrl ??
+    (disabledRuntimeVariantSourceUrls.has(sourcePath) ? undefined : runtimeModelVariantUrls.get(sourceModelUrl))
   const revisedSourceModelUrl = assetUrlWithRevision(sourceModelUrl)
 
   return {
@@ -81,7 +138,10 @@ export function modelVariantUrlsFor(sourceModelUrl: string): ModelVariantUrls {
 }
 
 export function modelUrlWithBestVariant(modelUrl: string) {
-  const runtimeVariantUrl = bakedFurnitureVariantUrlFor(modelUrl) ?? runtimeModelVariantUrls.get(modelUrl)
+  const sourcePath = sourcePathForVariantLookup(modelUrl)
+  const runtimeVariantUrl =
+    bakedFurnitureVariantUrlFor(modelUrl) ??
+    (disabledRuntimeVariantSourceUrls.has(sourcePath) ? undefined : runtimeModelVariantUrls.get(modelUrl))
 
   if (enableRuntimeModelVariants && runtimeVariantUrl) {
     return assetUrlWithRevision(runtimeVariantUrl)
@@ -97,20 +157,30 @@ export function modelUrlWithBestVariant(modelUrl: string) {
 export function modelUrlForRenderContext(
   model: {
     url: string
+    sourceModelUrl?: string
     runtimeModelUrl?: string
     heroModelUrl?: string
   },
   context: ModelVariantRenderContext,
 ) {
-  const runtimeVariantUrl = bakedFurnitureVariantUrlFor(model.url) ?? runtimeModelVariantUrls.get(model.url)
-
   if (!enableRuntimeModelVariants) {
-    return model.url
+    return sourceFallbackUrlFor(model) ?? model.url
   }
 
-  if (context.selected && model.heroModelUrl) {
-    return model.heroModelUrl
+  if (preferSourceRoomModels && model.sourceModelUrl && (context.quality === 'high' || context.selected)) {
+    return sourceFallbackUrlFor(model) ?? safeVariantUrl(model.sourceModelUrl) ?? model.url
   }
 
-  return model.runtimeModelUrl ?? runtimeVariantUrl ?? model.url
+  return (
+    safeVariantUrl(model.runtimeModelUrl) ??
+    safeVariantUrl(model.heroModelUrl) ??
+    sourceFallbackUrlFor(model) ??
+    safeVariantUrl(
+      disabledRuntimeVariantSourceUrls.has(sourcePathForVariantLookup(model.url))
+        ? undefined
+        : runtimeModelVariantUrls.get(model.url),
+    ) ??
+    safeVariantUrl(model.url) ??
+    model.url
+  )
 }

@@ -34,12 +34,6 @@ const variants = [
     kind: 'ceramic',
   },
   {
-    id: 'wooden-display-shelves-4k-baked',
-    source: 'public/assets/models/polyhaven/wooden_display_shelves_01.optimized.glb',
-    output: 'wooden-display-shelves-4k-baked.glb',
-    kind: 'wood',
-  },
-  {
     id: 'hackney-sofa-4k-baked',
     source: 'public/assets/models/manual/dimensiva-hackney-sofa-by-hay.optimized.glb',
     bakeSource: 'public/assets/generated/runtime-variants/hackney-sofa-runtime-lite.glb',

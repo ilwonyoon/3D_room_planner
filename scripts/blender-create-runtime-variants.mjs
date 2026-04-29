@@ -83,6 +83,38 @@ const variants = [
     simplifyError: 0.0025,
     textureSize: 512,
   },
+  {
+    id: 'rounded-commode-runtime-lite',
+    source: 'public/assets/models/manual/zeel-by-furniture-rounded-commode.optimized.glb',
+    output: 'rounded-commode-runtime-lite.glb',
+    simplifyRatio: 0.55,
+    simplifyError: 0.0018,
+    textureSize: 512,
+  },
+  {
+    id: 'ibiza-coffee-table-runtime-lite',
+    source: 'public/assets/models/manual/dimensiva-ibiza-forte-coffee-table-by-ritzwell.optimized.glb',
+    output: 'ibiza-coffee-table-runtime-lite.glb',
+    simplifyRatio: 0.55,
+    simplifyError: 0.0018,
+    textureSize: 512,
+  },
+  {
+    id: 'blown-armchair-runtime-lite',
+    source: 'public/assets/models/manual/zeel-by-furniture-blown-armchair.optimized.glb',
+    output: 'blown-armchair-runtime-lite.glb',
+    simplifyRatio: 0.44,
+    simplifyError: 0.002,
+    textureSize: 512,
+  },
+  {
+    id: 'slit-side-table-runtime-lite',
+    source: 'public/assets/models/manual/dimensiva-slit-side-table-round-high-by-hay.optimized.glb',
+    output: 'slit-side-table-runtime-lite.glb',
+    simplifyRatio: 0.6,
+    simplifyError: 0.0018,
+    textureSize: 512,
+  },
 ]
 
 const deferredVariants = [

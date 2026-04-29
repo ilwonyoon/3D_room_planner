@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { chromium } from 'playwright'
 
-const PRESETS = ['daylight-window', 'warm-evening', 'night-room']
+const PRESETS = ['afternoon-natural']
 const VIEWS = ['isometric', 'bird', 'pov']
 const OUT_DIR = 'output/render-budget'
 

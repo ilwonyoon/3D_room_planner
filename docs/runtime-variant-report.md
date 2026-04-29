@@ -1,6 +1,6 @@
 # Runtime Variant Report
 
-Generated: 2026-04-28T08:45:17.291Z
+Generated: 2026-04-29T03:14:40.565Z
 
 These runtime-lite GLBs are generated variants. Source GLBs are not overwritten.
 
@@ -15,6 +15,11 @@ These runtime-lite GLBs are generated variants. Source GLBs are not overwritten.
 | book-encyclopedia-set-runtime-lite | `public/assets/models/polyhaven/book_encyclopedia_set_01.optimized.glb` | `/assets/generated/runtime-variants/book-encyclopedia-set-runtime-lite.glb` | 108,963 -> 40,305 (-63.0%) | 26.67 MB -> 26.67 MB (0.0%) | 555.4 KB -> 308.9 KB (-44.4%) |
 | hackney-sofa-runtime-lite | `public/assets/models/manual/dimensiva-hackney-sofa-by-hay.optimized.glb` | `/assets/generated/runtime-variants/hackney-sofa-runtime-lite.glb` | 541,701 -> 130,002 (-76.0%) | 5.33 MB -> 5.33 MB (0.0%) | 1.35 MB -> 497.3 KB (-64.1%) |
 | potted-plant-01-runtime-lite | `public/assets/models/polyhaven/potted_plant_01.optimized.glb` | `/assets/generated/runtime-variants/potted-plant-01-runtime-lite.glb` | 461,283 -> 82,971 (-82.0%) | 32.00 MB -> 32.00 MB (0.0%) | 1.55 MB -> 745.0 KB (-53.1%) |
+| wooden-display-shelves-runtime-lite | `public/assets/models/polyhaven/wooden_display_shelves_01.optimized.glb` | `/assets/generated/runtime-variants/wooden-display-shelves-runtime-lite.glb` | 8,562 -> 5,817 (-32.1%) | 16.00 MB -> 16.00 MB (0.0%) | 165.3 KB -> 159.9 KB (-3.3%) |
+| rounded-commode-runtime-lite | `public/assets/models/manual/zeel-by-furniture-rounded-commode.optimized.glb` | `/assets/generated/runtime-variants/rounded-commode-runtime-lite.glb` | 32,565 -> 27,018 (-17.0%) | 0 B -> 0 B (n/a) | 111.4 KB -> 77.2 KB (-30.6%) |
+| ibiza-coffee-table-runtime-lite | `public/assets/models/manual/dimensiva-ibiza-forte-coffee-table-by-ritzwell.optimized.glb` | `/assets/generated/runtime-variants/ibiza-coffee-table-runtime-lite.glb` | 27,384 -> 15,057 (-45.0%) | 0 B -> 0 B (n/a) | 36.5 KB -> 22.7 KB (-37.9%) |
+| blown-armchair-runtime-lite | `public/assets/models/manual/zeel-by-furniture-blown-armchair.optimized.glb` | `/assets/generated/runtime-variants/blown-armchair-runtime-lite.glb` | 23,766 -> 10,452 (-56.0%) | 0 B -> 0 B (n/a) | 39.9 KB -> 20.9 KB (-47.6%) |
+| slit-side-table-runtime-lite | `public/assets/models/manual/dimensiva-slit-side-table-round-high-by-hay.optimized.glb` | `/assets/generated/runtime-variants/slit-side-table-runtime-lite.glb` | 6,636 -> 3,978 (-40.1%) | 0 B -> 0 B (n/a) | 11.5 KB -> 8.0 KB (-30.9%) |
 
 ## Notes
 

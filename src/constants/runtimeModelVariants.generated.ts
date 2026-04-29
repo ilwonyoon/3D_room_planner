@@ -12,6 +12,10 @@ export const runtimeModelVariantUrls = new Map<string, string>([
     "/assets/generated/runtime-variants/hackney-sofa-runtime-lite.glb"
   ],
   [
+    "/assets/models/manual/dimensiva-ibiza-forte-coffee-table-by-ritzwell.optimized.glb",
+    "/assets/generated/runtime-variants/ibiza-coffee-table-runtime-lite.glb"
+  ],
+  [
     "/assets/models/manual/dimensiva-lotus-vase-by-101-copenhagen.optimized.glb",
     "/assets/generated/runtime-variants/lotus-vase-runtime-lite.glb"
   ],
@@ -20,8 +24,20 @@ export const runtimeModelVariantUrls = new Map<string, string>([
     "/assets/generated/runtime-variants/plan-chair-runtime-lite.glb"
   ],
   [
+    "/assets/models/manual/dimensiva-slit-side-table-round-high-by-hay.optimized.glb",
+    "/assets/generated/runtime-variants/slit-side-table-runtime-lite.glb"
+  ],
+  [
     "/assets/models/manual/dimensiva-toio-led-floor-lamp-by-flos.optimized.glb",
     "/assets/generated/runtime-variants/toio-floor-lamp-runtime-lite.glb"
+  ],
+  [
+    "/assets/models/manual/zeel-by-furniture-blown-armchair.optimized.glb",
+    "/assets/generated/runtime-variants/blown-armchair-runtime-lite.glb"
+  ],
+  [
+    "/assets/models/manual/zeel-by-furniture-rounded-commode.optimized.glb",
+    "/assets/generated/runtime-variants/rounded-commode-runtime-lite.glb"
   ],
   [
     "/assets/models/polyhaven/book_encyclopedia_set_01.optimized.glb",

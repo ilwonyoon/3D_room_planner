@@ -17,6 +17,7 @@ import {
   useCameraViewStore,
   useEditorObjectsStore,
   useLightingPresetStore,
+  useRenderQualityStore,
   useRoomSettingsStore,
   useRoomStore,
   useSelectionStore,
@@ -38,60 +39,42 @@ const BAKED_LIGHTING_TEXTURES = {
 }
 const BAKED_LIGHTING_VIEW_SETTINGS = {
   isometric: {
-    floorAo: 0.26,
-    floorLight: 0.18,
-    backWallAo: 0.18,
-    backWallLight: 0.32,
-    leftWallAo: 0.2,
-    rightWallAo: 0.16,
-    frontWallAo: 0.16,
+    floorAo: 0.3,
+    floorLight: 0.14,
+    backWallAo: 0.22,
+    backWallLight: 0.36,
+    leftWallAo: 0.24,
+    rightWallAo: 0.2,
+    frontWallAo: 0.2,
   },
   bird: {
-    floorAo: 0.18,
-    floorLight: 0.16,
-    backWallAo: 0.11,
+    floorAo: 0.12,
+    floorLight: 0.04,
+    backWallAo: 0.12,
     backWallLight: 0.28,
-    leftWallAo: 0.11,
-    rightWallAo: 0.11,
-    frontWallAo: 0.11,
+    leftWallAo: 0.12,
+    rightWallAo: 0.12,
+    frontWallAo: 0.12,
   },
   pov: {
-    floorAo: 0.3,
-    floorLight: 0.12,
-    backWallAo: 0.22,
-    backWallLight: 0.2,
-    leftWallAo: 0.24,
-    rightWallAo: 0.22,
-    frontWallAo: 0.22,
+    floorAo: 0.34,
+    floorLight: 0.08,
+    backWallAo: 0.26,
+    backWallLight: 0.24,
+    leftWallAo: 0.26,
+    rightWallAo: 0.24,
+    frontWallAo: 0.24,
   },
 } satisfies Record<CameraViewMode, Record<keyof typeof BAKED_LIGHTING_TEXTURES, number>>
 const BAKED_LIGHTING_PRESET_MULTIPLIERS = {
-  'daylight-window': {
-    floorAo: 1,
-    floorLight: 1,
-    backWallAo: 1,
-    backWallLight: 1,
-    leftWallAo: 1,
-    rightWallAo: 1,
-    frontWallAo: 1,
-  },
-  'warm-evening': {
-    floorAo: 1,
-    floorLight: 0.92,
-    backWallAo: 1,
-    backWallLight: 0.88,
-    leftWallAo: 1,
-    rightWallAo: 1,
-    frontWallAo: 1,
-  },
-  'night-room': {
-    floorAo: 1.06,
-    floorLight: 0.22,
-    backWallAo: 1.08,
-    backWallLight: 0.08,
-    leftWallAo: 1.08,
-    rightWallAo: 1.08,
-    frontWallAo: 1.08,
+  'afternoon-natural': {
+    floorAo: 0.84,
+    floorLight: 0.52,
+    backWallAo: 0.86,
+    backWallLight: 0.84,
+    leftWallAo: 0.88,
+    rightWallAo: 0.86,
+    frontWallAo: 0.86,
   },
 } satisfies Record<LightingPresetId, Record<keyof typeof BAKED_LIGHTING_TEXTURES, number>>
 const LAMP_EMISSIVE_COLOR = '#ffd79a'
@@ -179,6 +162,29 @@ function stripEmbeddedLights(root: THREE.Object3D) {
   })
 }
 
+function stripImportedHelperMeshes(root: THREE.Object3D) {
+  const helpers: THREE.Object3D[] = []
+
+  root.traverse((node) => {
+    const nodeName = node.name.toLowerCase()
+    const meshName = node instanceof THREE.Mesh ? node.geometry?.name?.toLowerCase() ?? '' : ''
+    const originalName = (node.userData?.nodeOriginalName ?? node.userData?.meshOriginalName ?? '').toString().toLowerCase()
+
+    if (
+      nodeName.includes('shadowgroundplane') ||
+      nodeName.includes('shadow_ground') ||
+      meshName.includes('shadowgroundplane') ||
+      originalName.includes('shadowgroundplane')
+    ) {
+      helpers.push(node)
+    }
+  })
+
+  helpers.forEach((helper) => {
+    helper.parent?.remove(helper)
+  })
+}
+
 function renderedDimensionsFromRawSize(rawSize: THREE.Vector3, targetSize: number) {
   const uniformScale = targetSize / Math.max(rawSize.x, rawSize.y, rawSize.z, 0.001)
 
@@ -215,6 +221,43 @@ function createRadialGlowTexture() {
   gradient.addColorStop(0.34, 'rgba(255,216,150,0.42)')
   gradient.addColorStop(1, 'rgba(255,216,150,0)')
   context.fillStyle = gradient
+  context.fillRect(0, 0, canvas.width, canvas.height)
+
+  const texture = new THREE.CanvasTexture(canvas)
+  texture.colorSpace = THREE.SRGBColorSpace
+  texture.needsUpdate = true
+  return texture
+}
+
+function createSunPatchTexture() {
+  const canvas = document.createElement('canvas')
+  canvas.width = 512
+  canvas.height = 256
+  const context = canvas.getContext('2d')
+
+  if (!context) {
+    return null
+  }
+
+  context.clearRect(0, 0, canvas.width, canvas.height)
+
+  const lengthFade = context.createLinearGradient(0, 0, canvas.width, 0)
+  lengthFade.addColorStop(0, 'rgba(255, 228, 176, 0)')
+  lengthFade.addColorStop(0.16, 'rgba(255, 224, 164, 0.26)')
+  lengthFade.addColorStop(0.52, 'rgba(255, 213, 145, 0.42)')
+  lengthFade.addColorStop(0.84, 'rgba(255, 218, 154, 0.18)')
+  lengthFade.addColorStop(1, 'rgba(255, 226, 178, 0)')
+  context.fillStyle = lengthFade
+  context.fillRect(0, 0, canvas.width, canvas.height)
+
+  const crossFade = context.createLinearGradient(0, 0, 0, canvas.height)
+  crossFade.addColorStop(0, 'rgba(0, 0, 0, 0.96)')
+  crossFade.addColorStop(0.24, 'rgba(0, 0, 0, 0.28)')
+  crossFade.addColorStop(0.5, 'rgba(0, 0, 0, 0)')
+  crossFade.addColorStop(0.76, 'rgba(0, 0, 0, 0.28)')
+  crossFade.addColorStop(1, 'rgba(0, 0, 0, 0.96)')
+  context.globalCompositeOperation = 'destination-out'
+  context.fillStyle = crossFade
   context.fillRect(0, 0, canvas.width, canvas.height)
 
   const texture = new THREE.CanvasTexture(canvas)
@@ -436,26 +479,27 @@ function usePbrRoomMaterials() {
     () => ({
       floor: new THREE.MeshStandardMaterial({
         ...floorTextures,
-        color: '#ece2d4',
-        roughness: 0.96,
+        color: '#c9ae8f',
+        roughness: 1,
+        roughnessMap: null,
         metalness: 0,
-        envMapIntensity: 0.04,
+        envMapIntensity: 0,
         normalScale: new THREE.Vector2(
-          Math.min(floorMaterial.relief?.normalScale ?? 0.1, 0.055),
-          Math.min(floorMaterial.relief?.normalScale ?? 0.1, 0.055),
+          Math.min(floorMaterial.relief?.normalScale ?? 0.1, 0.036),
+          Math.min(floorMaterial.relief?.normalScale ?? 0.1, 0.036),
         ),
-        aoMapIntensity: Math.min(floorMaterial.relief?.aoIntensity ?? 0.62, 0.42),
-        displacementScale: Math.min(floorMaterial.relief?.displacementScale ?? 0.002, 0.00055),
-        displacementBias: Math.max(floorMaterial.relief?.displacementBias ?? -0.0008, -0.00022),
+        aoMapIntensity: Math.min(floorMaterial.relief?.aoIntensity ?? 0.62, 0.34),
+        displacementScale: Math.min(floorMaterial.relief?.displacementScale ?? 0.002, 0.00022),
+        displacementBias: Math.max(floorMaterial.relief?.displacementBias ?? -0.0008, -0.0001),
       }),
       wall: new THREE.MeshStandardMaterial({
         ...wallTextures,
-        color: '#fdfcf9',
+        color: '#f2ede5',
         roughness: 0.98,
         metalness: 0,
-        normalScale: new THREE.Vector2(0.012, 0.012),
-        aoMapIntensity: 0.06,
-        displacementScale: 0.00015,
+        normalScale: new THREE.Vector2(0.018, 0.018),
+        aoMapIntensity: 0.08,
+        displacementScale: 0.00022,
         displacementBias: -0.00006,
       }),
       trim: new THREE.MeshStandardMaterial({ color: '#fffdfa', roughness: 0.7 }),
@@ -550,6 +594,7 @@ function RoomShell({ materials }: { materials: ReturnType<typeof usePbrRoomMater
   const bakedLighting = useBakedRoomLightingTextures()
   const bakedLightingStrength = BAKED_LIGHTING_VIEW_SETTINGS[cameraMode]
   const bakedLightingMultiplier = BAKED_LIGHTING_PRESET_MULTIPLIERS[lightingPreset]
+  const sunPatchTexture = useMemo(() => createSunPatchTexture(), [])
   const bakedOpacity = (key: keyof typeof BAKED_LIGHTING_TEXTURES) =>
     bakedLightingStrength[key] * bakedLightingMultiplier[key]
   const backWallRef = useRef<THREE.Group>(null)
@@ -625,15 +670,31 @@ function RoomShell({ materials }: { materials: ReturnType<typeof usePbrRoomMater
         renderOrder={2}
       >
         <meshBasicMaterial
-          color="#f1d6aa"
+          color="#cfa774"
           transparent
           opacity={bakedOpacity('floorLight')}
           alphaMap={bakedLighting.floorLight}
           depthWrite={false}
           blending={THREE.NormalBlending}
-          toneMapped={false}
         />
       </mesh>
+      {sunPatchTexture ? (
+        <mesh
+          position={[0.36, 0.016, -1.54]}
+          rotation={[-Math.PI / 2, 0, -0.08]}
+          scale={[2.2, 0.92, 1]}
+          renderOrder={3}
+        >
+          <planeGeometry args={[1, 1]} />
+          <meshBasicMaterial
+            map={sunPatchTexture}
+            transparent
+            opacity={cameraMode === 'bird' ? 0.12 : cameraMode === 'pov' ? 0.18 : 0.17}
+            depthWrite={false}
+            blending={THREE.NormalBlending}
+          />
+        </mesh>
+      ) : null}
 
       <group ref={backWallRef}>
         <mesh
@@ -876,8 +937,6 @@ function WindowOpening({
   object: EditorObject
 }) {
   const cameraMode = useCameraViewStore((s) => s.mode)
-  const lightingPreset = useLightingPresetStore((s) => s.preset)
-  const isNight = lightingPreset === 'night-room'
   const width = object.dimensionsM.x
   const height = object.dimensionsM.y
   const frame = Math.min(0.055, width * 0.08, height * 0.1)
@@ -887,41 +946,41 @@ function WindowOpening({
   const glassMaterial = useMemo(
     () =>
       new THREE.MeshPhysicalMaterial({
-        color: isNight ? '#2e3e4f' : '#e9f6fb',
-        emissive: isNight ? '#0e1720' : '#cbeeff',
-        emissiveIntensity: isNight ? 0.008 : 0.08,
+        color: '#e5f4f8',
+        emissive: '#cbeeff',
+        emissiveIntensity: 0.045,
         roughness: 0.08,
         metalness: 0,
         transparent: true,
-        opacity: isNight ? 0.22 : 0.38,
+        opacity: 0.34,
       }),
-    [isNight],
+    [],
   )
   const skyMaterial = useMemo(
     () =>
       new THREE.MeshBasicMaterial({
-        color: isNight ? '#121c27' : '#d7eef7',
+        color: '#d7edf4',
         transparent: true,
-        opacity: isNight ? 0.42 : 0.82,
+        opacity: 0.76,
         toneMapped: false,
       }),
-    [isNight],
+    [],
   )
   const glowMaterial = useMemo(
     () =>
       new THREE.MeshBasicMaterial({
-        color: isNight ? '#415a72' : '#e7f7ff',
+        color: '#e7f7ff',
         transparent: true,
-        opacity: isNight ? 0.008 : cameraMode === 'pov' ? 0.035 : cameraMode === 'bird' ? 0.065 : 0.1,
+        opacity: cameraMode === 'pov' ? 0.024 : cameraMode === 'bird' ? 0.045 : 0.075,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
         toneMapped: false,
       }),
-    [cameraMode, isNight],
+    [cameraMode],
   )
   const frameMaterial = useMemo(
-    () => new THREE.MeshStandardMaterial({ color: isNight ? '#d7d4cf' : '#fffdfa', roughness: 0.62 }),
-    [isNight],
+    () => new THREE.MeshStandardMaterial({ color: '#fbf8f1', roughness: 0.68 }),
+    [],
   )
   const railMaterial = useMemo(
     () => new THREE.MeshStandardMaterial({ color: '#c6ced6', roughness: 0.62 }),
@@ -1231,7 +1290,7 @@ function LampGlow({
         map: map ?? undefined,
         color: LAMP_EMISSIVE_COLOR,
         transparent: true,
-        opacity: object.id === 'reading-lamp' ? 0.48 : 0.38,
+        opacity: object.id === 'reading-lamp' ? 0.48 : 0.18,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
         toneMapped: false,
@@ -1245,7 +1304,7 @@ function LampGlow({
   }
 
   const height = object.dimensionsM.y * (object.id === 'desk-lamp' ? 0.72 : 0.84)
-  const size = (object.id === 'desk-lamp' ? 0.22 : 0.3) / scale
+  const size = (object.id === 'desk-lamp' ? 0.12 : 0.3) / scale
 
   return (
     <sprite
@@ -1404,7 +1463,10 @@ function LoadedFurnitureModel({
   const hitboxRef = useRef<THREE.Mesh>(null)
   const { model, scale, renderedDimensionsM } = useMemo(() => {
     const cloned = sourceScene.clone(true)
+    stripImportedHelperMeshes(cloned)
     stripEmbeddedLights(cloned)
+    applyImportAxisCorrection(cloned, object)
+    cloned.updateMatrixWorld(true)
     const bounds = new THREE.Box3().setFromObject(cloned)
     const size = bounds.getSize(new THREE.Vector3())
     const center = bounds.getCenter(new THREE.Vector3())
@@ -1416,7 +1478,7 @@ function LoadedFurnitureModel({
       scale,
       renderedDimensionsM: renderedDimensionsFromRawSize(size, object.targetSize),
     }
-  }, [object.targetSize, sourceScene])
+  }, [object.sourceModelUrl, object.targetSize, object.url, sourceScene])
   const hitboxArgs = useMemo(
     () => {
       if (object.placement === 'wall' && object.wallSurfacePlane === 'yz') {
@@ -1499,6 +1561,17 @@ function LoadedFurnitureModel({
   )
 }
 
+function applyImportAxisCorrection(model: THREE.Object3D, object: EditorObject) {
+  const sourceUrl = object.sourceModelUrl ?? object.url
+
+  if (sourceUrl.includes('/muuto-70-70-table-')) {
+    // This Muuto asset is authored with its table height on the negative Z axis.
+    // Rotate once before bounds normalization
+    // so the tabletop remains horizontal in Three.js' Y-up room.
+    model.rotation.x += Math.PI / 2
+  }
+}
+
 function FurnitureModel(props: {
   object: EditorObject
   selected?: boolean
@@ -1507,8 +1580,9 @@ function FurnitureModel(props: {
 }) {
   const gl = useThree((state) => state.gl)
   const invalidate = useThree((state) => state.invalidate)
+  const quality = useRenderQualityStore((state) => state.quality)
   const requestedObject = useMemo(() => {
-    const url = modelUrlForRenderContext(props.object, { selected: props.selected })
+    const url = modelUrlForRenderContext(props.object, { selected: props.selected, quality })
 
     if (url === props.object.url) {
       return props.object
@@ -1518,7 +1592,7 @@ function FurnitureModel(props: {
       ...props.object,
       url,
     }
-  }, [props.object, props.selected])
+  }, [props.object, props.selected, quality])
   const [displayUrl, setDisplayUrl] = useState<string | null>(() => (
     modelResourceCache.has(requestedObject.url) ? requestedObject.url : null
   ))

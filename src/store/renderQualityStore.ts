@@ -21,7 +21,7 @@ function shiftQuality(current: RenderQuality, step: -1 | 1) {
 }
 
 export const useRenderQualityStore = create<RenderQualityState>((set) => ({
-  quality: 'medium',
+  quality: 'high',
   setQuality: (quality) => set({ quality }),
   lowerQuality: () => set((state) => ({ quality: shiftQuality(state.quality, -1) })),
   raiseQuality: () => set((state) => ({ quality: shiftQuality(state.quality, 1) })),

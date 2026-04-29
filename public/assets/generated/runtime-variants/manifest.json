@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-28T08:45:17.280Z",
+  "generatedAt": "2026-04-29T03:14:40.554Z",
   "variants": [
     {
       "id": "beyla-shoe-cabinet-runtime-lite",
@@ -251,6 +251,118 @@
         "transferBytes": "-53.1%",
         "renderVertexCount": "-82.0%",
         "textureGpuBytes": "0.0%"
+      }
+    },
+    {
+      "id": "rounded-commode-runtime-lite",
+      "source": "public/assets/models/manual/zeel-by-furniture-rounded-commode.optimized.glb",
+      "output": "rounded-commode-runtime-lite.glb",
+      "simplifyRatio": 0.55,
+      "simplifyError": 0.0018,
+      "textureSize": 512,
+      "outputUrl": "/assets/generated/runtime-variants/rounded-commode-runtime-lite.glb",
+      "sourceStats": {
+        "bytes": 114040,
+        "renderVertexCount": 32565,
+        "uploadVertexCount": 23510,
+        "textureCount": 0,
+        "textureGpuBytes": 0
+      },
+      "runtimeStats": {
+        "bytes": 79092,
+        "renderVertexCount": 27018,
+        "uploadVertexCount": 14845,
+        "textureCount": 0,
+        "textureGpuBytes": 0
+      },
+      "deltas": {
+        "transferBytes": "-30.6%",
+        "renderVertexCount": "-17.0%",
+        "textureGpuBytes": "n/a"
+      }
+    },
+    {
+      "id": "ibiza-coffee-table-runtime-lite",
+      "source": "public/assets/models/manual/dimensiva-ibiza-forte-coffee-table-by-ritzwell.optimized.glb",
+      "output": "ibiza-coffee-table-runtime-lite.glb",
+      "simplifyRatio": 0.55,
+      "simplifyError": 0.0018,
+      "textureSize": 512,
+      "outputUrl": "/assets/generated/runtime-variants/ibiza-coffee-table-runtime-lite.glb",
+      "sourceStats": {
+        "bytes": 37344,
+        "renderVertexCount": 27384,
+        "uploadVertexCount": 4557,
+        "textureCount": 0,
+        "textureGpuBytes": 0
+      },
+      "runtimeStats": {
+        "bytes": 23208,
+        "renderVertexCount": 15057,
+        "uploadVertexCount": 2537,
+        "textureCount": 0,
+        "textureGpuBytes": 0
+      },
+      "deltas": {
+        "transferBytes": "-37.9%",
+        "renderVertexCount": "-45.0%",
+        "textureGpuBytes": "n/a"
+      }
+    },
+    {
+      "id": "blown-armchair-runtime-lite",
+      "source": "public/assets/models/manual/zeel-by-furniture-blown-armchair.optimized.glb",
+      "output": "blown-armchair-runtime-lite.glb",
+      "simplifyRatio": 0.44,
+      "simplifyError": 0.002,
+      "textureSize": 512,
+      "outputUrl": "/assets/generated/runtime-variants/blown-armchair-runtime-lite.glb",
+      "sourceStats": {
+        "bytes": 40872,
+        "renderVertexCount": 23766,
+        "uploadVertexCount": 4913,
+        "textureCount": 0,
+        "textureGpuBytes": 0
+      },
+      "runtimeStats": {
+        "bytes": 21420,
+        "renderVertexCount": 10452,
+        "uploadVertexCount": 2373,
+        "textureCount": 0,
+        "textureGpuBytes": 0
+      },
+      "deltas": {
+        "transferBytes": "-47.6%",
+        "renderVertexCount": "-56.0%",
+        "textureGpuBytes": "n/a"
+      }
+    },
+    {
+      "id": "slit-side-table-runtime-lite",
+      "source": "public/assets/models/manual/dimensiva-slit-side-table-round-high-by-hay.optimized.glb",
+      "output": "slit-side-table-runtime-lite.glb",
+      "simplifyRatio": 0.6,
+      "simplifyError": 0.0018,
+      "textureSize": 512,
+      "outputUrl": "/assets/generated/runtime-variants/slit-side-table-runtime-lite.glb",
+      "sourceStats": {
+        "bytes": 11800,
+        "renderVertexCount": 6636,
+        "uploadVertexCount": 1110,
+        "textureCount": 0,
+        "textureGpuBytes": 0
+      },
+      "runtimeStats": {
+        "bytes": 8156,
+        "renderVertexCount": 3978,
+        "uploadVertexCount": 667,
+        "textureCount": 0,
+        "textureGpuBytes": 0
+      },
+      "deltas": {
+        "transferBytes": "-30.9%",
+        "renderVertexCount": "-40.1%",
+        "textureGpuBytes": "n/a"
       }
     }
   ]

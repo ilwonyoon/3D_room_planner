@@ -3,9 +3,7 @@ import { join } from 'node:path'
 import { chromium } from 'playwright'
 
 const PRESETS = [
-  { id: 'daylight-window', label: 'day' },
-  { id: 'warm-evening', label: 'warm' },
-  { id: 'night-room', label: 'night' },
+  { id: 'afternoon-natural', label: 'natural' },
 ]
 
 const VIEWS = [
@@ -100,25 +98,12 @@ function scoreBand(value, min, idealLow, idealHigh, max) {
 }
 
 function scoreMetrics(metrics, presetId) {
-  const night = presetId === 'night-room'
-  const contrastScore = night
-    ? scoreBand(metrics.lumaRangeP05P95, 58, 96, 178, 232)
-    : scoreRange(metrics.lumaRangeP05P95, 84, 176)
-  const localContrastScore = night
-    ? scoreBand(metrics.localContrast, 2.4, 3.4, 6.2, 9.8)
-    : scoreBand(metrics.localContrast, 2.8, 4.4, 8.4, 12.4)
-  const groundingScore = night
-    ? scoreBand(metrics.shadowRatio, 0.16, 0.32, 0.56, 0.82)
-    : scoreBand(metrics.shadowRatio, 0.08, 0.18, 0.36, 0.58)
-  const highlightScore = night
-    ? scoreBand(metrics.highlightRatio, 0.001, 0.006, 0.065, 0.18)
-    : scoreBand(metrics.highlightRatio, 0.012, 0.035, 0.18, 0.34)
-  const colorSeparationScore = night
-    ? scoreRange(metrics.warmCoolStdDev, 0.036, 0.082)
-    : scoreRange(metrics.warmCoolStdDev, 0.028, 0.09)
-  const occupancyScore = night
-    ? scoreRange(metrics.sceneOccupancy, 0.32, 0.7)
-    : scoreRange(metrics.sceneOccupancy, 0.42, 0.78)
+  const contrastScore = scoreRange(metrics.lumaRangeP05P95, 84, 176)
+  const localContrastScore = scoreBand(metrics.localContrast, 2.8, 4.4, 8.4, 12.4)
+  const groundingScore = scoreBand(metrics.shadowRatio, 0.08, 0.18, 0.36, 0.58)
+  const highlightScore = scoreBand(metrics.highlightRatio, 0.012, 0.035, 0.16, 0.3)
+  const colorSeparationScore = scoreRange(metrics.warmCoolStdDev, 0.028, 0.09)
+  const occupancyScore = scoreRange(metrics.sceneOccupancy, 0.42, 0.78)
   const darkBlobPenalty = scoreRange(metrics.darkBlobRatio, 0.018, 0.075)
 
   const weighted =
@@ -132,7 +117,7 @@ function scoreMetrics(metrics, presetId) {
 
   return {
     perceptualProxyScore: Math.round(adjusted * 1000) / 10,
-    profile: night ? 'night-mood' : 'balanced-room',
+    profile: 'afternoon-natural-room',
     components: {
       contrastScore: Math.round(contrastScore * 1000) / 1000,
       localContrastScore: Math.round(localContrastScore * 1000) / 1000,
@@ -244,7 +229,7 @@ function writeMarkdownReport(path, result) {
   const setRows = result.heroSetSummary
     .map(
       (set) =>
-        `| ${set.id} | ${set.averageScore} | ${set.byView.isometric ?? '-'} | ${set.byView.bird ?? '-'} | ${set.byView.pov ?? '-'} | ${set.byLightingPreset['daylight-window'] ?? '-'} | ${set.byLightingPreset['warm-evening'] ?? '-'} | ${set.byLightingPreset['night-room'] ?? '-'} |`,
+        `| ${set.id} | ${set.averageScore} | ${set.byView.isometric ?? '-'} | ${set.byView.bird ?? '-'} | ${set.byView.pov ?? '-'} | ${set.byLightingPreset['afternoon-natural'] ?? '-'} |`,
     )
     .join('\n')
   const winnerRows = result.winners
@@ -265,8 +250,8 @@ Average perceptual proxy score: ${result.averagePerceptualProxyScore}
 
 ## Hero Set Summary
 
-| Hero set | Avg | Isometric | Bird | POV | Day | Warm | Night |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Hero set | Avg | Isometric | Bird | POV | Natural |
+| --- | ---: | ---: | ---: | ---: | ---: |
 ${setRows}
 
 ## Winners By View And Preset
