@@ -4,10 +4,9 @@ import {
   CameraControls,
   OrthographicCamera,
   PerspectiveCamera,
-  SoftShadows,
 } from '@react-three/drei'
 import type { CameraControls as CameraControlsImpl } from '@react-three/drei'
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 
 import { EffectComposer, N8AO, SMAA } from '@react-three/postprocessing'
@@ -72,7 +71,7 @@ function EditorInteractionLayers() {
   const raycaster = useThree((state) => state.raycaster)
   const invalidate = useThree((state) => state.invalidate)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     camera.layers.enable(EDITOR_OVERLAY_LAYER)
     raycaster.layers.set(RAYCAST_HITBOX_LAYER)
     invalidate()
@@ -91,7 +90,7 @@ function WebglLifecycleGuard() {
   const gl = useThree((state) => state.gl)
   const invalidate = useThree((state) => state.invalidate)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const canvas = gl.domElement
 
     const handleContextLost = (event: Event) => {
@@ -121,6 +120,12 @@ function WebglLifecycleGuard() {
 const SCENE_GRID_SIZE = 18
 const SCENE_GRID_INNER_FADE_RADIUS = 2.6
 const SCENE_GRID_OUTER_FADE_RADIUS = 5.8
+const ISOMETRIC_CAMERA_POSITION = new THREE.Vector3(6.8, 5.9, 6.8)
+const ISOMETRIC_CAMERA_TARGET = new THREE.Vector3(0, 0.15, 0)
+const BIRD_CAMERA_POSITION = new THREE.Vector3(0, 9.4, 0.01)
+const BIRD_CAMERA_TARGET = new THREE.Vector3(0, 0, 0)
+const ROOM_FRAME_MARGIN_M = 0.06
+const ROOM_FRAME_MARGIN_PX = 10
 
 function applyGridFadeMask(material: THREE.Material) {
   material.onBeforeCompile = (shader) => {
@@ -353,6 +358,73 @@ function ScenePostProcessing({ quality }: { quality: RenderQuality }) {
   )
 }
 
+function roomFramePoints(room: { widthM: number; depthM: number; heightM: number }) {
+  const halfWidth = room.widthM / 2 + ROOM_FRAME_MARGIN_M
+  const halfDepth = room.depthM / 2 + ROOM_FRAME_MARGIN_M
+  const minY = -0.1
+  const maxY = room.heightM + 0.24
+
+  return [
+    new THREE.Vector3(-halfWidth, minY, -halfDepth),
+    new THREE.Vector3(halfWidth, minY, -halfDepth),
+    new THREE.Vector3(-halfWidth, minY, halfDepth),
+    new THREE.Vector3(halfWidth, minY, halfDepth),
+    new THREE.Vector3(-halfWidth, maxY, -halfDepth),
+    new THREE.Vector3(halfWidth, maxY, -halfDepth),
+    new THREE.Vector3(-halfWidth, maxY, halfDepth),
+    new THREE.Vector3(halfWidth, maxY, halfDepth),
+  ]
+}
+
+function calculateOrthographicRoomFrame({
+  position,
+  baseTarget,
+  up,
+  room,
+  canvasWidth,
+  canvasHeight,
+  maxZoom,
+}: {
+  position: THREE.Vector3
+  baseTarget: THREE.Vector3
+  up: THREE.Vector3
+  room: { widthM: number; depthM: number; heightM: number }
+  canvasWidth: number
+  canvasHeight: number
+  maxZoom: number
+}) {
+  const zAxis = position.clone().sub(baseTarget).normalize()
+  const xAxis = up.clone().cross(zAxis).normalize()
+  const yAxis = zAxis.clone().cross(xAxis).normalize()
+  const points = roomFramePoints(room)
+  let minX = Infinity
+  let maxX = -Infinity
+  let minY = Infinity
+  let maxY = -Infinity
+
+  points.forEach((point) => {
+    const relative = point.clone().sub(baseTarget)
+    const projectedX = relative.dot(xAxis)
+    const projectedY = relative.dot(yAxis)
+
+    minX = Math.min(minX, projectedX)
+    maxX = Math.max(maxX, projectedX)
+    minY = Math.min(minY, projectedY)
+    maxY = Math.max(maxY, projectedY)
+  })
+
+  const frameWidth = Math.max(maxX - minX, 0.001)
+  const frameHeight = Math.max(maxY - minY, 0.001)
+  const usableWidth = Math.max(1, canvasWidth - ROOM_FRAME_MARGIN_PX * 2)
+  const usableHeight = Math.max(1, canvasHeight - ROOM_FRAME_MARGIN_PX * 2)
+  const zoom = Math.min(
+    maxZoom,
+    usableWidth / frameWidth,
+    usableHeight / frameHeight,
+  )
+  return { zoom, target: baseTarget.clone() }
+}
+
 function CameraRig({
   cameraEnabled,
   mode,
@@ -361,6 +433,7 @@ function CameraRig({
   mode: CameraViewMode
 }) {
   const invalidate = useThree((state) => state.invalidate)
+  const size = useThree((state) => state.size)
   const room = useRoomStore((state) => state.room)
   const controlsRef = useRef<CameraControlsImpl | null>(null)
   const orthographicRef = useRef<THREE.OrthographicCamera | null>(null)
@@ -379,25 +452,83 @@ function CameraRig({
     }
 
     const camera = orthographicRef.current
-    const controls = controlsRef.current
-
-    if (!camera || !controls) {
+    if (!camera) {
       return
     }
 
     if (mode === 'bird') {
-      camera.up.set(0, 0, -1)
-      camera.zoom = 76
+      const position = BIRD_CAMERA_POSITION
+      const up = new THREE.Vector3(0, 0, -1)
+      const frame = calculateOrthographicRoomFrame({
+        position,
+        baseTarget: BIRD_CAMERA_TARGET,
+        up,
+        room,
+        canvasWidth: size.width,
+        canvasHeight: size.height,
+        maxZoom: 76,
+      })
+
+      camera.up.copy(up)
+      camera.position.copy(position)
+      camera.zoom = frame.zoom
+      camera.lookAt(frame.target)
       camera.updateProjectionMatrix()
-      controls.setLookAt(0, 9.4, 0.01, 0, 0, 0, true).then(() => invalidate())
+      camera.updateMatrixWorld()
+
+      const controls = controlsRef.current
+      if (!controls) {
+        invalidate()
+        return
+      }
+
+      void controls.setLookAt(
+        position.x,
+        position.y,
+        position.z,
+        frame.target.x,
+        frame.target.y,
+        frame.target.z,
+        false,
+      ).then(() => invalidate())
       return
     }
 
-    camera.up.set(0, 1, 0)
-    camera.zoom = 54
+    const position = ISOMETRIC_CAMERA_POSITION
+    const up = new THREE.Vector3(0, 1, 0)
+    const frame = calculateOrthographicRoomFrame({
+      position,
+      baseTarget: ISOMETRIC_CAMERA_TARGET,
+      up,
+      room,
+      canvasWidth: size.width,
+      canvasHeight: size.height,
+      maxZoom: 54,
+    })
+
+    camera.up.copy(up)
+    camera.position.copy(position)
+    camera.zoom = frame.zoom
+    camera.lookAt(frame.target)
     camera.updateProjectionMatrix()
-    controls.setLookAt(6.8, 5.9, 6.8, 0, 0.15, 0, true).then(() => invalidate())
-  }, [invalidate, mode])
+    camera.updateMatrixWorld()
+
+    const controls = controlsRef.current
+    if (!controls) {
+      invalidate()
+      return
+    }
+
+    void controls.setLookAt(
+      position.x,
+      position.y,
+      position.z,
+      frame.target.x,
+      frame.target.y,
+      frame.target.z,
+      false,
+    ).then(() => invalidate())
+  }, [invalidate, mode, room, size.height, size.width])
 
   useEffect(() => {
     const controls = controlsRef.current
@@ -406,8 +537,8 @@ function CameraRig({
       return
     }
 
-    const targetMarginX = mode === 'bird' ? room.widthM * 0.38 : room.widthM * 0.12
-    const targetMarginZ = mode === 'bird' ? room.depthM * 0.38 : room.depthM * 0.12
+    const targetMarginX = mode === 'bird' ? room.widthM * 0.38 : room.widthM * 0.42
+    const targetMarginZ = mode === 'bird' ? room.depthM * 0.38 : room.depthM * 0.42
     controls.boundaryFriction = 0
     controls.setBoundary(
       new THREE.Box3(
@@ -445,13 +576,13 @@ function CameraRig({
           minPolarAngle={mode === 'bird' ? 0 : Math.PI / 8}
           maxPolarAngle={mode === 'bird' ? 0.02 : Math.PI / 2.22}
           minZoom={mode === 'bird' ? 34 : 18}
-          maxZoom={mode === 'bird' ? 140 : 72}
+          maxZoom={mode === 'bird' ? 180 : 180}
           minDistance={0.7}
           maxDistance={14}
           draggingSmoothTime={0.08}
           azimuthRotateSpeed={mode === 'bird' ? 0 : 0.72}
           polarRotateSpeed={mode === 'bird' ? 0 : 0.72}
-          truckSpeed={mode === 'bird' ? 1.15 : 0.25}
+          truckSpeed={mode === 'bird' ? 1.15 : 0.72}
           dollySpeed={1.25}
         />
       ) : null}
@@ -686,7 +817,6 @@ export function IsometricScene({ className }: Props) {
         <CameraRig mode={viewMode} cameraEnabled={cameraEnabled} />
         <PovMovementController enabled={viewMode === 'pov'} />
 
-        {quality === 'high' ? <SoftShadows size={32} samples={18} focus={0.22} /> : null}
         <Lighting quality={quality} />
 
         <AssetRoom

@@ -28,6 +28,7 @@ import {
 } from '@/store'
 import type { EditorObject } from '@/store/editorObjectsStore'
 import type { RenderQuality } from '@/store/renderQualityStore'
+import { useInertialScroll } from './useInertialScroll'
 
 type SheetSegment = 'product' | 'room-settings' | 'explore'
 type FilterId = 'search' | 'in-room' | 'saved' | ProductCategory
@@ -606,6 +607,7 @@ export function CatalogSheet() {
   const [activeRoomFilter, setActiveRoomFilter] = useState<RoomFilterId>('wall-materials')
   const pointerRef = useRef<SheetPointerState | null>(null)
   const suppressNextClickRef = useRef(false)
+  const sheetScrollRef = useRef<HTMLDivElement | null>(null)
   const objects = useEditorObjectsStore((s) => s.objects)
   const addObject = useEditorObjectsStore((s) => s.addObject)
   const setEditMode = useEditorObjectsStore((s) => s.setEditMode)
@@ -664,6 +666,10 @@ export function CatalogSheet() {
   const collapseSheet = () => setCatalog(false)
   const hasFilterChips = activeSegment !== 'explore'
   const controlsHeight = TOP_TABS_HEIGHT + (hasFilterChips ? CHIPS_HEIGHT : 0)
+
+  useInertialScroll(sheetScrollRef, {
+    enabled: catalogExpanded,
+  })
 
   const handleSheetClickCapture = (event: MouseEvent<HTMLDivElement>) => {
     if (showSelectedEditMode) {
@@ -968,7 +974,9 @@ export function CatalogSheet() {
         ) : null}
 
         <div
+          ref={sheetScrollRef}
           className="no-scrollbar"
+          data-inertial-scroll={catalogExpanded ? 'true' : undefined}
           style={{
             height: `calc(100% - ${23 + SECTION_GAP + controlsHeight}px)`,
             padding: activeSegment === 'explore' ? '12px 0 24px' : '20px 10px 24px',

@@ -45,6 +45,70 @@ button {
 
 ul { list-style: none; padding: 0; margin: 0; }
 
+.liquid-glass-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 41px;
+  height: 41px;
+  margin-left: -20.5px;
+  margin-top: -20.5px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  background:
+    radial-gradient(
+      circle at 30% 30%,
+      rgba(255, 255, 255, 0.26),
+      rgba(255, 255, 255, 0.08) 58%,
+      rgba(255, 255, 255, 0.04) 100%
+    );
+  backdrop-filter: blur(10px) saturate(145%);
+  -webkit-backdrop-filter: blur(10px) saturate(145%);
+  box-shadow:
+    0 8px 22px rgba(0, 0, 0, 0.18),
+    inset 0 1px 1px rgba(255, 255, 255, 0.24),
+    inset 0 -6px 10px rgba(255, 255, 255, 0.06);
+  pointer-events: none;
+  opacity: 0;
+  z-index: 1000;
+  transition:
+    opacity 120ms ease,
+    width 120ms ease,
+    height 120ms ease,
+    margin 120ms ease,
+    background-color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.liquid-glass-cursor--visible {
+  opacity: 1;
+}
+
+.liquid-glass-cursor--pressed {
+  width: 36px;
+  height: 36px;
+  margin-left: -18px;
+  margin-top: -18px;
+  background:
+    radial-gradient(
+      circle at 30% 30%,
+      rgba(255, 255, 255, 0.32),
+      rgba(255, 255, 255, 0.12) 58%,
+      rgba(255, 255, 255, 0.06) 100%
+    );
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.16),
+    inset 0 1px 1px rgba(255, 255, 255, 0.24),
+    inset 0 -5px 8px rgba(255, 255, 255, 0.06);
+}
+
+@media (pointer: fine) {
+  body,
+  body * {
+    cursor: none !important;
+  }
+}
+
 /* Hide scrollbars but keep scroll */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
