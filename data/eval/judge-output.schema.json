@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Judge verdict (v2 — Discovery-focused)",
+  "type": "object",
+  "required": ["discovery", "conversion", "safety", "voice", "diagnoses", "summary"],
+  "properties": {
+    "discovery": {
+      "type": "object",
+      "required": [
+        "context_recognition_speed",
+        "customer_type_calibration",
+        "scope_capture_efficiency",
+        "budget_handling",
+        "interrogation_load",
+        "propose_readiness_accuracy",
+        "respects_user_input_priority"
+      ],
+      "properties": {
+        "context_recognition_speed":    { "type": "integer", "minimum": 1, "maximum": 5 },
+        "customer_type_calibration":    { "type": "integer", "minimum": 1, "maximum": 5 },
+        "scope_capture_efficiency":     { "type": "integer", "minimum": 1, "maximum": 5 },
+        "budget_handling":              { "type": "integer", "minimum": 1, "maximum": 5 },
+        "interrogation_load":           { "type": "integer", "minimum": 1, "maximum": 5 },
+        "propose_readiness_accuracy":   { "type": "integer", "minimum": 1, "maximum": 5 },
+        "respects_user_input_priority": { "enum": [0, 1, null] }
+      }
+    },
+    "conversion": {
+      "type": "object",
+      "required": ["task_success", "cart_within_persona_range", "close_quality"],
+      "properties": {
+        "task_success":              { "enum": [0, 1, null] },
+        "cart_within_persona_range": { "enum": [0, 1, null] },
+        "close_quality":             { "type": "integer", "minimum": 1, "maximum": 5 }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "required": ["no_invented_facts", "respected_explicit_constraints"],
+      "properties": {
+        "no_invented_facts":              { "enum": [0, 1, null] },
+        "respected_explicit_constraints": { "enum": [0, 1, null] }
+      }
+    },
+    "voice": {
+      "type": "object",
+      "required": ["designer_quality", "listening"],
+      "properties": {
+        "designer_quality": { "type": "integer", "minimum": 1, "maximum": 5 },
+        "listening":        { "type": "integer", "minimum": 1, "maximum": 5 }
+      }
+    },
+    "diagnoses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["criterion", "prompt_section", "evidence_quote", "analysis", "suggested_patch"],
+        "properties": {
+          "criterion":        { "type": "string" },
+          "prompt_section":   { "type": "string" },
+          "evidence_quote":   { "type": "string" },
+          "analysis":         { "type": "string" },
+          "suggested_patch":  { "type": "string" }
+        }
+      }
+    },
+    "summary": {
+      "type": "string",
+      "description": "One-paragraph natural-language summary."
+    }
+  }
+}

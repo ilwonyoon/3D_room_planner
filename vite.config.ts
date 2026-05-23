@@ -79,5 +79,14 @@ export default defineConfig({
     host: true,
     port: 5175,
     strictPort: true,
+    proxy: {
+      // The Anthropic-key-bearing API runs on :3001 (scripts/api-server.mjs).
+      // Same-origin /api/* from the SPA gets forwarded so the browser never
+      // sees the API key.
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      },
+    },
   },
 })

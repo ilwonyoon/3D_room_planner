@@ -1,0 +1,547 @@
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { marked } from 'marked'
+import { DEFAULT_SYSTEM_PROMPT } from './systemPrompt'
+import { SCENARIOS, entryContextString } from './scenarios'
+import { useAgentChat, type ChatMessage } from './useAgentChat'
+import { SlotConfidencePanel } from './SlotConfidencePanel'
+import type { SlotState } from './slotModel'
+import { setSlot } from './slotModel'
+import { RoomScenePanel, type SceneState } from './RoomScenePanel'
+import { placeStandInForSlot, clearAgentPlacements } from './sceneBridge'
+import { IsometricScene } from '@/scene/IsometricScene'
+import catalogJson from '../../data/catalog.json'
+
+type CatalogItem = {
+  readonly id: string
+  readonly name: string
+  readonly brand?: string
+  readonly category: string
+  readonly price_cents: number
+  readonly image_url?: string
+}
+const CATALOG: ReadonlyArray<CatalogItem> = catalogJson as CatalogItem[]
+
+/**
+ * The agent playground — left: 3D placeholder (real R3F lands later); center:
+ * chat thread; right: inspector with live-editable system prompt, scenario
+ * picker, and turn telemetry. Designed for sit-and-tune: change the prompt,
+ * reset, see the new behavior in seconds.
+ *
+ * Inspector is hidden when `?demo=1` is in the URL — clean view for the
+ * actual meeting.
+ */
+
+export function AgentPage() {
+  const params = useMemo(() => new URLSearchParams(location.search), [])
+  const demoMode = params.get('demo') === '1'
+  // ?blank=1 → start with no scenario / no entry context. Just an open chat
+  // box and an empty thread. The shopper (you) opens the conversation.
+  const blankStart = params.get('blank') === '1'
+  // ?inspector=1 → show the dev inspector instead of the room scene panel.
+  const showInspector = params.get('inspector') === '1'
+  const [scenarioId, setScenarioId] = useState<'A' | 'B' | 'C' | 'D' | 'E' | 'blank'>(
+    blankStart ? 'blank' : 'A',
+  )
+  const [systemPrompt, setSystemPrompt] = useState(DEFAULT_SYSTEM_PROMPT)
+  const scenario = SCENARIOS.find((s) => s.id === scenarioId) ?? SCENARIOS[0]
+  const [input, setInput] = useState('')
+  // Discovery slot state (left dashboard) — agent + user write.
+  const [slotState, setSlotState] = useState<SlotState>({})
+  // Scene state (right room panel) — agent writes via updateSceneSlot.
+  const [sceneState, setSceneState] = useState<SceneState>({})
+
+  const handleToolUse = ({ name, input }: { name: string; input: Record<string, unknown> }) => {
+    if (name === 'updateSlotConfidence') {
+      const slot = String(input.slot ?? '')
+      const confidence = Number(input.confidence ?? 0)
+      const value = input.value
+      const evidence = typeof input.evidence === 'string' ? input.evidence : undefined
+      if (!slot) return
+      setSlotState((prev) => setSlot(prev, slot, { value, confidence, evidence, source: 'agent' }))
+    } else if (name === 'updateSceneSlot') {
+      const slot = String(input.slot ?? '')
+      const productId = String(input.product_id ?? '')
+      const reason = typeof input.reason === 'string' ? input.reason : undefined
+      if (!slot || !productId) return
+      const product = CATALOG.find((p) => p.id === productId)
+      if (!product) return
+      setSceneState((prev) => ({
+        ...prev,
+        [slot]: {
+          productId,
+          brand: product.brand,
+          name: product.name,
+          price_cents: product.price_cents,
+          image_url: product.image_url,
+          reason,
+        },
+      }))
+      // Live R3F scene update — pick a stand-in mesh for this slot and
+      // place it in the IsometricScene via editorObjectsStore. A1 path:
+      // visual approximation, not real bathroom GLBs.
+      placeStandInForSlot(slot)
+    }
+  }
+
+  const chat = useAgentChat(systemPrompt, handleToolUse)
+
+  // Mobile detection via media query. Tailwind's lg: prefix was unreliable on
+  // mobile Safari in this codebase (same problem we hit on /docs), so we
+  // decide layout in JS and apply styles directly.
+  const [isDesktop, setIsDesktop] = useState(
+    typeof window !== 'undefined' ? window.matchMedia('(min-width: 1024px)').matches : true,
+  )
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px)')
+    const update = () => setIsDesktop(mq.matches)
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
+
+  // Seed the conversation with the entry context on first mount + whenever
+  // the scenario changes. Skip entirely for 'blank' — the user opens the
+  // conversation themselves. The ref guards against React 19 StrictMode's
+  // double-mount in dev.
+  const seededFor = useRef<string | null>(null)
+  useEffect(() => {
+    if (seededFor.current === scenarioId) return
+    seededFor.current = scenarioId
+    if (scenarioId === 'blank') {
+      chat.reset()
+      return
+    }
+    const seedText =
+      `[entry context — system fyi]\n${entryContextString(scenario.entry)}\n\n` +
+      `[shopper has just landed; greet them according to the role's "consult" turn]`
+    chat.seed(seedText)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scenarioId])
+
+  return (
+    <div
+      // dvh tracks the *visible* viewport on iOS Safari (excluding the URL bar),
+      // so the input form at the bottom stays in view instead of being pushed
+      // below the fold. Falls back to vh on browsers without dvh support.
+      style={{ height: '100dvh' }}
+      className="grid grid-rows-[auto_1fr] bg-[var(--color-surface)] text-[var(--color-ink)]"
+    >
+      <header className="flex items-center gap-3 border-b border-[var(--color-border)] px-5 py-3">
+        <span className="text-callout font-extrabold tracking-tight text-[var(--color-lowes-blue)]">
+          Mylow Designer
+        </span>
+        <span className="text-caption text-[var(--color-muted)]">· agent playground</span>
+        <span className="ml-auto text-caption text-[var(--color-muted)]">
+          scenario {scenario.id} · {scenario.mode}
+        </span>
+      </header>
+
+      {/* Mobile: single column, chat only.
+          Desktop: dashboard 300 | chat 1fr | inspector 320.
+          demoMode hides the inspector. */}
+      <div
+        className="grid min-h-0"
+        style={{
+          gridTemplateColumns: isDesktop
+            ? demoMode
+              ? 'minmax(0, 300px) 1fr'
+              : 'minmax(0, 300px) 1fr minmax(0, 320px)'
+            : '1fr',
+        }}
+      >
+        {/* left — Project dashboard. Read-only on mobile, editable on desktop. */}
+        {isDesktop ? (
+          <SlotConfidencePanel
+            state={slotState}
+            onSlotEdit={(slotId, newValue) =>
+              setSlotState((prev) =>
+                setSlot(prev, slotId, {
+                  value: newValue,
+                  confidence: 95,
+                  source: 'user',
+                  evidence: 'set in dashboard',
+                }),
+              )
+            }
+          />
+        ) : null}
+
+        {/* center — chat thread (always visible, full width on mobile) */}
+        <section className="flex min-h-0 flex-col border-r border-[var(--color-border)]">
+          <ChatThread
+            messages={chat.messages}
+            streaming={chat.streaming}
+            onUserPick={(text) => {
+              if (!chat.streaming) void chat.send(text)
+            }}
+          />
+          <form
+            className="shrink-0 border-t border-[var(--color-border)] bg-[var(--color-surface)] p-3"
+            onSubmit={(e) => {
+              e.preventDefault()
+              if (!input.trim() || chat.streaming) return
+              void chat.send(input)
+              setInput('')
+            }}
+          >
+            <div className="flex gap-2">
+              <input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                disabled={chat.streaming}
+                placeholder={chat.streaming ? 'Mylow is thinking…' : 'Type a reply…'}
+                className="min-w-0 flex-1 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-small disabled:opacity-50"
+              />
+              <button
+                type="submit"
+                disabled={!input.trim() || chat.streaming}
+                className="rounded-[var(--radius-sm)] bg-[var(--color-lowes-blue)] px-4 py-2 text-small font-bold text-[var(--color-on-brand)] disabled:opacity-40"
+              >
+                Send
+              </button>
+            </div>
+            {chat.error ? (
+              <div className="mt-2 text-caption text-red-600">{chat.error}</div>
+            ) : null}
+          </form>
+        </section>
+
+        {/* right — room scene by default, inspector if ?inspector=1.
+            Hidden in demo mode (the chat takes priority on the walkthrough). */}
+        {isDesktop && !demoMode ? (
+          showInspector ? (
+            <Inspector
+              scenarioId={scenarioId}
+              onScenario={setScenarioId}
+              systemPrompt={systemPrompt}
+              onSystemPrompt={setSystemPrompt}
+              onReset={() => {
+                chat.reset()
+                clearAgentPlacements()
+                setSceneState({})
+                setSlotState({})
+                seededFor.current = null
+                void chat.seed(
+                  `[entry context — system fyi]\n${entryContextString(scenario.entry)}\n\n` +
+                    `[shopper has just landed; greet them according to the role's "consult" turn]`,
+                )
+                seededFor.current = scenarioId
+              }}
+              messageCount={chat.messages.length}
+            />
+          ) : params.get('scene') === '2d' ? (
+            // Legacy PNG-overlay scene panel kept behind ?scene=2d for the
+            // first hero-moment fallback. Default is the live R3F scene.
+            <RoomScenePanel state={sceneState} />
+          ) : (
+            // Live 3D — IsometricScene reads from editorObjectsStore. The
+            // agent's updateSceneSlot tool calls flow through sceneBridge.ts
+            // which mutates that store, so the canvas updates as the
+            // conversation progresses.
+            <div className="relative h-full min-h-0 w-full overflow-hidden bg-[var(--color-surface-sunken)]">
+              <IsometricScene />
+            </div>
+          )
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
+function ChatThread({
+  messages,
+  streaming,
+  onUserPick,
+}: {
+  readonly messages: readonly ChatMessage[]
+  readonly streaming: boolean
+  readonly onUserPick: (text: string) => void
+}) {
+  // Auto-scroll the thread to the bottom as new tokens arrive.
+  const endRef = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+  }, [messages])
+
+  return (
+    <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-4 py-6 sm:px-6">
+      {messages.length === 0 ? (
+        <div className="m-auto max-w-xs text-center text-caption text-[var(--color-muted)]">
+          Empty chat — say something to start. Try
+          {' '}<em>"I want to redo my bathroom"</em> or
+          {' '}<em>"show me modern vanities"</em>.
+        </div>
+      ) : null}
+      {messages.map((m, i) => {
+        const isUser = m.role === 'user'
+        const isFirstUser = isUser && i === 0
+        // First user message = the entry-context seed; de-emphasize it.
+        if (isUser) {
+          return (
+            <div
+              key={i}
+              style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}
+              className={
+                isFirstUser
+                  ? 'self-stretch whitespace-pre-wrap rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-muted)_8%,transparent)] px-3 py-2 font-mono text-[11px] text-[var(--color-muted)]'
+                  : 'self-end max-w-[85%] whitespace-pre-wrap rounded-[var(--radius-sm)] bg-[var(--color-lowes-blue)] px-4 py-2.5 text-small text-[var(--color-on-brand)]'
+              }
+            >
+              {m.content}
+            </div>
+          )
+        }
+        // Assistant: full-width markdown rendering + optional thinking panel.
+        const isLast = i === messages.length - 1
+        const isStreamingThis = streaming && isLast
+        return (
+          <AssistantBlock
+            key={i}
+            message={m}
+            streaming={isStreamingThis}
+            onUserPick={onUserPick}
+          />
+        )
+      })}
+      <div ref={endRef} />
+    </div>
+  )
+}
+
+function AssistantBlock({
+  message,
+  streaming,
+  onUserPick,
+}: {
+  readonly message: ChatMessage
+  readonly streaming: boolean
+  readonly onUserPick: (text: string) => void
+}) {
+  const [thinkingOpen, setThinkingOpen] = useState(false)
+  // While streaming, default-open the thinking panel so the user sees reasoning
+  // live. After the answer finishes, collapse it (assumes the user wants the
+  // final answer prominent and reasoning is reference-only).
+  useEffect(() => {
+    if (streaming && message.thinking) setThinkingOpen(true)
+    if (!streaming) setThinkingOpen(false)
+  }, [streaming, message.thinking])
+
+  const html = useMemo(
+    () => (message.content ? (marked.parse(message.content) as string) : ''),
+    [message.content],
+  )
+
+  return (
+    <div className="flex flex-col gap-2">
+      {message.thinking ? (
+        <details
+          open={thinkingOpen}
+          onToggle={(e) => setThinkingOpen((e.target as HTMLDetailsElement).open)}
+          className="rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-muted)_6%,transparent)]"
+        >
+          <summary className="cursor-pointer select-none px-3 py-2 text-caption font-bold uppercase tracking-widest text-[var(--color-muted)]">
+            {streaming && !message.content ? 'Thinking…' : 'Thinking'}{' '}
+            <span className="ml-1 font-normal normal-case tracking-normal opacity-70">
+              ({message.thinking.length} chars)
+            </span>
+          </summary>
+          <div
+            style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}
+            className="whitespace-pre-wrap border-t border-[var(--color-border)] px-3 py-2 font-mono text-[11px] leading-relaxed text-[var(--color-muted)]"
+          >
+            {message.thinking}
+          </div>
+        </details>
+      ) : null}
+      {message.content || streaming ? (
+        <div
+          className="agent-prose"
+          dangerouslySetInnerHTML={{ __html: html || '<p>…</p>' }}
+        />
+      ) : null}
+      {(message.toolCalls ?? []).map((tc, i) => (
+        <RichComponent key={i} call={tc} onUserPick={onUserPick} />
+      ))}
+    </div>
+  )
+}
+
+function RichComponent({
+  call,
+  onUserPick,
+}: {
+  readonly call: { readonly name: string; readonly input: Record<string, unknown> }
+  readonly onUserPick: (text: string) => void
+}) {
+  if (call.name === 'proposeChipChoice') {
+    const question = (call.input.question as string) ?? ''
+    const options = (call.input.options as string[]) ?? []
+    return (
+      <div className="rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-lowes-blue)_4%,transparent)] px-3 py-2.5">
+        {question ? <p className="mb-2 text-small text-[var(--color-ink)]">{question}</p> : null}
+        <div className="flex flex-wrap gap-1.5">
+          {options.map((opt) => (
+            <button
+              key={opt}
+              type="button"
+              onClick={() => onUserPick(opt)}
+              className="rounded-full border border-[var(--color-lowes-blue)] bg-[var(--color-surface)] px-3 py-1 text-small font-medium text-[var(--color-lowes-blue)] hover:bg-[var(--color-lowes-blue)] hover:text-[var(--color-on-brand)]"
+            >
+              {opt}
+            </button>
+          ))}
+        </div>
+      </div>
+    )
+  }
+  if (call.name === 'proposeImageChoice') {
+    const question = (call.input.question as string) ?? ''
+    const options = (call.input.options as Array<{
+      id: string; label: string; blurb?: string; image_url?: string
+    }>) ?? []
+    return (
+      <div className="rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-lowes-blue)_4%,transparent)] px-3 py-2.5">
+        {question ? <p className="mb-2 text-small text-[var(--color-ink)]">{question}</p> : null}
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {options.map((o) => (
+            <button
+              key={o.id}
+              type="button"
+              onClick={() => onUserPick(o.label)}
+              className="flex flex-col items-stretch overflow-hidden rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface)] text-left hover:border-[var(--color-lowes-blue)]"
+            >
+              {o.image_url ? (
+                <img
+                  src={o.image_url}
+                  alt={o.label}
+                  className="h-24 w-full object-cover"
+                />
+              ) : (
+                <div className="flex h-24 items-center justify-center bg-[color-mix(in_srgb,var(--color-ink)_6%,transparent)] text-caption text-[var(--color-muted)]">
+                  {o.label}
+                </div>
+              )}
+              <div className="px-2 py-1.5">
+                <p className="text-small font-bold text-[var(--color-ink)]">{o.label}</p>
+                {o.blurb ? (
+                  <p className="text-[11px] text-[var(--color-muted)]">{o.blurb}</p>
+                ) : null}
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    )
+  }
+  if (call.name === 'proposeProductGrid') {
+    const intro = (call.input.intro as string) ?? ''
+    const products = (call.input.products as Array<{
+      id: string; name: string; brand?: string; price_cents: number; image_url?: string; reason?: string
+    }>) ?? []
+    return (
+      <div className="rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-lowes-blue)_4%,transparent)] px-3 py-2.5">
+        {intro ? <p className="mb-2 text-small text-[var(--color-ink)]">{intro}</p> : null}
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {products.map((p) => (
+            <div
+              key={p.id}
+              className="flex gap-2 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface)] p-2"
+            >
+              {p.image_url ? (
+                <img
+                  src={p.image_url}
+                  alt={p.name}
+                  className="h-14 w-14 shrink-0 rounded object-cover"
+                />
+              ) : (
+                <div className="h-14 w-14 shrink-0 rounded bg-[color-mix(in_srgb,var(--color-ink)_6%,transparent)]" />
+              )}
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[11px] text-[var(--color-muted)]">{p.brand ?? ''}</p>
+                <p className="truncate text-small font-bold text-[var(--color-ink)]">
+                  {p.name}
+                </p>
+                <p className="text-small text-[var(--color-ink)]">${(p.price_cents / 100).toFixed(2)}</p>
+                {p.reason ? (
+                  <p className="mt-0.5 text-[11px] italic text-[var(--color-muted)]">
+                    {p.reason}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+  // updateSlotConfidence renders nothing — it's a side effect (dashboard)
+  return null
+}
+
+function Inspector({
+  scenarioId,
+  onScenario,
+  systemPrompt,
+  onSystemPrompt,
+  onReset,
+  messageCount,
+}: {
+  readonly scenarioId: 'A' | 'B' | 'C' | 'D' | 'E' | 'blank'
+  readonly onScenario: (id: 'A' | 'B' | 'C' | 'D' | 'E' | 'blank') => void
+  readonly systemPrompt: string
+  readonly onSystemPrompt: (s: string) => void
+  readonly onReset: () => void
+  readonly messageCount: number
+}) {
+  const noteText =
+    scenarioId === 'blank'
+      ? 'Empty chat — you start the conversation.'
+      : SCENARIOS.find((s) => s.id === scenarioId)?.note
+  return (
+    <aside className="flex min-h-0 flex-col gap-4 overflow-y-auto bg-[color-mix(in_srgb,var(--color-surface)_92%,var(--color-ink))] px-4 py-4 text-caption">
+      <div>
+        <div className="mb-1 font-bold uppercase tracking-widest text-[var(--color-muted)]">
+          Scenario
+        </div>
+        <select
+          value={scenarioId}
+          onChange={(e) => onScenario(e.target.value as 'A' | 'B' | 'C' | 'D' | 'E' | 'blank')}
+          className="w-full rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface)] px-2 py-1.5 text-small"
+        >
+          <option value="blank">— · Blank chat (no entry context)</option>
+          {SCENARIOS.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.title}
+            </option>
+          ))}
+        </select>
+        <div className="mt-1.5 text-[11px] text-[var(--color-muted)]">{noteText}</div>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onReset}
+          className="rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface)] px-2.5 py-1 text-[11px] font-bold hover:bg-[color-mix(in_srgb,var(--color-ink)_5%,transparent)]"
+        >
+          Reset & replay
+        </button>
+        <span className="text-[11px] text-[var(--color-muted)]">{messageCount} msgs</span>
+      </div>
+
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div className="mb-1 font-bold uppercase tracking-widest text-[var(--color-muted)]">
+          System prompt (live-editable)
+        </div>
+        <textarea
+          value={systemPrompt}
+          onChange={(e) => onSystemPrompt(e.target.value)}
+          spellCheck={false}
+          className="min-h-[260px] flex-1 resize-none rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface)] p-2 font-mono text-[11px] leading-relaxed"
+        />
+        <div className="mt-1 text-[11px] text-[var(--color-muted)]">
+          Edit then click <em>Reset & replay</em> to test with new prompt.
+        </div>
+      </div>
+    </aside>
+  )
+}

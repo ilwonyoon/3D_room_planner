@@ -1,0 +1,94 @@
+{
+  "source": "https://api.usedemo.io/catalog/v3/products",
+  "retailer": {
+    "id": "c1a7ba5f-4120-4eeb-87cb-39e018cbd581",
+    "name": "Lowe's Demo"
+  },
+  "fetched_at": "2026-05-23T06:16:23.105Z",
+  "anon_access_note": "Anon API access returns only page 1 (25 items per query). Paginate beyond requires Bearer token. See data/catalog-meta.json category histogram for the slice we have; supplement with synthetic or hand-picked SKUs for demo coverage.",
+  "api_reported_lowes_total": 3977,
+  "api_reported_full_total": 7948,
+  "sample_collected": 38,
+  "lowes_in_sample": 25,
+  "bathroom_in_sample": 24,
+  "categories": [
+    {
+      "name": "Decorative Lighting",
+      "total": 15,
+      "bathroom": true
+    },
+    {
+      "name": "Vanities",
+      "total": 6,
+      "bathroom": true
+    },
+    {
+      "name": "Tile",
+      "total": 2,
+      "bathroom": true
+    },
+    {
+      "name": "Ovens",
+      "total": 1,
+      "bathroom": false
+    },
+    {
+      "name": "Paint",
+      "total": 1,
+      "bathroom": true
+    }
+  ],
+  "real_count": 24,
+  "synthetic_count": 42,
+  "augmented_at": "2026-05-23T08:36:04.109Z",
+  "categories_after_augment": [
+    {
+      "name": "Decorative Lighting",
+      "total": 15
+    },
+    {
+      "name": "Vanities",
+      "total": 10
+    },
+    {
+      "name": "Faucets",
+      "total": 8
+    },
+    {
+      "name": "Tile",
+      "total": 6
+    },
+    {
+      "name": "Mirrors",
+      "total": 6
+    },
+    {
+      "name": "Toilets",
+      "total": 5
+    },
+    {
+      "name": "Bathtubs",
+      "total": 4
+    },
+    {
+      "name": "Shower Systems",
+      "total": 4
+    },
+    {
+      "name": "Paint",
+      "total": 3
+    },
+    {
+      "name": "Bath Safety",
+      "total": 3
+    },
+    {
+      "name": "Bath Accessories",
+      "total": 1
+    },
+    {
+      "name": "Medicine Cabinets",
+      "total": 1
+    }
+  ]
+}
