@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import {
   SLOT_SPEC,
   THRESHOLDS,
@@ -65,11 +65,18 @@ export function SlotConfidencePanel({ state, onSlotEdit }: Props) {
         onSlotEdit={onSlotEdit}
       />
 
+      {/* Layer C slots are internal diagnostics (budget posture, decision
+          speed, taste cues). A 40-60-yr-old shopper doesn't need to see
+          them by default — they show up if the user expands the section.
+          We keep them visible behind one tap because they're part of the
+          "Mylow is reading you" demo narrative. */}
       <SlotGroup
-        title="Agent reading"
+        title="More about how I see you"
         slots={byLayer.C}
         state={state}
         onSlotEdit={undefined /* always read-only */}
+        collapsible
+        defaultOpen={false}
       />
 
       <footer className="mt-auto rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2.5">
@@ -112,25 +119,70 @@ function SlotGroup({
   slots,
   state,
   onSlotEdit,
+  collapsible = false,
+  defaultOpen = true,
 }: {
   readonly title: string
   readonly slots: readonly SlotSpec[]
   readonly state: SlotState
   readonly onSlotEdit?: (slotId: string, newValue: unknown) => void
+  readonly collapsible?: boolean
+  readonly defaultOpen?: boolean
 }) {
+  const [open, setOpen] = useState(defaultOpen)
   if (slots.length === 0) return null
+  // Non-collapsible groups render the same header style as before.
+  if (!collapsible) {
+    return (
+      <section className="flex flex-col gap-2">
+        <h3 className="text-[10.5px] font-bold uppercase tracking-widest text-[var(--color-muted)]">
+          {title}
+        </h3>
+        <ul className="flex flex-col gap-2">
+          {slots.map((s) => (
+            <li key={s.id}>
+              <SlotRow spec={s} value={state[s.id]} onEdit={onSlotEdit} />
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+  // Collapsible: header is a tap target ≥ 48px, opens/closes the slot list.
+  // Default closed so 40-60-yr shoppers don't see diagnostic-style fields
+  // until they ask. The chevron + slot count make the affordance obvious.
   return (
     <section className="flex flex-col gap-2">
-      <h3 className="text-[10.5px] font-bold uppercase tracking-widest text-[var(--color-muted)]">
-        {title}
-      </h3>
-      <ul className="flex flex-col gap-2">
-        {slots.map((s) => (
-          <li key={s.id}>
-            <SlotRow spec={s} value={state[s.id]} onEdit={onSlotEdit} />
-          </li>
-        ))}
-      </ul>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        className="flex min-h-[48px] items-center justify-between gap-2 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-left hover:bg-[color-mix(in_srgb,var(--color-surface)_94%,var(--color-ink))]"
+      >
+        <span className="text-small font-bold text-[var(--color-ink)]">
+          {title}
+        </span>
+        <span className="flex items-center gap-2">
+          <span className="text-[11px] text-[var(--color-muted)]">
+            {slots.length} {slots.length === 1 ? 'item' : 'items'}
+          </span>
+          <span
+            aria-hidden
+            className={`text-[var(--color-muted)] transition-transform ${open ? 'rotate-90' : ''}`}
+          >
+            ›
+          </span>
+        </span>
+      </button>
+      {open ? (
+        <ul className="flex flex-col gap-2">
+          {slots.map((s) => (
+            <li key={s.id}>
+              <SlotRow spec={s} value={state[s.id]} onEdit={onSlotEdit} />
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </section>
   )
 }
@@ -318,9 +370,76 @@ function formatSlotValue(spec: SlotSpec, value: unknown): string {
   return prettyOption(spec, String(value))
 }
 
+/**
+ * Friendly display strings for the snake_case option tokens stored in
+ * data/eval/slot-model.json. Designed for 40-60-yr-old shoppers — first-person
+ * voice where natural, no internal jargon. Anything not in this table falls
+ * back to underscore-stripped lowercase so a missing key never blocks rendering.
+ */
+const OPTION_LABELS: Record<string, string> = {
+  // scope
+  a_few_items: 'A few items',
+  partial: 'Partial refresh',
+  full_reno: 'Whole bathroom',
+  // style_direction
+  spa: 'Spa / calm',
+  modern: 'Modern',
+  transitional: 'Transitional',
+  farmhouse: 'Farmhouse',
+  traditional: 'Traditional',
+  coastal: 'Coastal',
+  // room_size
+  small: 'Small',
+  standard: 'Standard',
+  master: 'Primary / large',
+  // persona_traits
+  newlywed: 'Newlywed / first home',
+  family_with_kids: 'Family with kids',
+  downsizer: 'Downsizing',
+  single_homeowner: 'Single homeowner',
+  senior_aging_in_place: 'Designing to age in place',
+  diy_er: 'DIY-ing it myself',
+  hiring_contractor: 'Hiring a contractor',
+  pro_buying_for_client: 'Buying for a client (pro)',
+  // trigger
+  aging_fixtures: 'Aging fixtures',
+  move_in: 'Just moved in',
+  resale: 'Selling / resale',
+  leak_urgent: 'Leak — needs fix now',
+  accessibility: 'Accessibility',
+  family_change: 'Family life changing',
+  // lifestyle
+  shower_focused: 'Shower-focused',
+  tub_focused: 'Tub-focused',
+  uses_both: 'Use both',
+  kids_in_household: 'Kids in the house',
+  low_maintenance_pref: 'Low-maintenance please',
+  accessibility_needs: 'Accessibility needs',
+  // budget_posture (Layer C — surfaced only when expanded)
+  on_target: 'On track',
+  'over-silent': 'Stretching the budget',
+  refuses_anchor: 'Wants flexibility',
+  unrealistic_low: 'Budget vs. wish-list mismatch',
+  // decision_speed
+  fast: 'Quick decider',
+  browsing: 'Looking around',
+  hesitant: 'Taking time',
+}
+
 function prettyOption(_spec: SlotSpec, raw: string): string {
   if (!raw) return ''
-  // Replace underscores with spaces for friendlier display
+  // Multi-value tokens (Taste cues / lifestyle multi_choice) arrive as
+  // comma-joined strings — map each side independently so a single bad
+  // token doesn't drop the rest.
+  if (raw.includes(',')) {
+    return raw
+      .split(',')
+      .map((t) => prettyOption(_spec, t.trim()))
+      .filter(Boolean)
+      .join(' + ')
+  }
+  if (OPTION_LABELS[raw]) return OPTION_LABELS[raw]
+  // Fall back to underscore-stripped — never block on a missing label
   return raw.replace(/_/g, ' ')
 }
 

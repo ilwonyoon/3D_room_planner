@@ -3,12 +3,13 @@ import { marked } from 'marked'
 import { DEFAULT_SYSTEM_PROMPT } from './systemPrompt'
 import { SCENARIOS, entryContextString } from './scenarios'
 import { useAgentChat, type ChatMessage } from './useAgentChat'
-import { SlotConfidencePanel } from './SlotConfidencePanel'
 import type { SlotState } from './slotModel'
 import { setSlot } from './slotModel'
 import { RoomScenePanel, type SceneState } from './RoomScenePanel'
 import { placeStandInForSlot, clearAgentPlacements } from './sceneBridge'
 import { IsometricScene } from '@/scene/IsometricScene'
+import { ProjectSettingsBar } from './ProjectSettingsBar'
+import { ProjectSettingsSheet } from './ProjectSettingsSheet'
 import catalogJson from '../../data/catalog.json'
 
 type CatalogItem = {
@@ -45,10 +46,15 @@ export function AgentPage() {
   const [systemPrompt, setSystemPrompt] = useState(DEFAULT_SYSTEM_PROMPT)
   const scenario = SCENARIOS.find((s) => s.id === scenarioId) ?? SCENARIOS[0]
   const [input, setInput] = useState('')
-  // Discovery slot state (left dashboard) — agent + user write.
+  // Discovery slot state — agent + user write.
   const [slotState, setSlotState] = useState<SlotState>({})
   // Scene state (right room panel) — agent writes via updateSceneSlot.
   const [sceneState, setSceneState] = useState<SceneState>({})
+  // Bottom-sheet (Project settings) state. unreadCount tracks how many
+  // agent-driven slot updates have landed since the user last opened the
+  // sheet — drives the red-dot indicator on the chip.
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
 
   const handleToolUse = ({ name, input }: { name: string; input: Record<string, unknown> }) => {
     if (name === 'updateSlotConfidence') {
@@ -58,6 +64,9 @@ export function AgentPage() {
       const evidence = typeof input.evidence === 'string' ? input.evidence : undefined
       if (!slot) return
       setSlotState((prev) => setSlot(prev, slot, { value, confidence, evidence, source: 'agent' }))
+      // Red-dot signal — only count when the sheet is closed; otherwise the
+      // user is looking at the sheet right now and would see the change live.
+      if (!settingsOpen) setUnreadCount((n) => n + 1)
     } else if (name === 'updateSceneSlot') {
       const slot = String(input.slot ?? '')
       const productId = String(input.product_id ?? '')
@@ -137,38 +146,26 @@ export function AgentPage() {
         </span>
       </header>
 
-      {/* Mobile: single column, chat only.
-          Desktop: dashboard 300 | chat 1fr | inspector 320.
-          demoMode hides the inspector. */}
+      {/* Desktop: chat 1fr | scene 320 (or inspector). Mobile: single col.
+          The old left-column dashboard moved into a bottom sheet that
+          slides up over the chat area, exposed via a chip above the
+          chat input (ProjectSettingsBar). The 3D scene stays uncovered
+          so users see the room while editing settings. */}
       <div
         className="grid min-h-0"
         style={{
+          height: '100%',
           gridTemplateColumns: isDesktop
             ? demoMode
-              ? 'minmax(0, 300px) 1fr'
-              : 'minmax(0, 300px) 1fr minmax(0, 320px)'
+              ? '1fr'
+              : '1fr minmax(0, 320px)'
             : '1fr',
         }}
       >
-        {/* left — Project dashboard. Read-only on mobile, editable on desktop. */}
-        {isDesktop ? (
-          <SlotConfidencePanel
-            state={slotState}
-            onSlotEdit={(slotId, newValue) =>
-              setSlotState((prev) =>
-                setSlot(prev, slotId, {
-                  value: newValue,
-                  confidence: 95,
-                  source: 'user',
-                  evidence: 'set in dashboard',
-                }),
-              )
-            }
-          />
-        ) : null}
-
-        {/* center — chat thread (always visible, full width on mobile) */}
-        <section className="flex min-h-0 flex-col border-r border-[var(--color-border)]">
+        {/* center — chat thread + Project settings entry. position: relative
+            so the bottom sheet can absolute-position inside this column
+            (covering chat but not the 3D scene to the right). */}
+        <section className="relative flex min-h-0 flex-col border-r border-[var(--color-border)]">
           <ChatThread
             messages={chat.messages}
             streaming={chat.streaming}
@@ -185,18 +182,30 @@ export function AgentPage() {
               setInput('')
             }}
           >
+            {/* Project-settings chip + send row. The chip is the single
+                entry point to the dashboard; red dot announces new agent
+                inferences when sheet is closed. */}
             <div className="flex gap-2">
+              <ProjectSettingsBar
+                unreadCount={unreadCount}
+                onOpen={() => {
+                  setSettingsOpen(true)
+                  setUnreadCount(0)
+                }}
+              />
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 disabled={chat.streaming}
                 placeholder={chat.streaming ? 'Mylow is thinking…' : 'Type a reply…'}
-                className="min-w-0 flex-1 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-small disabled:opacity-50"
+                className="min-w-0 flex-1 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-base disabled:opacity-50"
+                style={{ minHeight: 48 }}
               />
               <button
                 type="submit"
                 disabled={!input.trim() || chat.streaming}
-                className="rounded-[var(--radius-sm)] bg-[var(--color-lowes-blue)] px-4 py-2 text-small font-bold text-[var(--color-on-brand)] disabled:opacity-40"
+                className="rounded-[var(--radius-sm)] bg-[var(--color-lowes-blue)] px-5 text-base font-bold text-[var(--color-on-brand)] disabled:opacity-40"
+                style={{ minHeight: 48 }}
               >
                 Send
               </button>
@@ -205,6 +214,24 @@ export function AgentPage() {
               <div className="mt-2 text-caption text-red-600">{chat.error}</div>
             ) : null}
           </form>
+          {/* The bottom sheet itself — slides up inside this section so
+              backdrop + sheet stay within the chat column and don't cover
+              the 3D scene. */}
+          <ProjectSettingsSheet
+            open={settingsOpen}
+            state={slotState}
+            onSlotEdit={(slotId, newValue) =>
+              setSlotState((prev) =>
+                setSlot(prev, slotId, {
+                  value: newValue,
+                  confidence: 95,
+                  source: 'user',
+                  evidence: 'set in dashboard',
+                }),
+              )
+            }
+            onClose={() => setSettingsOpen(false)}
+          />
         </section>
 
         {/* right — room scene by default, inspector if ?inspector=1.
@@ -239,7 +266,15 @@ export function AgentPage() {
             // agent's updateSceneSlot tool calls flow through sceneBridge.ts
             // which mutates that store, so the canvas updates as the
             // conversation progresses.
-            <div className="relative h-full min-h-0 w-full overflow-hidden bg-[var(--color-surface-sunken)]">
+            //
+            // The wrapper sets `position: relative` + a concrete height
+            // because the R3F <Canvas> inside IsometricScene is
+            // `position: absolute; inset: 0` — without a sized relative
+            // ancestor the WebGL canvas mounts at 0×0.
+            <div
+              style={{ position: 'relative', height: '100%', width: '100%' }}
+              className="overflow-hidden bg-[var(--color-surface-sunken)]"
+            >
               <IsometricScene />
             </div>
           )

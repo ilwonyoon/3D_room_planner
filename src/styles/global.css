@@ -1,4 +1,35 @@
+/* bond-demo: Tailwind v4 + Bond_studio design tokens for the agent UI.
+   Original pocketroom tokens are kept below (--color-brand, --color-base-*,
+   --color-scene-bg) because the existing R3F editor + AssetRoom use them. */
+@import "tailwindcss";
+
+@theme {
+  /* Lowe's brand + agent UI tokens — pasted verbatim from Bond_studio. */
+  --color-lowes-blue: #004990;
+  --color-lowes-blue-600: #003a73;
+  --color-lowes-blue-50: #eaf1f8;
+  --color-ink: #16181d;
+  --color-muted: #6b7280;
+  --color-on-brand: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-sunken: #f3f4f6;
+  --color-border: #e5e7eb;
+
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-full: 9999px;
+
+  --text-callout: 1rem;
+  --text-callout--line-height: 1.45;
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.4;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.35;
+}
+
 :root {
+  /* pocketroom tokens — kept for the R3F editor that lives in main */
   --color-brand: #6391E6;
   --color-base-1: #2F3438;
   --color-base-2: #828C94;
@@ -7,6 +38,12 @@
   --color-base-5: #F7F9FA;
   --color-base-6: #FFFFFF;
   --color-scene-bg: #1B1B1D;
+}
+
+/* Bottom-sheet slide-up animation used by ProjectSettingsSheet. */
+@keyframes sheet-slide-up {
+  from { transform: translateY(100%); opacity: 0.85; }
+  to   { transform: translateY(0);    opacity: 1; }
 }
 
 html, body, #root {
