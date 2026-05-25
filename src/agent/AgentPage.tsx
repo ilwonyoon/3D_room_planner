@@ -10,6 +10,7 @@ import { placeStandInForSlot, clearAgentPlacements } from './sceneBridge'
 import { IsometricScene } from '@/scene/IsometricScene'
 import { ProjectSettingsBar } from './ProjectSettingsBar'
 import { ProjectSettingsSheet } from './ProjectSettingsSheet'
+import { SceneViewToggle } from './SceneViewToggle'
 import catalogJson from '../../data/catalog.json'
 
 type CatalogItem = {
@@ -146,26 +147,22 @@ export function AgentPage() {
         </span>
       </header>
 
-      {/* Desktop: chat 1fr | scene 320 (or inspector). Mobile: single col.
-          The old left-column dashboard moved into a bottom sheet that
-          slides up over the chat area, exposed via a chip above the
-          chat input (ProjectSettingsBar). The 3D scene stays uncovered
-          so users see the room while editing settings. */}
+      {/* Desktop: chat is the LEFT rail (proto2's right panel width:
+          clamp(360px, 30vw, 420px)), scene fills the main area on the
+          right (proto2's preview region, flex-1). Mobile: single column,
+          scene hidden. The Project-settings bottom sheet slides up inside
+          the chat rail only — scene stays visible. */}
       <div
-        className="grid min-h-0"
-        style={{
-          height: '100%',
-          gridTemplateColumns: isDesktop
-            ? demoMode
-              ? '1fr'
-              : '1fr minmax(0, 320px)'
-            : '1fr',
-        }}
+        className="flex min-h-0"
+        style={{ height: '100%' }}
       >
-        {/* center — chat thread + Project settings entry. position: relative
-            so the bottom sheet can absolute-position inside this column
+        {/* chat — LEFT rail, bounded width. position: relative so the
+            bottom sheet can absolute-position inside this column
             (covering chat but not the 3D scene to the right). */}
-        <section className="relative flex min-h-0 flex-col border-r border-[var(--color-border)]">
+        <section
+          style={{ width: 'clamp(360px, 30vw, 420px)' }}
+          className="relative flex h-full min-h-0 shrink-0 flex-col border-r border-[var(--color-border)]"
+        >
           <ChatThread
             messages={chat.messages}
             streaming={chat.streaming}
@@ -234,50 +231,70 @@ export function AgentPage() {
           />
         </section>
 
-        {/* right — room scene by default, inspector if ?inspector=1.
-            Hidden in demo mode (the chat takes priority on the walkthrough). */}
+        {/* right — room scene as the MAIN area (flex-1, like proto2's
+            preview pane). Inspector swap if ?inspector=1. Hidden in demo
+            mode + on mobile. */}
         {isDesktop && !demoMode ? (
-          showInspector ? (
-            <Inspector
-              scenarioId={scenarioId}
-              onScenario={setScenarioId}
-              systemPrompt={systemPrompt}
-              onSystemPrompt={setSystemPrompt}
-              onReset={() => {
-                chat.reset()
-                clearAgentPlacements()
-                setSceneState({})
-                setSlotState({})
-                seededFor.current = null
-                void chat.seed(
-                  `[entry context — system fyi]\n${entryContextString(scenario.entry)}\n\n` +
-                    `[shopper has just landed; greet them according to the role's "consult" turn]`,
-                )
-                seededFor.current = scenarioId
-              }}
-              messageCount={chat.messages.length}
-            />
-          ) : params.get('scene') === '2d' ? (
-            // Legacy PNG-overlay scene panel kept behind ?scene=2d for the
-            // first hero-moment fallback. Default is the live R3F scene.
-            <RoomScenePanel state={sceneState} />
-          ) : (
-            // Live 3D — IsometricScene reads from editorObjectsStore. The
-            // agent's updateSceneSlot tool calls flow through sceneBridge.ts
-            // which mutates that store, so the canvas updates as the
-            // conversation progresses.
-            //
-            // The wrapper sets `position: relative` + a concrete height
-            // because the R3F <Canvas> inside IsometricScene is
-            // `position: absolute; inset: 0` — without a sized relative
-            // ancestor the WebGL canvas mounts at 0×0.
-            <div
-              style={{ position: 'relative', height: '100%', width: '100%' }}
-              className="overflow-hidden bg-[var(--color-surface-sunken)]"
-            >
-              <IsometricScene />
-            </div>
-          )
+          <aside className="h-full min-h-0 min-w-0 flex-1">
+
+            {showInspector ? (
+              <Inspector
+                scenarioId={scenarioId}
+                onScenario={setScenarioId}
+                systemPrompt={systemPrompt}
+                onSystemPrompt={setSystemPrompt}
+                onReset={() => {
+                  chat.reset()
+                  clearAgentPlacements()
+                  setSceneState({})
+                  setSlotState({})
+                  seededFor.current = null
+                  void chat.seed(
+                    `[entry context — system fyi]\n${entryContextString(scenario.entry)}\n\n` +
+                      `[shopper has just landed; greet them according to the role's "consult" turn]`,
+                  )
+                  seededFor.current = scenarioId
+                }}
+                messageCount={chat.messages.length}
+              />
+            ) : params.get('scene') === '2d' ? (
+              // Legacy PNG-overlay scene panel kept behind ?scene=2d for the
+              // first hero-moment fallback. Default is the live R3F scene.
+              <RoomScenePanel state={sceneState} />
+            ) : (
+              // Live 3D — IsometricScene reads from editorObjectsStore. The
+              // agent's updateSceneSlot tool calls flow through sceneBridge.ts
+              // which mutates that store, so the canvas updates as the
+              // conversation progresses.
+              //
+              // The wrapper sets `position: relative` + a concrete height
+              // because the R3F <Canvas> inside IsometricScene is
+              // `position: absolute; inset: 0` — without a sized relative
+              // ancestor the WebGL canvas mounts at 0×0.
+              //
+              // Background #f5f5f5 (--color-surface-sunken) sits under the
+              // Canvas; Canvas itself still paints `color.scene.bg` (#1B1B1D)
+              // because that value is reused by R3F's fog. We override the
+              // canvas style with the same light color so the *visible* room
+              // background is light, not pocketroom-dark.
+              <div
+                data-agent-scene
+                style={{
+                  position: 'relative',
+                  height: '100%',
+                  width: '100%',
+                  background: '#f5f5f5',
+                }}
+                className="overflow-hidden"
+              >
+                <IsometricScene />
+                {/* View toggle overlay — top-right corner of the scene.
+                    Mounted *outside* the Canvas so it stays interactive
+                    even when R3F captures pointer events. */}
+                <SceneViewToggle />
+              </div>
+            )}
+          </aside>
         ) : null}
       </div>
     </div>

@@ -40,10 +40,21 @@
   --color-scene-bg: #1B1B1D;
 }
 
-/* Bottom-sheet slide-up animation used by ProjectSettingsSheet. */
-@keyframes sheet-slide-up {
-  from { transform: translateY(100%); opacity: 0.85; }
-  to   { transform: translateY(0);    opacity: 1; }
+/* Fade-in animation for the Bathroom-settings fullscreen takeover. */
+@keyframes settings-fade-in {
+  from { opacity: 0; transform: scale(0.99); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* bond-demo: the R3F IsometricScene paints its Canvas with the
+   pocketroom dark scene color (color.scene.bg, #1B1B1D). For the agent
+   demo we want a light room background, so any descendant <canvas>
+   inside the [data-agent-scene] wrapper gets a light bg. R3F's own
+   `scene.background` + fog still use the dark hex internally — that's
+   only the rendered viewport color when the WebGL surface is empty,
+   and once the room mesh draws it's covered anyway. */
+[data-agent-scene] canvas {
+  background: #f5f5f5 !important;
 }
 
 html, body, #root {
@@ -139,12 +150,9 @@ ul { list-style: none; padding: 0; margin: 0; }
     inset 0 -5px 8px rgba(255, 255, 255, 0.06);
 }
 
-@media (pointer: fine) {
-  body,
-  body * {
-    cursor: none !important;
-  }
-}
+/* bond-demo: the original pocketroom rule `cursor: none` was paired with
+   LiquidGlassCursor which we don't mount in this branch. Restoring the
+   native cursor so the agent UI is interactive. */
 
 /* Hide scrollbars but keep scroll */
 .no-scrollbar::-webkit-scrollbar { display: none; }

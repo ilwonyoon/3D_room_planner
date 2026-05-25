@@ -1,5 +1,5 @@
 /**
- * The chat-bottom entry point to Project settings.
+ * The chat-bottom entry point to Bathroom settings.
  *
  * Replaces the always-visible left-column dashboard. A single chip with a
  * red dot when there are new agent-inferred slots since the user last
@@ -23,13 +23,13 @@ export function ProjectSettingsBar({ unreadCount, onOpen }: Props) {
       onClick={onOpen}
       aria-label={
         hasUnread
-          ? `Project settings — ${unreadCount} new from Mylow`
-          : 'Project settings'
+          ? `Bathroom settings — ${unreadCount} new from Mylow`
+          : 'Bathroom settings'
       }
       className="relative flex min-h-[48px] items-center gap-2 rounded-[var(--radius-sm)] border-2 border-[var(--color-lowes-blue)] bg-[var(--color-surface)] px-4 text-base font-semibold text-[var(--color-lowes-blue)] hover:bg-[color-mix(in_srgb,var(--color-lowes-blue)_8%,var(--color-surface))]"
     >
       <SettingsIcon />
-      <span>Project settings</span>
+      <span>Bathroom settings</span>
       {hasUnread ? (
         <span
           aria-hidden

@@ -29,7 +29,7 @@
       "layer": "A",
       "editable": true,
       "kind": "single_choice",
-      "options": ["spa", "modern", "transitional", "farmhouse", "traditional", "coastal"],
+      "options": ["spa", "modern", "transitional", "farmhouse", "traditional", "contemporary"],
       "required_for_design": true,
       "confidence_sources": {
         "user_dashboard_click": 95,
