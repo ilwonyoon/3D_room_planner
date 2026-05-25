@@ -68,8 +68,8 @@
       "kind": "single_choice",
       "options": ["powder", "three_quarter", "full_bath", "primary"],
       "modes": ["partial", "full"],
-      "required_for_design": true,
-      "_comment": "Replaces the old room_size slot. Configuration is what the user actually knows about their bathroom (which fixtures it has) — size is inferred. powder = toilet+sink, three_quarter = +shower, full_bath = +tub or combo, primary = separate tub & shower. Skipped in single-SKU mode (PDP entry already pins the fixture being swapped).",
+      "required_for_design": false,
+      "_comment": "Configuration is what the user knows about their bathroom (which fixtures it has) — size is inferred. powder = toilet+sink, three_quarter = +shower, full_bath = +tub or combo, primary = separate tub & shower. NOT required_for_design — agent can ask in chat if needed. Lives in 'More questions (optional)' to keep Essentials minimal: scope + style + budget only.",
       "confidence_sources": {
         "user_dashboard_click": 95,
         "user_explicit_in_chat": 90,

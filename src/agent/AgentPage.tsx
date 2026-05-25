@@ -11,6 +11,7 @@ import { IsometricScene } from '@/scene/IsometricScene'
 import { ProjectSettingsBar } from './ProjectSettingsBar'
 import { ProjectSettingsSheet } from './ProjectSettingsSheet'
 import { SceneViewToggle } from './SceneViewToggle'
+import { getMockShopper, bootstrapSlots } from './inference'
 import catalogJson from '../../data/catalog.json'
 
 type CatalogItem = {
@@ -41,14 +42,23 @@ export function AgentPage() {
   const blankStart = params.get('blank') === '1'
   // ?inspector=1 → show the dev inspector instead of the room scene panel.
   const showInspector = params.get('inspector') === '1'
+  // ?shopper=A|B|C|D|E|anon → bootstrap slot state from a mock Lowe's
+  // session profile. The inference layer fills scope/style/budget/
+  // persona/trigger from browse history + saved lists + region before
+  // the user types anything — the "magical" path.
+  const shopperId = params.get('shopper') ?? ''
   const [scenarioId, setScenarioId] = useState<'A' | 'B' | 'C' | 'D' | 'E' | 'blank'>(
     blankStart ? 'blank' : 'A',
   )
   const [systemPrompt, setSystemPrompt] = useState(DEFAULT_SYSTEM_PROMPT)
   const scenario = SCENARIOS.find((s) => s.id === scenarioId) ?? SCENARIOS[0]
   const [input, setInput] = useState('')
-  // Discovery slot state — agent + user write.
-  const [slotState, setSlotState] = useState<SlotState>({})
+  // Discovery slot state — agent + user write + inferred from Lowe's data.
+  // If ?shopper= is present, we bootstrap from the mock profile on mount.
+  const [slotState, setSlotState] = useState<SlotState>(() => {
+    const profile = shopperId ? getMockShopper(shopperId) : undefined
+    return bootstrapSlots(profile)
+  })
   // Scene state (right room panel) — agent writes via updateSceneSlot.
   const [sceneState, setSceneState] = useState<SceneState>({})
   // Bottom-sheet (Project settings) state. unreadCount tracks how many

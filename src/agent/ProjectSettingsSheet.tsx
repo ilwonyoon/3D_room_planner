@@ -45,7 +45,7 @@ export function ProjectSettingsSheet({ open, state, onSlotEdit, onClose }: Props
             Bathroom settings
           </h2>
           <p className="mt-1 text-base text-[var(--color-muted)]">
-            What Mylow knows about your bathroom. Tap to update.
+            Just the basics here — Mylow learns the rest from your chat.
           </p>
         </div>
         <button

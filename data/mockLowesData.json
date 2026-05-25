@@ -1,0 +1,199 @@
+{
+  "_comment": "Mock Lowe's shopper profiles — what we'd plausibly receive from a partner-integration handoff if Bond were embedded on lowes.com. Each shopper id matches a persona in data/eval/personas.json so the demo + eval harness share the same identity space. The inference engine (src/agent/inference.ts) reads this file at boot, picks a shopper by ?shopper=... URL param, and bootstraps slot state from the signals before the chat opens. Source mapping for fields documented in the deep-dive Track 3 report.",
+  "version": "2026-05-25-v1",
+  "shoppers": [
+    {
+      "id": "A",
+      "label": "Sarah, Hoboken — newlywed designing first home bath",
+      "auth_state": "signed_in_mylowes",
+      "mylowes_tier": "homeowner_standard",
+      "geo": {
+        "zip": "07030",
+        "city": "Hoboken",
+        "state": "NJ",
+        "regional_cluster": "urban_transitional"
+      },
+      "device": "desktop",
+      "session": {
+        "visit_number": 2,
+        "visit_recency_days": 1
+      },
+      "browse_history_30d": [
+        { "sku": "ARB-BECKETT-24-NAVY", "category": "vanity", "views": 4, "dwell_sec": 180 },
+        { "sku": "ARB-BECKETT-30-WHITE", "category": "vanity", "views": 1, "dwell_sec": 22 },
+        { "sku": "MOEN-BRANTFORD-BRASS", "category": "faucet", "views": 2, "dwell_sec": 45 },
+        { "sku": "VANITY-LIGHT-CHAMPAGNE-3LT", "category": "lighting", "views": 1, "dwell_sec": 60 }
+      ],
+      "search_history_90d": [
+        { "query": "navy bathroom vanity", "ts_days_ago": 5 },
+        { "query": "small bathroom storage", "ts_days_ago": 12 }
+      ],
+      "saved_lists": [
+        {
+          "name": "First Home Bath",
+          "items": ["ARB-BECKETT-24-NAVY", "ARB-RECT-MIRROR-30X36-BK"]
+        }
+      ],
+      "purchase_history_24m": [],
+      "regional_signals": {
+        "top_styles_in_zip": ["transitional", "modern"],
+        "top_palettes": ["navy+brass", "white+chrome"]
+      }
+    },
+    {
+      "id": "B",
+      "label": "Marcus — buying for elderly parent (aging in place)",
+      "auth_state": "signed_in_mylowes",
+      "mylowes_tier": "homeowner_standard",
+      "geo": {
+        "zip": "27513",
+        "city": "Cary",
+        "state": "NC",
+        "regional_cluster": "suburban_traditional"
+      },
+      "device": "mobile",
+      "session": {
+        "visit_number": 4,
+        "visit_recency_days": 0
+      },
+      "browse_history_30d": [
+        { "sku": "GRAB-BAR-18-BN", "category": "accessory", "views": 3, "dwell_sec": 80 },
+        { "sku": "GRAB-BAR-24-BN", "category": "accessory", "views": 2, "dwell_sec": 65 },
+        { "sku": "KOHLER-COMFORT-HEIGHT-TOILET", "category": "toilet", "views": 1, "dwell_sec": 100 },
+        { "sku": "TEAK-SHOWER-BENCH", "category": "accessory", "views": 2, "dwell_sec": 55 }
+      ],
+      "search_history_90d": [
+        { "query": "make bathroom safer for elderly", "ts_days_ago": 14 },
+        { "query": "comfort height toilet", "ts_days_ago": 14 }
+      ],
+      "saved_lists": [],
+      "purchase_history_24m": [
+        { "sku": "NON-SLIP-BATH-MAT", "category": "accessory", "ts_days_ago": 20 }
+      ],
+      "regional_signals": {
+        "top_styles_in_zip": ["traditional", "transitional"],
+        "top_palettes": ["white+chrome"]
+      }
+    },
+    {
+      "id": "C",
+      "label": "Jamie — urgent leak, just needs a bathtub fix",
+      "auth_state": "guest",
+      "geo": {
+        "zip": "30309",
+        "city": "Atlanta",
+        "state": "GA",
+        "regional_cluster": "urban_southern"
+      },
+      "device": "mobile",
+      "session": {
+        "visit_number": 1,
+        "visit_recency_days": 0,
+        "entry_path": "search_result"
+      },
+      "search_history_90d": [
+        { "query": "bathtub leak emergency", "ts_days_ago": 0 },
+        { "query": "60 inch alcove bathtub white", "ts_days_ago": 0 }
+      ],
+      "browse_history_30d": [],
+      "saved_lists": [],
+      "purchase_history_24m": [],
+      "regional_signals": {}
+    },
+    {
+      "id": "D",
+      "label": "Pat & Riley — downsizing into condo, primary bath reno",
+      "auth_state": "signed_in_mylowes",
+      "mylowes_tier": "homeowner_premium",
+      "geo": {
+        "zip": "33139",
+        "city": "Miami Beach",
+        "state": "FL",
+        "regional_cluster": "coastal_premium"
+      },
+      "device": "desktop",
+      "session": {
+        "visit_number": 6,
+        "visit_recency_days": 2
+      },
+      "browse_history_30d": [
+        { "sku": "FREESTANDING-TUB-OVAL-WHITE", "category": "bathtub", "views": 5, "dwell_sec": 220 },
+        { "sku": "WALK-IN-SHOWER-MARBLE", "category": "shower", "views": 4, "dwell_sec": 180 },
+        { "sku": "DOUBLE-VANITY-72-WHITE", "category": "vanity", "views": 3, "dwell_sec": 140 },
+        { "sku": "PENDANT-CHANDELIER-BRASS", "category": "lighting", "views": 2, "dwell_sec": 90 }
+      ],
+      "search_history_90d": [
+        { "query": "spa bathroom design", "ts_days_ago": 8 },
+        { "query": "freestanding tub primary bath", "ts_days_ago": 15 },
+        { "query": "walk in shower no curb", "ts_days_ago": 18 }
+      ],
+      "saved_lists": [
+        {
+          "name": "Master Bath 2026",
+          "items": [
+            "FREESTANDING-TUB-OVAL-WHITE",
+            "WALK-IN-SHOWER-MARBLE",
+            "DOUBLE-VANITY-72-WHITE"
+          ]
+        }
+      ],
+      "purchase_history_24m": [
+        { "sku": "KITCHEN-CABINET-SHAKER", "category": "kitchen", "ts_days_ago": 280 }
+      ],
+      "regional_signals": {
+        "top_styles_in_zip": ["coastal", "contemporary"],
+        "top_palettes": ["white+brass", "soft+warm"]
+      }
+    },
+    {
+      "id": "E",
+      "label": "DIY-er Alex — refreshing hardware family across bath",
+      "auth_state": "signed_in_mylowes",
+      "mylowes_tier": "homeowner_standard",
+      "geo": {
+        "zip": "78704",
+        "city": "Austin",
+        "state": "TX",
+        "regional_cluster": "modern_urban"
+      },
+      "device": "desktop",
+      "session": {
+        "visit_number": 3,
+        "visit_recency_days": 1
+      },
+      "browse_history_30d": [
+        { "sku": "MATTE-BLACK-FAUCET-WIDESPREAD", "category": "faucet", "views": 4, "dwell_sec": 150 },
+        { "sku": "MATTE-BLACK-TOWEL-BAR-18", "category": "accessory", "views": 2, "dwell_sec": 30 },
+        { "sku": "MATTE-BLACK-SHOWERHEAD-RAINFALL", "category": "shower", "views": 3, "dwell_sec": 80 },
+        { "sku": "MATTE-BLACK-PAPER-HOLDER", "category": "accessory", "views": 1, "dwell_sec": 15 }
+      ],
+      "search_history_90d": [
+        { "query": "matte black bathroom hardware set", "ts_days_ago": 7 }
+      ],
+      "saved_lists": [],
+      "purchase_history_24m": [
+        { "sku": "DIY-TILE-FLOOR-12X24", "category": "tile_floor", "ts_days_ago": 90 }
+      ],
+      "regional_signals": {
+        "top_styles_in_zip": ["modern", "contemporary"]
+      }
+    },
+    {
+      "id": "anon",
+      "label": "Anonymous — global nav cold start",
+      "auth_state": "guest",
+      "geo": {},
+      "device": "desktop",
+      "session": {
+        "visit_number": 1,
+        "visit_recency_days": 0,
+        "entry_path": "global_nav"
+      },
+      "browse_history_30d": [],
+      "search_history_90d": [],
+      "saved_lists": [],
+      "purchase_history_24m": [],
+      "regional_signals": {}
+    }
+  ]
+}
