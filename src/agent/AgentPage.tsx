@@ -78,8 +78,10 @@ export function AgentPage() {
       }))
       // Live R3F scene update — pick a stand-in mesh for this slot and
       // place it in the IsometricScene via editorObjectsStore. A1 path:
-      // visual approximation, not real bathroom GLBs.
-      placeStandInForSlot(slot)
+      // visual approximation, not real bathroom GLBs. productId is
+      // passed so the pick is deterministic across reloads for the
+      // same agent recommendation.
+      placeStandInForSlot(slot, productId)
     }
   }
 
