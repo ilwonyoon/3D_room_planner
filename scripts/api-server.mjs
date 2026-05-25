@@ -14,6 +14,7 @@
 import http from 'node:http'
 import { config as loadDotenv } from 'dotenv'
 import Anthropic from '@anthropic-ai/sdk'
+import { retrieve, assembleContext } from './rag.mjs'
 
 loadDotenv({ path: '.env.local' })
 
@@ -133,9 +134,11 @@ const AGENT_TOOLS = [
         slot: {
           type: 'string',
           enum: [
-            'scope', 'style_direction', 'room_size', 'budget_range',
-            'must_keep', 'must_change', 'persona_traits', 'trigger',
-            'lifestyle', 'taste_signals', 'budget_posture', 'decision_speed',
+            'scope', 'style_direction', 'budget_range',
+            'bathroom_configuration', 'who_uses_it',
+            'must_haves_avoids', 'wet_dry_priority',
+            'persona_traits', 'trigger',
+            'taste_signals', 'budget_posture', 'decision_speed',
           ],
         },
         value: {},
@@ -181,11 +184,27 @@ const handleChat = async (req, res) => {
     res.end('Invalid JSON')
     return
   }
-  const { systemPrompt, messages } = body
+  const { systemPrompt, messages, slotState } = body
   if (!systemPrompt || !Array.isArray(messages)) {
     res.statusCode = 400
     res.end('Missing systemPrompt or messages')
     return
+  }
+
+  // RAG: retrieve knowledge chunks based on current slot state and append
+  // them as a DYNAMIC KNOWLEDGE section to the system prompt. This is the
+  // server-side retrieval step — the client just sends slotState, the
+  // server resolves what knowledge is relevant.
+  const chunks = retrieve(slotState ?? {})
+  const dynamicContext = assembleContext(chunks)
+  const fullSystemPrompt = dynamicContext
+    ? systemPrompt + '\n\n' + dynamicContext
+    : systemPrompt
+  if (chunks.length > 0) {
+    console.log(
+      `[chat] RAG retrieved ${chunks.length} chunks:`,
+      chunks.map((c) => `${c.type}:${c.id}`).join(', '),
+    )
   }
 
   res.setHeader('content-type', 'text/event-stream')
@@ -198,7 +217,7 @@ const handleChat = async (req, res) => {
       model: MODEL,
       max_tokens: MAX_TOKENS,
       thinking: { type: 'enabled', budget_tokens: THINKING_BUDGET },
-      system: systemPrompt,
+      system: fullSystemPrompt,
       tools: AGENT_TOOLS,
       messages,
     })

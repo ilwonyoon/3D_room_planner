@@ -1,0 +1,77 @@
+{
+  "_comment": "Persona → design tendency mapping. The 7 personas mirror data/eval/personas.json (also used as the Lowe's mock-shopper roster in data/mockLowesData.json). For each, we document: what they likely care about, common style pulls, finish bias, budget posture, and a one-sentence voice cue the agent can adopt. The agent uses these as soft priors — never as hard categorization.",
+  "version": "2026-05-25-v1",
+  "personas": {
+    "first_home_couple": {
+      "label": "Newlywed / first-home couple",
+      "design_priorities": ["budget per impact", "future-proof choices", "lifestyle expression"],
+      "common_style_pulls": ["modern", "transitional", "contemporary"],
+      "finish_bias": ["matte_black", "polished_chrome", "brushed_brass"],
+      "budget_posture": "stretching but careful — every dollar visible",
+      "bundles_likely": ["vanity_wall_refresh", "hardware_refresh", "three_quarter_starter"],
+      "voice_cue": "first home — they want it to feel like theirs without overspending. Anchor on one bold piece (vanity OR finish family), keep the rest restrained."
+    },
+    "family_with_kids": {
+      "label": "Family with young kids",
+      "design_priorities": ["durability", "safety", "easy cleaning", "shared use"],
+      "common_style_pulls": ["transitional", "farmhouse", "traditional"],
+      "finish_bias": ["brushed_nickel", "polished_chrome", "matte_black"],
+      "budget_posture": "value-focused — prioritizes proven over trendy",
+      "avoid_materials": ["porous stone", "ornate hardware", "deep dark grout"],
+      "bundles_likely": ["full_bath", "vanity_wall_refresh", "shower_zone_refresh"],
+      "voice_cue": "kids in the house — surfaces need to take a beating. Sealed porcelain over honed marble, brushed over polished, integrated drains."
+    },
+    "downsizer": {
+      "label": "Downsizing — empty nester",
+      "design_priorities": ["luxury feel", "manageable maintenance", "aging-in-place prep"],
+      "common_style_pulls": ["spa", "transitional", "traditional"],
+      "finish_bias": ["brushed_brass", "polished_nickel", "aged_bronze"],
+      "budget_posture": "spending up for fewer remodels in their life",
+      "bundles_likely": ["primary_bath_starter", "spa_wellness_addon", "tub_zone_refresh"],
+      "voice_cue": "downsizing — fewer square feet but more quality per. Walk-in shower with bench, soaking tub, warm finishes that won't date."
+    },
+    "single_homeowner": {
+      "label": "Single homeowner",
+      "design_priorities": ["self-expression", "right-sized solutions", "easy maintenance"],
+      "common_style_pulls": ["modern", "contemporary", "farmhouse"],
+      "finish_bias": ["matte_black", "brushed_brass", "polished_chrome"],
+      "budget_posture": "varies widely — depends on home tenure",
+      "bundles_likely": ["vanity_wall_refresh", "hardware_refresh", "three_quarter_starter"],
+      "voice_cue": "designing for one means no compromise. Wherever they want to be bold, lean in."
+    },
+    "senior_aging_in_place": {
+      "label": "Senior — aging in place",
+      "design_priorities": ["accessibility", "safety", "low maintenance", "future flexibility"],
+      "common_style_pulls": ["transitional", "spa", "traditional"],
+      "finish_bias": ["brushed_nickel", "brushed_brass"],
+      "must_include": ["grab_bar", "comfort_height_toilet", "walk_in_shower", "non_slip_tile"],
+      "avoid_materials": ["polished tile (slip)", "tubs (step-over)", "deep cabinets (reach)"],
+      "bundles_likely": ["toilet_accessibility", "shower_zone_refresh", "hardware_refresh"],
+      "voice_cue": "aging in place doesn't mean looking institutional. Comfort-height seat, grab bars in reach, walk-in shower with bench. Warm brushed finishes read homey, not medical."
+    },
+    "diy_er": {
+      "label": "DIY-er — self-installing",
+      "design_priorities": ["installation complexity", "standard rough-ins", "fewer specialty tools"],
+      "common_style_pulls": ["transitional", "farmhouse", "modern"],
+      "finish_bias": ["matte_black", "brushed_nickel", "polished_chrome"],
+      "avoid_features": ["wall-mounted toilet (concealed carrier)", "freestanding tub with floor-mount filler", "custom tile patterns"],
+      "bundles_likely": ["hardware_refresh", "vanity_wall_refresh"],
+      "voice_cue": "DIY install — prioritize standard 12in toilet rough-in, drop-in vs undermount sinks, prefabricated shower kits over custom tile. Save the splurge for finishes."
+    },
+    "hiring_contractor": {
+      "label": "Hiring a contractor",
+      "design_priorities": ["spec quality", "delivery + scheduling", "trade compatibility"],
+      "common_style_pulls": ["any"],
+      "finish_bias": ["any"],
+      "budget_posture": "labor cost shifts focus to material decision quality",
+      "voice_cue": "with a pro install, the constraint is materials decision quality, not feasibility. Anything's possible — make it count."
+    },
+    "pro_buying_for_client": {
+      "label": "Designer / pro buying for a client",
+      "design_priorities": ["spec sheet completeness", "trade-ready info", "lead time"],
+      "common_style_pulls": ["any"],
+      "finish_bias": ["any"],
+      "voice_cue": "you're the pro — give you the spec sheet, the lead time, the model number. Skip the consult-voice, lead with data."
+    }
+  }
+}

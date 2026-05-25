@@ -1,0 +1,172 @@
+{
+  "_comment": "Co-purchase bundles. Curated from Houzz 2024-2025 trends (84-87% of vanity replacements include faucet; 87% of shower remodels replace wall tile; etc.), Lowe's allen+roth collections, Home Depot Glacier Bay, IKEA named series, NKBA bathroom zone conventions. Each bundle is what real shoppers buy together in a single project — not a guess. The agent retrieves bundles by anchor category + scope and proposes them as coordinated sets via proposeProductGrid.",
+  "version": "2026-05-25-v1",
+  "bundles": [
+    {
+      "id": "vanity_wall_refresh",
+      "name": "Vanity Wall Refresh",
+      "scope": ["partial"],
+      "anchor_category": "vanity",
+      "items": [
+        { "category": "vanity", "role": "anchor" },
+        { "category": "mirror", "role": "complement" },
+        { "category": "faucet", "role": "complement" },
+        { "category": "lighting", "role": "complement", "sub": "vanity_light" }
+      ],
+      "item_count": 4,
+      "finish_family_rule": "single_dominant",
+      "frequency_data": "84-87% of vanity replacements include the faucet (Houzz 2024). Mirror + light upgrade rate together ~62%.",
+      "designer_voice": "The vanity is the anchor — mirror, faucet, and light all live in its finish family. Get those four right and the wall reads as designed, not assembled."
+    },
+    {
+      "id": "shower_zone_refresh",
+      "name": "Shower Zone Refresh",
+      "scope": ["partial"],
+      "anchor_category": "shower",
+      "items": [
+        { "category": "shower", "role": "anchor", "sub": "showerhead" },
+        { "category": "shower", "role": "complement", "sub": "valve_trim" },
+        { "category": "tile_wall", "role": "complement" },
+        { "category": "tile_floor", "role": "complement" }
+      ],
+      "item_count": 4,
+      "finish_family_rule": "single_dominant",
+      "frequency_data": "87% of shower remodels replace wall tile, 83% floor tile, 84% showerhead (Houzz 2024). Joint floor ≥71%.",
+      "designer_voice": "Wet zone is one decision: the showerhead/valve pair sets the finish, the wall tile sets the palette, the floor tile carries through. Anything mismatched here shows up first."
+    },
+    {
+      "id": "tub_zone_refresh",
+      "name": "Tub Zone Refresh",
+      "scope": ["partial"],
+      "anchor_category": "bathtub",
+      "items": [
+        { "category": "bathtub", "role": "anchor" },
+        { "category": "faucet", "role": "complement", "sub": "tub_filler" },
+        { "category": "tile_wall", "role": "complement", "sub": "tub_surround" },
+        { "category": "accessory", "role": "complement", "sub": "drain" }
+      ],
+      "item_count": 4,
+      "finish_family_rule": "single_dominant",
+      "frequency_data": "Tub replacements average 4-piece bundle; freestanding tubs imply deck-mount or floor-mount filler (different forms).",
+      "designer_voice": "Tub style locks the filler form. Freestanding = floor-mount filler statement piece; alcove = deck-mount minimal. Drain finish matches the filler."
+    },
+    {
+      "id": "hardware_refresh",
+      "name": "Hardware Refresh",
+      "scope": ["a_few_items", "partial"],
+      "anchor_category": "faucet",
+      "items": [
+        { "category": "faucet", "role": "anchor" },
+        { "category": "shower", "role": "complement", "sub": "showerhead" },
+        { "category": "accessory", "role": "complement", "sub": "towel_bar" },
+        { "category": "accessory", "role": "complement", "sub": "paper_holder" },
+        { "category": "accessory", "role": "complement", "sub": "robe_hook" },
+        { "category": "accessory", "role": "complement", "sub": "towel_ring" }
+      ],
+      "item_count": 6,
+      "finish_family_rule": "strict_lock",
+      "frequency_data": "Finish-only refresh ($300-800) — popular for $5K-under partial projects. Pottery Barn Mercer / RH Lugarno pattern.",
+      "designer_voice": "Cheapest way to change the feel of a bathroom. Lock one finish across every piece of metal you touch — that's the only rule."
+    },
+    {
+      "id": "powder_room_starter",
+      "name": "Powder Room Starter",
+      "scope": ["full_reno"],
+      "configuration": "powder",
+      "anchor_category": "vanity",
+      "items": [
+        { "category": "vanity", "role": "anchor" },
+        { "category": "mirror", "role": "complement" },
+        { "category": "faucet", "role": "complement" },
+        { "category": "lighting", "role": "complement" },
+        { "category": "toilet", "role": "complement" }
+      ],
+      "item_count": 5,
+      "finish_family_rule": "single_dominant",
+      "designer_voice": "Powder room = the bathroom guests see. Spend the personality budget here — bold finish, statement vanity. Five pieces, all coordinated."
+    },
+    {
+      "id": "three_quarter_starter",
+      "name": "Three-Quarter Bath Starter",
+      "scope": ["full_reno"],
+      "configuration": "three_quarter",
+      "anchor_category": "vanity",
+      "items": [
+        { "category": "vanity", "role": "anchor" },
+        { "category": "mirror", "role": "complement" },
+        { "category": "faucet", "role": "complement" },
+        { "category": "lighting", "role": "complement" },
+        { "category": "toilet", "role": "complement" },
+        { "category": "shower", "role": "complement", "sub": "shower_system" },
+        { "category": "tile_wall", "role": "complement" }
+      ],
+      "item_count": 7,
+      "finish_family_rule": "single_dominant_one_accent",
+      "designer_voice": "Three-quarter bath = the working bathroom. Function leads — pick durable finishes, easy-clean tile. One bold metal, one accent."
+    },
+    {
+      "id": "primary_bath_starter",
+      "name": "Primary Bath Starter",
+      "scope": ["full_reno"],
+      "configuration": "primary",
+      "anchor_category": "vanity",
+      "items": [
+        { "category": "vanity", "role": "anchor", "sub": "double_vanity" },
+        { "category": "mirror", "role": "complement", "count": 2 },
+        { "category": "lighting", "role": "complement", "count": 2 },
+        { "category": "faucet", "role": "complement", "count": 2 },
+        { "category": "bathtub", "role": "complement", "sub": "freestanding" },
+        { "category": "shower", "role": "complement", "sub": "walk_in" },
+        { "category": "toilet", "role": "complement" },
+        { "category": "tile_wall", "role": "complement" },
+        { "category": "paint_wall", "role": "complement" }
+      ],
+      "item_count": 9,
+      "finish_family_rule": "dual_allowed",
+      "designer_voice": "Primary bath = your space, your rules. Two finishes work here — typically one cool + one warm metal — as long as they show up in pairs (not orphaned). Tub and walk-in shower as separate destinations."
+    },
+    {
+      "id": "toilet_accessibility",
+      "name": "Toilet + Safety Accessories",
+      "scope": ["a_few_items"],
+      "anchor_category": "toilet",
+      "items": [
+        { "category": "toilet", "role": "anchor", "sub": "comfort_height" },
+        { "category": "accessory", "role": "complement", "sub": "grab_bar" },
+        { "category": "accessory", "role": "complement", "sub": "paper_holder" }
+      ],
+      "item_count": 3,
+      "finish_family_rule": "single",
+      "trigger_fit": ["accessibility", "aging_in_place"],
+      "designer_voice": "Aging-in-place starts with the toilet. Comfort-height seat, grab bar in reach, finish that doesn't shout 'medical'. Brushed nickel reads warmer than chrome here."
+    },
+    {
+      "id": "mirror_light_pair",
+      "name": "Mirror + Light Pair",
+      "scope": ["a_few_items"],
+      "anchor_category": "mirror",
+      "items": [
+        { "category": "mirror", "role": "anchor" },
+        { "category": "lighting", "role": "complement", "sub": "vanity_light" }
+      ],
+      "item_count": 2,
+      "finish_family_rule": "strict_lock",
+      "designer_voice": "Mirror frame and the vanity light over it are the most-seen pair in any bathroom. Same finish, scaled — light bar should be 60-75% of vanity width."
+    },
+    {
+      "id": "spa_wellness_addon",
+      "name": "Spa Wellness Add-On",
+      "scope": ["partial", "full_reno"],
+      "anchor_category": "bathtub",
+      "items": [
+        { "category": "bathtub", "role": "anchor", "sub": "soaking" },
+        { "category": "lighting", "role": "complement", "sub": "dimmable" },
+        { "category": "accessory", "role": "complement", "sub": "towel_warmer" }
+      ],
+      "item_count": 3,
+      "finish_family_rule": "warm_only",
+      "trigger_fit": ["wellness_focused"],
+      "designer_voice": "Spa is a temperature. Warm metals (brass, bronze, aged), warm light (≤2700K, dimmable), warm textures (towel warmer ready, stone). Polished cool finishes break it."
+    }
+  ]
+}

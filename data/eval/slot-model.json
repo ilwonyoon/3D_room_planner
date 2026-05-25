@@ -1,10 +1,10 @@
 {
-  "_comment": "Slot model for Discovery + Confidence dashboard. Schema is shared by the agent (writes via updateSlotConfidence tool), the dashboard UI (renders confidence bars), and the eval harness (measures Discovery quality). See docs/bond-demo/08-DISCOVERY-FOCUS.md.",
-  "version": "2026-05-23-v1",
+  "_comment": "Slot model — Z (mode-aware). Schema is shared by agent (writes via updateSlotConfidence), dashboard UI (renders slot rows), eval harness. Each slot has a `modes` array listing which scope values it applies to: 'all' = always shown, otherwise gated to scope ∈ {single, partial, full}. See docs/bond-demo/08-DISCOVERY-FOCUS.md and the deep-dive Tracks 1-3 (style discovery / scope branching / inference engine).",
+  "version": "2026-05-25-v2-z-model",
   "thresholds": {
     "filled": 70,
     "ready_to_design": 70,
-    "ready_to_iterate_min_filled_slots": 5
+    "ready_to_iterate_min_filled_slots": 4
   },
   "slots": [
     {
@@ -14,6 +14,7 @@
       "editable": true,
       "kind": "single_choice",
       "options": ["a_few_items", "partial", "full_reno"],
+      "modes": ["all"],
       "required_for_design": true,
       "confidence_sources": {
         "user_dashboard_click": 95,
@@ -25,11 +26,12 @@
     },
     {
       "id": "style_direction",
-      "title": "Style direction",
+      "title": "Style",
       "layer": "A",
       "editable": true,
       "kind": "single_choice",
       "options": ["spa", "modern", "transitional", "farmhouse", "traditional", "contemporary"],
+      "modes": ["all"],
       "required_for_design": true,
       "confidence_sources": {
         "user_dashboard_click": 95,
@@ -40,31 +42,16 @@
       }
     },
     {
-      "id": "room_size",
-      "title": "Room size",
-      "layer": "A",
-      "editable": true,
-      "kind": "single_choice",
-      "options": ["small", "standard", "master"],
-      "alternate_input": "sqft_number",
-      "required_for_design": true,
-      "confidence_sources": {
-        "user_dashboard_click": 95,
-        "user_explicit_in_chat": 90,
-        "user_scan": 100,
-        "user_address_lookup": 80,
-        "agent_assumption_standard": 60
-      }
-    },
-    {
       "id": "budget_range",
       "title": "Budget",
       "layer": "A",
       "editable": true,
       "kind": "range",
       "unit": "USD",
-      "required_for_design": false,
+      "modes": ["all"],
+      "required_for_design": true,
       "estimable_with_anchor": true,
+      "_comment": "Promoted to required_for_design — every bathroom decision is budget-gated.",
       "confidence_sources": {
         "user_dashboard_slider": 95,
         "user_explicit_in_chat": 90,
@@ -74,69 +61,65 @@
       }
     },
     {
-      "id": "must_keep",
-      "title": "Must keep",
+      "id": "bathroom_configuration",
+      "title": "Bathroom configuration",
       "layer": "A",
       "editable": true,
-      "kind": "list",
-      "required_for_design": false,
+      "kind": "single_choice",
+      "options": ["powder", "three_quarter", "full_bath", "primary"],
+      "modes": ["partial", "full"],
+      "required_for_design": true,
+      "_comment": "Replaces the old room_size slot. Configuration is what the user actually knows about their bathroom (which fixtures it has) — size is inferred. powder = toilet+sink, three_quarter = +shower, full_bath = +tub or combo, primary = separate tub & shower. Skipped in single-SKU mode (PDP entry already pins the fixture being swapped).",
       "confidence_sources": {
-        "user_dashboard_add": 95,
-        "user_explicit_in_chat": 90
+        "user_dashboard_click": 95,
+        "user_explicit_in_chat": 90,
+        "agent_inference_from_entry": 55,
+        "agent_assumption_standard": 50
       }
     },
     {
-      "id": "must_change",
-      "title": "Must change",
+      "id": "who_uses_it",
+      "title": "Who uses this",
       "layer": "A",
       "editable": true,
-      "kind": "list",
+      "kind": "single_choice",
+      "options": ["one_adult", "two_adults", "family_with_kids", "multi_gen", "guest_bathroom", "occasional"],
+      "modes": ["partial", "full"],
       "required_for_design": false,
+      "_comment": "Single-question that combines household composition + bathroom use type. Skipped in single-SKU mode (one fixture swap is independent of who uses it).",
       "confidence_sources": {
-        "user_dashboard_add": 95,
-        "user_explicit_in_chat": 90
-      }
-    },
-    {
-      "id": "persona_traits",
-      "title": "Who you are",
-      "layer": "B",
-      "editable": true,
-      "kind": "multi_choice",
-      "options": ["newlywed", "family_with_kids", "downsizer", "single_homeowner", "senior_aging_in_place", "diy_er", "hiring_contractor", "pro_buying_for_client"],
-      "required_for_design": false,
-      "confidence_sources": {
-        "user_dashboard_set": 95,
-        "user_explicit_in_chat": 75,
+        "user_dashboard_click": 95,
+        "user_explicit_in_chat": 85,
         "agent_inference_from_lexical_cue": 40
       }
     },
     {
-      "id": "trigger",
-      "title": "What brought you here",
-      "layer": "B",
+      "id": "must_haves_avoids",
+      "title": "What stays / What goes",
+      "layer": "A",
       "editable": true,
-      "kind": "single_choice",
-      "options": ["aging_fixtures", "move_in", "resale", "leak_urgent", "accessibility", "family_change"],
+      "kind": "dual_list",
+      "modes": ["partial"],
       "required_for_design": false,
+      "_comment": "Partial reno only — semantically only meaningful when you're keeping some things and changing others. Single SKU = self-evident. Full reno = changing everything by definition.",
       "confidence_sources": {
-        "user_dashboard_set": 95,
-        "user_explicit_in_chat": 85,
-        "agent_inference_from_lexical_cue": 35
+        "user_dashboard_add": 95,
+        "user_explicit_in_chat": 90
       }
     },
     {
-      "id": "lifestyle",
-      "title": "How you live",
-      "layer": "B",
+      "id": "wet_dry_priority",
+      "title": "Shower or tub",
+      "layer": "A",
       "editable": true,
-      "kind": "multi_choice",
-      "options": ["shower_focused", "tub_focused", "uses_both", "kids_in_household", "low_maintenance_pref", "accessibility_needs"],
+      "kind": "single_choice",
+      "options": ["shower_focused", "tub_focused", "both"],
+      "modes": ["full"],
       "required_for_design": false,
+      "_comment": "Full reno only — decides whether to put a tub, walk-in shower, or both. In partial/single this is implicit in what the user is replacing.",
       "confidence_sources": {
-        "user_dashboard_set": 95,
-        "user_explicit_in_chat": 80,
-        "agent_inference_from_lexical_cue": 30
+        "user_dashboard_click": 95,
+        "user_explicit_in_chat": 90
       }
     },
     {
@@ -145,16 +128,48 @@
       "layer": "C",
       "editable": false,
       "kind": "aggregate",
+      "modes": ["all"],
       "required_for_design": false,
       "_comment": "Accumulated brand mentions, color/material cues, etc. Agent maintains; dashboard renders read-only."
     },
     {
+      "id": "persona_traits",
+      "title": "Reading you",
+      "layer": "C",
+      "editable": false,
+      "kind": "multi_choice",
+      "options": ["newlywed", "family_with_kids", "downsizer", "single_homeowner", "senior_aging_in_place", "diy_er", "hiring_contractor", "pro_buying_for_client"],
+      "modes": ["all"],
+      "required_for_design": false,
+      "_comment": "Demoted from Layer B to C — these are inference signals, not questions to ask the user. Visible only in the agent-internal Layer C expander.",
+      "confidence_sources": {
+        "agent_inference_from_lexical_cue": 40,
+        "agent_inference_from_entry": 35
+      }
+    },
+    {
+      "id": "trigger",
+      "title": "What brought them here",
+      "layer": "C",
+      "editable": false,
+      "kind": "single_choice",
+      "options": ["aging_fixtures", "move_in", "resale", "leak_urgent", "accessibility", "family_change"],
+      "modes": ["all"],
+      "required_for_design": false,
+      "_comment": "Demoted from Layer B to C — inferred from entry context, browsing history, urgency cues in chat. Not asked directly.",
+      "confidence_sources": {
+        "agent_inference_from_entry": 55,
+        "agent_inference_from_lexical_cue": 35
+      }
+    },
+    {
       "id": "budget_posture",
-      "title": "Budget posture",
+      "title": "Budget read",
       "layer": "C",
       "editable": false,
       "kind": "inferred_single",
       "options": ["on_target", "over_silent", "refuses_anchor", "unrealistic_low"],
+      "modes": ["all"],
       "required_for_design": false
     },
     {
@@ -164,6 +179,7 @@
       "editable": false,
       "kind": "inferred_single",
       "options": ["fast", "browsing", "hesitant"],
+      "modes": ["all"],
       "required_for_design": false
     }
   ]

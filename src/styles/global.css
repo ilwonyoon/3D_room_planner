@@ -82,13 +82,13 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* bond-demo: removed pocketroom's global `button { background:none; border:none;
+   padding:0 }` reset. It overrode Tailwind utility classes (border, bg-*, px-*)
+   on chip buttons because it loaded after @import "tailwindcss". Tailwind's
+   own preflight handles button base styling consistently. */
 button {
-  background: none;
-  border: none;
-  padding: 0;
   cursor: pointer;
   font-family: inherit;
-  color: inherit;
 }
 
 ul { list-style: none; padding: 0; margin: 0; }

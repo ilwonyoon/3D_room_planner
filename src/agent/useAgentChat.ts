@@ -35,7 +35,15 @@ export type ChatMessage = {
 
 export type ToolUseHandler = (call: { name: string; input: Record<string, unknown> }) => void
 
-export function useAgentChat(systemPrompt: string, onToolUse?: ToolUseHandler) {
+export function useAgentChat(
+  systemPrompt: string,
+  onToolUse?: ToolUseHandler,
+  /** Current slot state — sent to /api/chat so the server can RAG-retrieve
+   *  knowledge chunks (style guide, bundles, finish rules) tuned to the
+   *  conversation's current signals. We use a ref so updates between renders
+   *  don't re-bind the streaming callback. */
+  slotStateRef?: { readonly current: unknown },
+) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [streaming, setStreaming] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -66,6 +74,9 @@ export function useAgentChat(systemPrompt: string, onToolUse?: ToolUseHandler) {
             systemPrompt,
             // Send all turns EXCEPT the empty assistant placeholder we just added.
             messages: next.slice(0, -1).map((m) => ({ role: m.role, content: m.content })),
+            // Slot state for server-side RAG retrieval. Optional — if omitted
+            // the server falls through to no dynamic knowledge injection.
+            slotState: slotStateRef?.current ?? undefined,
           }),
           signal: ac.signal,
         })

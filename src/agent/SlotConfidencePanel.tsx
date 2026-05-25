@@ -3,17 +3,20 @@ import {
   SLOT_SPEC,
   type SlotState,
   type SlotSpec,
+  deriveModeFromScope,
+  isSlotVisibleInMode,
 } from './slotModel'
+import { BathroomConfigSprite } from './BathroomConfigSprite'
 import {
   Layers,
   Palette,
-  Ruler,
+  Bath,
   Wallet,
-  Lock,
   Wrench,
+  Users,
+  Droplets,
   UserCircle,
   Compass,
-  Home,
   Sparkles,
   Check,
   ChevronRight,
@@ -43,35 +46,41 @@ type Props = {
 const SLOT_ICONS: Record<string, LucideIcon> = {
   scope: Layers,
   style_direction: Palette,
-  room_size: Ruler,
   budget_range: Wallet,
-  must_keep: Lock,
-  must_change: Wrench,
+  bathroom_configuration: Bath,
+  who_uses_it: Users,
+  wet_dry_priority: Droplets,
+  must_haves_avoids: Wrench,
   persona_traits: UserCircle,
   trigger: Compass,
-  lifestyle: Home,
   taste_signals: Sparkles,
   budget_posture: Sparkles,
   decision_speed: Sparkles,
 }
 
 export function SlotConfidencePanel({ state, onSlotEdit }: Props) {
-  // Split Layer A into Essentials (required_for_design) and Optional.
-  // Layer B sits alongside Optional in "Advanced".
-  // Layer C is nested inside Advanced as "More about how I see you".
+  // Derive the active mode from scope (a_few_items → single, partial →
+  // partial, full_reno → full, otherwise unknown). Mode-conditional
+  // slots stay hidden until scope is committed.
+  const mode = useMemo(() => deriveModeFromScope(state), [state])
+
+  // Split visible slots into Essentials (required_for_design) + Optional
+  // (Layer A non-required + Layer B) + Layer C (always agent-internal).
+  // Mode-conditional filter is applied first.
   const groups = useMemo(() => {
     const essentials: SlotSpec[] = []
     const optionalA: SlotSpec[] = []
     const layerB: SlotSpec[] = []
     const layerC: SlotSpec[] = []
     for (const spec of SLOT_SPEC) {
+      if (!isSlotVisibleInMode(spec, mode)) continue
       if (spec.layer === 'A' && spec.required_for_design) essentials.push(spec)
       else if (spec.layer === 'A') optionalA.push(spec)
       else if (spec.layer === 'B') layerB.push(spec)
       else if (spec.layer === 'C') layerC.push(spec)
     }
     return { essentials, optionalA, layerB, layerC }
-  }, [])
+  }, [mode])
 
   return (
     <div className="flex flex-col gap-4 px-5 py-5">
@@ -118,13 +127,13 @@ function SlotGroup({
 }) {
   if (slots.length === 0) return null
   return (
-    <section className="flex flex-col gap-3">
+    <section className="flex flex-col gap-5">
       {!flat && title ? (
         <h3 className="text-xs font-bold uppercase tracking-widest text-[var(--color-muted)]">
           {title}
         </h3>
       ) : null}
-      <ul className="flex flex-col gap-3">
+      <ul className="flex flex-col gap-6">
         {slots.map((s) => (
           <li key={s.id}>
             <SlotRow spec={s} value={state[s.id]} onEdit={onSlotEdit} />
@@ -145,13 +154,15 @@ function CollapsibleGroup({
   readonly children: React.ReactNode
 }) {
   const [open, setOpen] = useState(defaultOpen)
+  // Box-free header — just text + chevron, hairline border under for a
+  // section divider that doesn't compete with the chip groups visually.
   return (
-    <section className="flex flex-col gap-3">
+    <section className="flex flex-col gap-5">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="flex min-h-[48px] items-center justify-between rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-2 text-left hover:bg-[color-mix(in_srgb,var(--color-ink)_4%,var(--color-surface))]"
+        className="flex min-h-[48px] items-center justify-between border-t border-[var(--color-border)] pt-4 text-left"
       >
         <span className="text-base font-semibold text-[var(--color-ink)]">{title}</span>
         <ChevronRight
@@ -160,7 +171,7 @@ function CollapsibleGroup({
           aria-hidden
         />
       </button>
-      {open ? <div className="flex flex-col gap-3 pl-2">{children}</div> : null}
+      {open ? <div className="flex flex-col gap-5">{children}</div> : null}
     </section>
   )
 }
@@ -174,43 +185,44 @@ function SlotRow({
   readonly value: SlotState[string]
   readonly onEdit?: (slotId: string, newValue: unknown) => void
 }) {
-  const filled = value?.value !== undefined && value.value !== null
+  const filled = hasMeaningfulValue(value?.value)
   const editable = !!onEdit && spec.editable
   const Icon = SLOT_ICONS[spec.id] ?? Sparkles
-  const source = value?.source
+  // Box-free layout: each slot is just an icon + title + value + chip
+  // group on a transparent background. The chips themselves carry the
+  // visual weight (border + bg). Slots separated by spacing only.
   return (
-    <div className="rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3">
-      {/* Row header — icon + title + (✓ if filled) */}
-      <div className="flex items-center gap-3">
-        <Icon size={20} className="shrink-0 text-[var(--color-muted)]" aria-hidden />
+    <div className="flex flex-col gap-2">
+      {/* Row header — icon + title + (✓ if filled). No border, no bg. */}
+      <div className="flex items-center gap-2.5">
+        <Icon size={18} className="shrink-0 text-[var(--color-muted)]" aria-hidden />
         <span className="flex-1 text-base font-semibold text-[var(--color-ink)]">
           {spec.title}
         </span>
         {filled ? (
           <Check
-            size={20}
+            size={18}
             className="shrink-0 text-[var(--color-lowes-blue)]"
             aria-label="set"
           />
         ) : null}
       </div>
-      {/* Value display (when filled) */}
-      {filled ? (
-        <p className="mt-2 pl-8 text-sm text-[var(--color-ink)]">
-          {formatSlotValue(spec, value.value)}
+      {/* Value display — only shown when the editor itself doesn't
+          already convey the selection state visually. Chips
+          (single_choice / multi_choice) highlight the active option,
+          so the textual repeat below them is redundant; for range +
+          list the selected values aren't otherwise visible, so we
+          keep the text. */}
+      {filled && !isChipKind(spec) ? (
+        <p className="pl-7 text-sm text-[var(--color-ink)]">
+          {formatSlotValue(spec, value?.value)}
         </p>
-      ) : !editable ? (
-        <p className="mt-2 pl-8 text-sm italic text-[var(--color-muted)]">not yet</p>
+      ) : !editable && !filled ? (
+        <p className="pl-7 text-sm italic text-[var(--color-muted)]">not yet</p>
       ) : null}
-      {/* Evidence quote (only for agent-inferred fills) */}
-      {value?.evidence && source === 'agent' ? (
-        <p className="mt-1 pl-8 text-xs text-[var(--color-muted)]">
-          from your message: &ldquo;{value.evidence.slice(0, 80)}{value.evidence.length > 80 ? '…' : ''}&rdquo;
-        </p>
-      ) : null}
-      {/* Inline editor */}
+      {/* Inline editor — chips live here, the only thing with visible borders */}
       {editable && onEdit ? (
-        <div className="mt-3 pl-8">
+        <div className="pl-7">
           <SlotEditor spec={spec} value={value?.value} onEdit={(v) => onEdit(spec.id, v)} />
         </div>
       ) : null}
@@ -228,6 +240,41 @@ function SlotEditor({
   readonly onEdit: (newValue: unknown) => void
 }) {
   if (spec.kind === 'single_choice' && spec.options) {
+    // Bathroom configuration — 2x2 grid of top-down SVG sprites.
+    // Each sprite shows the fixture layout (powder = toilet+sink,
+    // three_quarter = +shower, full_bath = +tub, primary = double
+    // vanity + tub + walk-in). Visual comparison, no labels needed.
+    if (spec.id === 'bathroom_configuration') {
+      return (
+        <div className="grid grid-cols-2 gap-2">
+          {spec.options.map((opt) => {
+            const active = value === opt
+            return (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => onEdit(opt)}
+                className={
+                  active
+                    ? 'flex flex-col overflow-hidden rounded-[var(--radius-sm)] border-2 border-[var(--color-lowes-blue)] bg-[var(--color-surface)]'
+                    : 'flex flex-col overflow-hidden rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface)] hover:border-[var(--color-lowes-blue)]'
+                }
+              >
+                <div className="aspect-square w-full bg-[color-mix(in_srgb,var(--color-lowes-blue)_4%,white)] p-3">
+                  <BathroomConfigSprite
+                    config={opt as 'powder' | 'three_quarter' | 'full_bath' | 'primary'}
+                    active={active}
+                  />
+                </div>
+                <div className="px-2 py-1.5 text-center text-sm font-semibold text-[var(--color-ink)]">
+                  {prettyOption(spec, opt)}
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      )
+    }
     // Style direction is the one slot worth a visual grid (cf. brief's
     // "style images, easy pre-prompts"). 2x3 mood-board cards; the
     // image file naming convention is /bathroom-styles/{option}.jpg —
@@ -382,6 +429,24 @@ function SlotEditor({
       </div>
     )
   }
+  if (spec.kind === 'dual_list') {
+    // value shape: { keep: string[], change: string[] }
+    const v =
+      (value as { keep?: readonly string[]; change?: readonly string[] } | undefined) ?? {
+        keep: [],
+        change: [],
+      }
+    const keep = v.keep ?? []
+    const change = v.change ?? []
+    const updateKeep = (next: readonly string[]) => onEdit({ keep: next, change })
+    const updateChange = (next: readonly string[]) => onEdit({ keep, change: next })
+    return (
+      <div className="flex flex-col gap-4">
+        <DualListSection label="What stays" items={keep} onChange={updateKeep} placeholder="+ add (e.g. the bathtub)" />
+        <DualListSection label="What goes" items={change} onChange={updateChange} placeholder="+ add (e.g. vanity)" />
+      </div>
+    )
+  }
   if (spec.kind === 'list') {
     const arr = Array.isArray(value) ? (value as readonly string[]) : []
     return (
@@ -421,15 +486,104 @@ function SlotEditor({
   return null
 }
 
+/** Slots whose editor renders chips that already show their own
+ *  selection state — text repetition of the selected value is redundant
+ *  for those. Range + list editors don't show the value visually, so
+ *  the textual readback stays. Read-only (no editor) slots always show
+ *  the value. */
+function isChipKind(spec: SlotSpec): boolean {
+  if (!spec.editable) return false
+  return spec.kind === 'single_choice' || spec.kind === 'multi_choice'
+}
+
+/** Filled = value present AND not an empty container. An empty array,
+ *  empty range ({low:0, high:0}), or empty dual_list ({keep:[],change:[]})
+ *  should still read as "not yet" in the UI. */
+function hasMeaningfulValue(v: unknown): boolean {
+  if (v == null) return false
+  if (Array.isArray(v)) return v.length > 0
+  if (typeof v === 'object') {
+    const obj = v as Record<string, unknown>
+    if ('low' in obj || 'high' in obj) {
+      const low = Number(obj.low ?? 0)
+      const high = Number(obj.high ?? 0)
+      return low > 0 || high > 0
+    }
+    if ('keep' in obj || 'change' in obj) {
+      const keep = (obj.keep as readonly unknown[] | undefined) ?? []
+      const change = (obj.change as readonly unknown[] | undefined) ?? []
+      return keep.length > 0 || change.length > 0
+    }
+  }
+  return true
+}
+
 function formatSlotValue(spec: SlotSpec, value: unknown): string {
   if (value == null) return ''
   if (Array.isArray(value)) return value.map((v) => prettyOption(spec, String(v))).join(', ')
   if (typeof value === 'object') {
-    const v = value as { low?: number; high?: number }
+    const v = value as { low?: number; high?: number; keep?: readonly string[]; change?: readonly string[] }
     if ('low' in v && 'high' in v) return `$${v.low ?? '?'}–$${v.high ?? '?'}`
+    if ('keep' in v || 'change' in v) {
+      const parts: string[] = []
+      if (v.keep?.length) parts.push(`Stays: ${v.keep.join(', ')}`)
+      if (v.change?.length) parts.push(`Goes: ${v.change.join(', ')}`)
+      return parts.join(' · ')
+    }
     return JSON.stringify(value)
   }
   return prettyOption(spec, String(value))
+}
+
+/** Sub-section for dual_list — each list with its own label, items,
+ *  and add input. Used by What stays / What goes pair. */
+function DualListSection({
+  label,
+  items,
+  onChange,
+  placeholder,
+}: {
+  readonly label: string
+  readonly items: readonly string[]
+  readonly onChange: (next: readonly string[]) => void
+  readonly placeholder: string
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <span className="text-xs font-bold uppercase tracking-widest text-[var(--color-muted)]">
+        {label}
+      </span>
+      {items.map((item, i) => (
+        <div
+          key={i}
+          className="flex items-center gap-2 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2"
+        >
+          <span className="flex-1 truncate text-sm">{item}</span>
+          <button
+            type="button"
+            onClick={() => onChange(items.filter((_, j) => j !== i))}
+            className="text-sm text-[var(--color-muted)] hover:text-[var(--color-ink)]"
+            aria-label="Remove"
+          >
+            ✕
+          </button>
+        </div>
+      ))}
+      <input
+        type="text"
+        placeholder={placeholder}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && e.currentTarget.value.trim()) {
+            e.preventDefault()
+            onChange([...items, e.currentTarget.value.trim()])
+            e.currentTarget.value = ''
+          }
+        }}
+        className="rounded border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-sm"
+        style={{ minHeight: 40 }}
+      />
+    </div>
+  )
 }
 
 /**
@@ -451,33 +605,38 @@ const OPTION_LABELS: Record<string, string> = {
   traditional: 'Traditional',
   coastal: 'Coastal',
   contemporary: 'Contemporary',
-  // room_size
-  small: 'Small',
-  standard: 'Standard',
-  master: 'Primary / large',
-  // persona_traits
-  newlywed: 'Newlywed / first home',
+  // bathroom_configuration
+  powder: 'Powder',
+  three_quarter: 'Three-quarter',
+  full_bath: 'Full bath',
+  primary: 'Primary',
+  // who_uses_it
+  one_adult: 'Just me',
+  two_adults: 'Two adults',
   family_with_kids: 'Family with kids',
+  multi_gen: 'Multi-generational',
+  guest_bathroom: 'Guest bathroom',
+  occasional: 'Occasional use',
+  // wet_dry_priority
+  shower_focused: 'Shower-focused',
+  tub_focused: 'Tub-focused',
+  both: 'Both — equally',
+  // persona_traits (Layer C — agent inference only, never user-shown
+  // chip — labels kept for prettyOption() of the formatted Layer C value)
+  newlywed: 'Newlywed / first home',
   downsizer: 'Downsizing',
   single_homeowner: 'Single homeowner',
   senior_aging_in_place: 'Designing to age in place',
   diy_er: 'DIY-ing it myself',
   hiring_contractor: 'Hiring a contractor',
   pro_buying_for_client: 'Buying for a client (pro)',
-  // trigger
+  // trigger (Layer C)
   aging_fixtures: 'Aging fixtures',
   move_in: 'Just moved in',
   resale: 'Selling / resale',
   leak_urgent: 'Leak — needs fix now',
   accessibility: 'Accessibility',
   family_change: 'Family life changing',
-  // lifestyle
-  shower_focused: 'Shower-focused',
-  tub_focused: 'Tub-focused',
-  uses_both: 'Use both',
-  kids_in_household: 'Kids in the house',
-  low_maintenance_pref: 'Low-maintenance please',
-  accessibility_needs: 'Accessibility needs',
   // budget_posture (Layer C — surfaced only when expanded)
   on_target: 'On track',
   'over-silent': 'Stretching the budget',

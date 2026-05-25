@@ -95,7 +95,13 @@ export function AgentPage() {
     }
   }
 
-  const chat = useAgentChat(systemPrompt, handleToolUse)
+  // Ref-snapshot of slotState for the chat hook. The hook reads the ref
+  // at fetch-time so each chat request gets the freshest slot picture
+  // (= what the server-side RAG retrieve() sees).
+  const slotStateRef = useRef<SlotState>(slotState)
+  slotStateRef.current = slotState
+
+  const chat = useAgentChat(systemPrompt, handleToolUse, slotStateRef)
 
   // Mobile detection via media query. Tailwind's lg: prefix was unreliable on
   // mobile Safari in this codebase (same problem we hit on /docs), so we

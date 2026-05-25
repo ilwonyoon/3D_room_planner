@@ -8,6 +8,11 @@ import slotModelJson from '../../data/eval/slot-model.json'
 
 export type SlotLayer = 'A' | 'B' | 'C' | 'D'
 
+/** Which scope modes a slot applies to. 'all' = always visible regardless
+ *  of scope. Otherwise the slot only renders when the user's scope value
+ *  matches one of the listed modes. */
+export type SlotMode = 'all' | 'single' | 'partial' | 'full'
+
 export type SlotSpec = {
   readonly id: string
   readonly title: string
@@ -15,6 +20,7 @@ export type SlotSpec = {
   readonly editable: boolean
   readonly kind: string
   readonly options?: readonly string[]
+  readonly modes?: readonly SlotMode[]
   readonly required_for_design?: boolean
   readonly estimable_with_anchor?: boolean
   readonly alternate_input?: string
@@ -44,6 +50,28 @@ export const REQUIRED_SLOTS: readonly string[] = SLOT_SPEC.filter(
 
 export function slotsByLayer(layer: SlotLayer): readonly SlotSpec[] {
   return SLOT_SPEC.filter((s) => s.layer === layer)
+}
+
+/** Derive the active mode from the scope slot value. Returns 'unknown'
+ *  when scope hasn't been set yet — used to hide mode-conditional slots
+ *  until scope is committed. */
+export function deriveModeFromScope(state: SlotState): SlotMode | 'unknown' {
+  const scopeValue = state.scope?.value
+  if (scopeValue === 'a_few_items') return 'single'
+  if (scopeValue === 'partial') return 'partial'
+  if (scopeValue === 'full_reno') return 'full'
+  return 'unknown'
+}
+
+/** Is this slot visible under the current mode? Slots with no `modes`
+ *  field default to `['all']`. While mode is 'unknown', only slots
+ *  marked `all` are visible — so the user sees scope/style/budget but
+ *  not the mode-conditional ones until they commit a scope. */
+export function isSlotVisibleInMode(spec: SlotSpec, mode: SlotMode | 'unknown'): boolean {
+  const slotModes = spec.modes ?? (['all'] as const)
+  if (slotModes.includes('all')) return true
+  if (mode === 'unknown') return false
+  return slotModes.includes(mode)
 }
 
 /** Sum of required-slot confidences, normalized to 0-100. */
