@@ -172,6 +172,58 @@ const INFERENCE_SEEDS = {
       source: 'agent',
     },
   }),
+  // Single-SKU pre-fill: PDP entry pins scope = a_few_items at high
+  // confidence. Used to verify the agent stays in commerce-filter mode
+  // and DOESN'T emit a bundle.
+  single_hot: () => ({
+    scope: {
+      value: 'a_few_items',
+      confidence: 85,
+      evidence: 'PDP entry — viewing a specific toilet for replacement',
+      source: 'agent',
+    },
+    style_direction: {
+      value: 'traditional',
+      confidence: 60,
+      evidence: 'product viewed is traditional white toilet',
+      source: 'agent',
+    },
+    trigger: {
+      value: 'leak_urgent',
+      confidence: 75,
+      evidence: 'search terms include "leak" and "fix now"',
+      source: 'agent',
+    },
+  }),
+  // Full-reno pre-fill: scope = full_reno, configuration committed,
+  // style + budget at moderate confidence. Used to verify the agent
+  // proposes MULTIPLE bundles across the session.
+  full_hot: () => ({
+    scope: {
+      value: 'full_reno',
+      confidence: 85,
+      evidence: 'Saved list "Master Bath 2026", browsed tub + shower + vanity',
+      source: 'agent',
+    },
+    style_direction: {
+      value: 'transitional',
+      confidence: 75,
+      evidence: 'transitional-leaning browsing',
+      source: 'agent',
+    },
+    budget_range: {
+      value: { low: 8000, high: 15000 },
+      confidence: 65,
+      evidence: 'premium tier + saved high-end SKUs',
+      source: 'agent',
+    },
+    bathroom_configuration: {
+      value: 'full_bath',
+      confidence: 60,
+      evidence: 'browsed tub + shower + vanity (full bath layout)',
+      source: 'agent',
+    },
+  }),
 }
 
 const allCases = CASE_MATRIX.flatMap(([pid, posId]) => {
@@ -192,18 +244,24 @@ let cases = allCases
 if (onePersona) cases = cases.filter((c) => c.persona.id === onePersona)
 if (oneCase) cases = cases.filter((c) => c.id === oneCase || c.id.startsWith(oneCase + '.'))
 if (quick) {
-  // Smoke test covers the 3 inference modes + 3 personas:
-  //   A on_target cold        — baseline cold start
-  //   A on_target hot         — magical (pre-filled slots ack)
-  //   D on_target hot         — premium/downsizer, hot
-  //   G on_target hot         — "I know exactly", hot
-  //   F unrealistic_low warm  — "I don't know" with weak inference
+  // Smoke test covers the 3 inference modes (cold/warm/hot) + all 3
+  // scope modes (single/partial/full) so the v13 mode-specific rules
+  // can be measured per surface. 7 cases:
+  //   A.on_target.cold       — baseline cold start, partial inferred from chat
+  //   A.on_target.hot        — magical (warm-start partial)
+  //   D.on_target.hot        — premium/downsizer partial — D fails ack at v12
+  //   G.on_target.hot        — "I know exactly" partial — G fails ack at v12
+  //   F.unrealistic_low.warm — "I don't know" with weak warm-start
+  //   C.on_target.single_hot — leak urgency, single-SKU mode (no bundle expected)
+  //   B.on_target.full_hot   — family full reno, multiple bundles expected
   cases = [
     { id: 'A.on_target.cold', persona: personaById.A, posture: postureById.on_target, scenarioMode: 'cold', initialSlotState: INFERENCE_SEEDS.cold() },
     { id: 'A.on_target.hot', persona: personaById.A, posture: postureById.on_target, scenarioMode: 'hot', initialSlotState: INFERENCE_SEEDS.hot() },
     { id: 'D.on_target.hot', persona: personaById.D, posture: postureById.on_target, scenarioMode: 'hot', initialSlotState: INFERENCE_SEEDS.hot() },
     { id: 'G.on_target.hot', persona: personaById.G, posture: postureById.on_target, scenarioMode: 'hot', initialSlotState: INFERENCE_SEEDS.hot() },
     { id: 'F.unrealistic_low.warm', persona: personaById.F, posture: postureById.unrealistic_low, scenarioMode: 'warm', initialSlotState: INFERENCE_SEEDS.warm() },
+    { id: 'C.on_target.single_hot', persona: personaById.C, posture: postureById.on_target, scenarioMode: 'single_hot', initialSlotState: INFERENCE_SEEDS.single_hot() },
+    { id: 'B.on_target.full_hot', persona: personaById.B, posture: postureById.on_target, scenarioMode: 'full_hot', initialSlotState: INFERENCE_SEEDS.full_hot() },
   ].filter((c) => c.persona && c.posture)
 }
 
@@ -615,7 +673,11 @@ const runJudge = async ({ trajectory }) => {
   const prompt = buildJudgePrompt({ trajectory })
   const res = await client.messages.create({
     model: MODEL_JUDGE,
-    max_tokens: 2048,
+    // Bumped from 2048 — Bucket-5 architecture criteria + tool-log
+    // diagnoses overflowed the old cap, leaving JSON truncated mid-
+    // string. 4096 leaves headroom for the diagnoses array on the
+    // hard cases.
+    max_tokens: 4096,
     messages: [{ role: 'user', content: prompt }],
   })
   const text = res.content

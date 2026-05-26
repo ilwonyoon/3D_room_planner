@@ -82,7 +82,7 @@ const AGENT_TOOLS = [
         intro: { type: 'string' },
         bundle: {
           type: 'object',
-          description: "Marks this grid as a coordinated bundle (4-6 SKUs that work as a set). Set when scope is partial or full. Look up the right bundle from the BUNDLE chunk in DYNAMIC KNOWLEDGE.",
+          description: "REQUIRED when scope is 'partial' or 'full_reno' — marks this grid as a coordinated 4-6 SKU bundle with a locked finish family. OMIT this field ONLY when scope is 'a_few_items' (single-SKU mode, where you propose 2-3 peer alternatives instead). Look up the bundle id + name from the BUNDLE chunks in DYNAMIC KNOWLEDGE — do not invent. If you find yourself emitting proposeProductGrid in partial/full mode WITHOUT this field, you are violating BUNDLE PROTOCOL and the user will see an uncoordinated grid instead of a set.",
           required: ['id', 'name'],
           properties: {
             id: {
