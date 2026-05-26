@@ -184,25 +184,26 @@ const handleChat = async (req, res) => {
     res.end('Invalid JSON')
     return
   }
-  const { systemPrompt, messages, slotState } = body
+  const { systemPrompt, messages, slotState, appContextId } = body
   if (!systemPrompt || !Array.isArray(messages)) {
     res.statusCode = 400
     res.end('Missing systemPrompt or messages')
     return
   }
 
-  // RAG: retrieve knowledge chunks based on current slot state and append
-  // them as a DYNAMIC KNOWLEDGE section to the system prompt. This is the
-  // server-side retrieval step — the client just sends slotState, the
-  // server resolves what knowledge is relevant.
-  const chunks = retrieve(slotState ?? {})
+  // RAG: retrieve knowledge chunks for the active appContext (Axis 1)
+  // + current slot state. The server reads from
+  // `data/knowledge/contexts/<contextId>/` so adding manufacturer
+  // contexts later is a folder + config drop, not a code change.
+  const contextId = appContextId ?? 'lowes-consumer'
+  const chunks = retrieve(slotState ?? {}, contextId)
   const dynamicContext = assembleContext(chunks)
   const fullSystemPrompt = dynamicContext
     ? systemPrompt + '\n\n' + dynamicContext
     : systemPrompt
   if (chunks.length > 0) {
     console.log(
-      `[chat] RAG retrieved ${chunks.length} chunks:`,
+      `[chat:${contextId}] RAG retrieved ${chunks.length} chunks:`,
       chunks.map((c) => `${c.type}:${c.id}`).join(', '),
     )
   }

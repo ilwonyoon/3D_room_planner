@@ -11,7 +11,9 @@ import { IsometricScene } from '@/scene/IsometricScene'
 import { ProjectSettingsBar } from './ProjectSettingsBar'
 import { ProjectSettingsSheet } from './ProjectSettingsSheet'
 import { SceneViewToggle } from './SceneViewToggle'
+import { ScenarioPicker, type ScenarioId } from './ScenarioPicker'
 import { getMockShopper, bootstrapSlots } from './inference'
+import { deriveAppContext, getAppContext } from './appContext'
 import catalogJson from '../../data/catalog.json'
 
 type CatalogItem = {
@@ -36,6 +38,11 @@ const CATALOG: ReadonlyArray<CatalogItem> = catalogJson as CatalogItem[]
 
 export function AgentPage() {
   const params = useMemo(() => new URLSearchParams(location.search), [])
+  // Axis 1 — appContext is derived from URL (?manufacturer=...) and
+  // drives brand lockup, settings/cart labels, RAG namespace, scene
+  // theme, etc. Falls back to 'lowes-consumer'.
+  const appContextId = useMemo(() => deriveAppContext(params), [params])
+  const appContext = getAppContext(appContextId)
   const demoMode = params.get('demo') === '1'
   // ?blank=1 → start with no scenario / no entry context. Just an open chat
   // box and an empty thread. The shopper (you) opens the conversation.
@@ -47,9 +54,27 @@ export function AgentPage() {
   // persona/trigger from browse history + saved lists + region before
   // the user types anything — the "magical" path.
   const shopperId = params.get('shopper') ?? ''
-  const [scenarioId, setScenarioId] = useState<'A' | 'B' | 'C' | 'D' | 'E' | 'blank'>(
-    blankStart ? 'blank' : 'A',
-  )
+  // Initial scenario: ?scenario= URL takes priority, then ?blank=1
+  // legacy alias, otherwise default 'A'. Valid values: A-E + 'blank'.
+  const initialScenarioId: ScenarioId = (() => {
+    const raw = params.get('scenario')
+    if (raw && ['A', 'B', 'C', 'D', 'E', 'blank'].includes(raw)) {
+      return raw as ScenarioId
+    }
+    return blankStart ? 'blank' : 'A'
+  })()
+  const [scenarioId, setScenarioIdState] = useState<ScenarioId>(initialScenarioId)
+  // Wrap setScenarioId so changing scenario also updates the URL — keeps
+  // the link shareable and survives a reload. Uses replaceState to avoid
+  // adding a history entry per pick.
+  const setScenarioId = (next: ScenarioId) => {
+    setScenarioIdState(next)
+    const url = new URL(window.location.href)
+    url.searchParams.set('scenario', next)
+    // Cleanup the legacy ?blank=1 alias if present so we don't double-encode
+    url.searchParams.delete('blank')
+    window.history.replaceState(null, '', url.toString())
+  }
   const [systemPrompt, setSystemPrompt] = useState(DEFAULT_SYSTEM_PROMPT)
   const scenario = SCENARIOS.find((s) => s.id === scenarioId) ?? SCENARIOS[0]
   const [input, setInput] = useState('')
@@ -111,7 +136,7 @@ export function AgentPage() {
   const slotStateRef = useRef<SlotState>(slotState)
   slotStateRef.current = slotState
 
-  const chat = useAgentChat(systemPrompt, handleToolUse, slotStateRef)
+  const chat = useAgentChat(systemPrompt, handleToolUse, slotStateRef, appContextId)
 
   // Mobile detection via media query. Tailwind's lg: prefix was unreliable on
   // mobile Safari in this codebase (same problem we hit on /docs), so we
@@ -133,9 +158,25 @@ export function AgentPage() {
   const seededFor = useRef<string | null>(null)
   useEffect(() => {
     if (seededFor.current === scenarioId) return
+    // Scenario changed: wipe everything carrying state from the previous
+    // run — chat thread, scene placements, dashboard slot state (other
+    // than the inference-bootstrapped baseline), and unread chip count.
+    // Then re-seed the new scenario (or just stop for 'blank').
+    const isFirstMount = seededFor.current === null
+    if (!isFirstMount) {
+      chat.reset()
+      clearAgentPlacements()
+      setSceneState({})
+      // Re-bootstrap slots from the mock shopper (if any) — preserves
+      // the ?shopper= inference but drops anything the agent or user
+      // touched during the previous scenario.
+      const profile = shopperId ? getMockShopper(shopperId) : undefined
+      setSlotState(bootstrapSlots(profile))
+      setUnreadCount(0)
+    }
     seededFor.current = scenarioId
     if (scenarioId === 'blank') {
-      chat.reset()
+      if (isFirstMount) chat.reset()
       return
     }
     const seedText =
@@ -155,12 +196,16 @@ export function AgentPage() {
     >
       <header className="flex items-center gap-3 border-b border-[var(--color-border)] px-5 py-3">
         <span className="text-callout font-extrabold tracking-tight text-[var(--color-lowes-blue)]">
-          Mylow Designer
+          {appContext.brand.name}
         </span>
-        <span className="text-caption text-[var(--color-muted)]">· agent playground</span>
-        <span className="ml-auto text-caption text-[var(--color-muted)]">
-          scenario {scenario.id} · {scenario.mode}
-        </span>
+        {appContext.brand.tagline ? (
+          <span className="text-caption text-[var(--color-muted)]">
+            {appContext.brand.tagline}
+          </span>
+        ) : null}
+        <div className="ml-auto">
+          <ScenarioPicker value={scenarioId} onChange={setScenarioId} />
+        </div>
       </header>
 
       {/* Desktop: chat is the LEFT rail (proto2's right panel width:
@@ -201,6 +246,7 @@ export function AgentPage() {
             <div className="flex gap-2">
               <ProjectSettingsBar
                 unreadCount={unreadCount}
+                label={appContext.settings.label}
                 onOpen={() => {
                   setSettingsOpen(true)
                   setUnreadCount(0)
@@ -233,6 +279,8 @@ export function AgentPage() {
           <ProjectSettingsSheet
             open={settingsOpen}
             state={slotState}
+            title={appContext.settings.label}
+            subhead={appContext.settings.subhead}
             onSlotEdit={(slotId, newValue) =>
               setSlotState((prev) =>
                 setSlot(prev, slotId, {
@@ -303,7 +351,7 @@ export function AgentPage() {
                 }}
                 className="overflow-hidden"
               >
-                <IsometricScene />
+                <IsometricScene theme={appContext.sceneTheme} />
                 {/* View toggle overlay — top-right corner of the scene.
                     Mounted *outside* the Canvas so it stays interactive
                     even when R3F captures pointer events. */}

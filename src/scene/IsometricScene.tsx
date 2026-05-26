@@ -29,6 +29,11 @@ import type { CameraViewMode, RenderQuality } from '@/store'
 
 interface Props {
   className?: string
+  /** Visual theme for the scene background + fog + exposure. Default
+   *  'dark' preserves the original pocketroom look (matte-black void).
+   *  'light' uses a near-white bg for the agent demo where the room
+   *  needs to read against a bright UI shell. */
+  theme?: 'dark' | 'light'
 }
 
 const EDITOR_OVERLAY_LAYER = 1
@@ -747,7 +752,14 @@ function PovMovementController({ enabled }: { enabled: boolean }) {
   return null
 }
 
-export function IsometricScene({ className }: Props) {
+export function IsometricScene({ className, theme = 'dark' }: Props) {
+  // Theme-derived scene parameters. Light theme: white bg, pushed-out
+  // fog (gear isn't fade-clipped), lower tonemap exposure so PBR mesh
+  // doesn't blow out against the bright background.
+  const sceneBg = theme === 'light' ? color.scene.bgLight : color.scene.bg
+  const fogNear = theme === 'light' ? 20 : 12
+  const fogFar = theme === 'light' ? 40 : 20
+  const toneExposure = theme === 'light' ? 0.9 : 1.04
   const editMode = useEditorObjectsStore((state) => state.editMode)
   const activeDragMode = useEditorObjectsStore((state) => state.activeDragMode)
   const setEditMode = useEditorObjectsStore((state) => state.setEditMode)
@@ -793,8 +805,8 @@ export function IsometricScene({ className }: Props) {
         onCreated={({ gl, scene }) => {
           gl.outputColorSpace = THREE.SRGBColorSpace
           gl.toneMapping = THREE.ACESFilmicToneMapping
-          gl.toneMappingExposure = 1.04
-          scene.fog = new THREE.Fog(color.scene.bg, 12, 20)
+          gl.toneMappingExposure = toneExposure
+          scene.fog = new THREE.Fog(sceneBg, fogNear, fogFar)
         }}
         onPointerMissed={(event) => {
           if (event.button === 0) {
@@ -804,11 +816,11 @@ export function IsometricScene({ className }: Props) {
         style={{
           position: 'absolute',
           inset: 0,
-          background: color.scene.bg,
+          background: sceneBg,
           touchAction: 'none',
         }}
       >
-        <color attach="background" args={[color.scene.bg]} />
+        <color attach="background" args={[sceneBg]} />
 
         <WebglLifecycleGuard />
         <RendererStatsBridge quality={quality} />

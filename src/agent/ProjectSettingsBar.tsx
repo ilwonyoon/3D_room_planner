@@ -13,23 +13,22 @@
 type Props = {
   readonly unreadCount: number
   readonly onOpen: () => void
+  /** Label from the active AppContext config — "Bathroom settings" for
+   *  Lowe's consumer, "Spec sheet" for MSI designer, etc. */
+  readonly label: string
 }
 
-export function ProjectSettingsBar({ unreadCount, onOpen }: Props) {
+export function ProjectSettingsBar({ unreadCount, onOpen, label }: Props) {
   const hasUnread = unreadCount > 0
   return (
     <button
       type="button"
       onClick={onOpen}
-      aria-label={
-        hasUnread
-          ? `Bathroom settings — ${unreadCount} new from Mylow`
-          : 'Bathroom settings'
-      }
+      aria-label={hasUnread ? `${label} — ${unreadCount} new` : label}
       className="relative flex min-h-[48px] items-center gap-2 rounded-[var(--radius-sm)] border-2 border-[var(--color-lowes-blue)] bg-[var(--color-surface)] px-4 text-base font-semibold text-[var(--color-lowes-blue)] hover:bg-[color-mix(in_srgb,var(--color-lowes-blue)_8%,var(--color-surface))]"
     >
       <SettingsIcon />
-      <span>Bathroom settings</span>
+      <span>{label}</span>
       {hasUnread ? (
         <span
           aria-hidden

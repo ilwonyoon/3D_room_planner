@@ -19,9 +19,13 @@ type Props = {
   readonly state: SlotState
   readonly onSlotEdit: (slotId: string, newValue: unknown) => void
   readonly onClose: () => void
+  /** Header title from active AppContext (e.g. "Bathroom settings" / "Spec sheet"). */
+  readonly title: string
+  /** Sub-line under the title, also from the AppContext. */
+  readonly subhead: string
 }
 
-export function ProjectSettingsSheet({ open, state, onSlotEdit, onClose }: Props) {
+export function ProjectSettingsSheet({ open, state, onSlotEdit, onClose, title, subhead }: Props) {
   useEffect(() => {
     if (!open) return
     const handler = (e: KeyboardEvent) => {
@@ -35,18 +39,14 @@ export function ProjectSettingsSheet({ open, state, onSlotEdit, onClose }: Props
 
   return (
     <aside
-      aria-label="Bathroom settings"
+      aria-label={title}
       className="absolute inset-0 z-40 flex flex-col bg-[var(--color-surface)] animate-[settings-fade-in_0.2s_ease-out]"
     >
       {/* Header — title + 1-line sub + close button */}
       <header className="flex shrink-0 items-start justify-between gap-4 border-b border-[var(--color-border)] px-5 py-4">
         <div>
-          <h2 className="text-lg font-extrabold text-[var(--color-ink)]">
-            Bathroom settings
-          </h2>
-          <p className="mt-1 text-base text-[var(--color-muted)]">
-            Just the basics here — Mylow learns the rest from your chat.
-          </p>
+          <h2 className="text-lg font-extrabold text-[var(--color-ink)]">{title}</h2>
+          <p className="mt-1 text-base text-[var(--color-muted)]">{subhead}</p>
         </div>
         <button
           type="button"

@@ -20,22 +20,43 @@ import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const KNOWLEDGE_DIR = join(__dirname, '..', 'data', 'knowledge')
+const KNOWLEDGE_ROOT = join(__dirname, '..', 'data', 'knowledge')
 
-function loadJson(name) {
-  return JSON.parse(readFileSync(join(KNOWLEDGE_DIR, name), 'utf-8'))
+/**
+ * Knowledge is namespaced per appContext (Axis 1). Today we ship
+ * lowes-consumer; manufacturer contexts (msi-designer, etc.) plug
+ * into the same shape by adding a sibling folder under
+ * `data/knowledge/contexts/<id>/`.
+ */
+function loadContext(contextId) {
+  const dir = join(KNOWLEDGE_ROOT, 'contexts', contextId)
+  const loadJson = (name) => JSON.parse(readFileSync(join(dir, name), 'utf-8'))
+  return {
+    bundles: loadJson('bundles.json'),
+    styleGuide: loadJson('style-guide.json'),
+    designRules: loadJson('design-rules.json'),
+    personaDesign: loadJson('persona-design.json'),
+  }
 }
 
-const BUNDLES = loadJson('bundles.json')
-const STYLE_GUIDE = loadJson('style-guide.json')
-const DESIGN_RULES = loadJson('design-rules.json')
-const PERSONA_DESIGN = loadJson('persona-design.json')
+// Lazy cache: KB per context loaded once, on first use.
+const CONTEXT_CACHE = new Map()
+function getKnowledge(contextId) {
+  if (!CONTEXT_CACHE.has(contextId)) {
+    const kb = loadContext(contextId)
+    CONTEXT_CACHE.set(contextId, kb)
+    console.log(
+      `[rag] knowledge loaded for '${contextId}': ` +
+        `${kb.bundles.bundles.length} bundles, ` +
+        `${Object.keys(kb.styleGuide.styles).length} styles, ` +
+        `${Object.keys(kb.personaDesign.personas).length} personas`,
+    )
+  }
+  return CONTEXT_CACHE.get(contextId)
+}
 
-console.log(
-  `[rag] knowledge loaded: ${BUNDLES.bundles.length} bundles, ` +
-    `${Object.keys(STYLE_GUIDE.styles).length} styles, ` +
-    `${Object.keys(PERSONA_DESIGN.personas).length} personas`,
-)
+// Eagerly load the default context so the boot log is informative.
+getKnowledge('lowes-consumer')
 
 /**
  * Derive a coarse mode label from the slot state's scope value.
@@ -59,7 +80,13 @@ function deriveMode(slotState) {
  *   - content: the actual content object (or string)
  *   - reason:  short label for why this chunk was selected (debug)
  */
-export function retrieve(slotState = {}) {
+export function retrieve(slotState = {}, contextId = 'lowes-consumer') {
+  const kb = getKnowledge(contextId)
+  const BUNDLES = kb.bundles
+  const STYLE_GUIDE = kb.styleGuide
+  const DESIGN_RULES = kb.designRules
+  const PERSONA_DESIGN = kb.personaDesign
+
   const chunks = []
   const mode = deriveMode(slotState)
   const style = slotState?.style_direction?.value

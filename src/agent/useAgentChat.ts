@@ -43,6 +43,10 @@ export function useAgentChat(
    *  conversation's current signals. We use a ref so updates between renders
    *  don't re-bind the streaming callback. */
   slotStateRef?: { readonly current: unknown },
+  /** AppContext identifier (Axis 1). Passed to the server so it reads
+   *  knowledge from `contexts/<id>/`. Defaults to 'lowes-consumer'
+   *  when omitted. */
+  appContextId?: string,
 ) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [streaming, setStreaming] = useState(false)
@@ -77,6 +81,8 @@ export function useAgentChat(
             // Slot state for server-side RAG retrieval. Optional — if omitted
             // the server falls through to no dynamic knowledge injection.
             slotState: slotStateRef?.current ?? undefined,
+            // AppContext for namespaced KB lookup (Axis 1).
+            appContextId,
           }),
           signal: ac.signal,
         })
