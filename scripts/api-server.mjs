@@ -19,7 +19,13 @@ import { retrieve, assembleContext } from './rag.mjs'
 loadDotenv({ path: '.env.local' })
 
 const PORT = 3001
-const MODEL = 'claude-sonnet-4-6'
+// Two-model routing: synthesis turns (bundle propose, multi-slot blend,
+// trade-off reasoning) get Sonnet 4.6 + extended thinking; discovery
+// turns (chip narrow, confirms, single-slot updates) get Haiku 4.5 for
+// ~30% cost + 1/3 latency. Routing key is needsThinking() — same
+// heuristic, just extended to model selection.
+const MODEL_HEAVY = 'claude-sonnet-4-6'
+const MODEL_LIGHT = 'claude-haiku-4-5-20251001'
 const MAX_TOKENS = 8192
 // Extended thinking lets the model reason in a separate content block before
 // answering — we surface that in the UI as a collapsible "thinking" panel.
@@ -280,16 +286,19 @@ const handleChat = async (req, res) => {
   // the turn actually needs synthesis (user delegating, agent about to
   // propose, multi-slot blend, trade-off). Routine turns (chips,
   // confirmations, narrow asks) skip thinking entirely — faster + cheaper.
+  // Same heuristic also picks the model: heavy turns → Sonnet 4.6,
+  // light turns → Haiku 4.5 (~30% cost, ~1/3 latency).
   const useThinking = needsThinking(messages, slotState ?? {})
+  const model = useThinking ? MODEL_HEAVY : MODEL_LIGHT
   const requestParams = {
-    model: MODEL,
+    model,
     max_tokens: MAX_TOKENS,
     system: fullSystemPrompt,
     tools: AGENT_TOOLS,
     messages,
     ...(useThinking ? { thinking: { type: 'enabled', budget_tokens: THINKING_BUDGET } } : {}),
   }
-  console.log(`[chat:${contextId}] thinking=${useThinking ? 'ON' : 'OFF'}`)
+  console.log(`[chat:${contextId}] model=${useThinking ? 'sonnet' : 'haiku'} thinking=${useThinking ? 'ON' : 'OFF'}`)
 
   try {
     const upstream = client.messages.stream(requestParams)
