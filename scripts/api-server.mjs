@@ -28,6 +28,50 @@ const THINKING_BUDGET = 2048
 
 // Tool schemas the agent can call. Mirrored in src/agent/tools.ts; kept here
 // inline so the api-server has no client-side dependency.
+/**
+ * Decide whether the agent needs extended thinking for this turn.
+ *
+ * Default: NO thinking — chip clicks, confirmations, narrow asks, and
+ * routine turn-by-turn dialog don't need 2K tokens of reasoning.
+ *
+ * Enable thinking when ANY of the following holds:
+ *   1. User delegates a decision (show/design/recommend/help me…)
+ *   2. Agent's last turn promised "let me pull/see/build" — propose phase
+ *   3. Required slots are filled AND user signals "now/show/go" —
+ *      multi-slot synthesis is about to happen
+ *   4. User language signals trade-off / comparison ("vs", "or", "which")
+ *
+ * Length is intentionally NOT a signal; conversation state is.
+ */
+function needsThinking(messages, slotState) {
+  const lastUser = [...messages].reverse().find((m) => m.role === 'user')?.content ?? ''
+  const lastAgent = [...messages].reverse().find((m) => m.role === 'assistant')?.content ?? ''
+
+  // Signal 1: user explicitly delegating a decision
+  const delegationVerbs = /\b(show|design|recommend|suggest|pull|render|build|grab|what should|help me|figure out|see options?|let me see|how about|what would|which one|which works|propose)\b/i
+  if (delegationVerbs.test(lastUser)) return true
+
+  // Signal 2: agent's last turn promised to fetch/build — next turn is propose
+  if (/\b(let me (pull|see|build|grab|render|put|line)|i'?ll (pull|grab|build|line up|render)|hang on|pulling|looking up)/i.test(lastAgent)) {
+    return true
+  }
+
+  // Signal 3: ready-to-design synthesis — multi-slot blending needed
+  const slot = slotState || {}
+  const filledRequired = ['scope', 'style_direction', 'budget_range'].filter(
+    (s) => (slot[s]?.confidence ?? 0) >= 70,
+  ).length
+  const userSignalsReady = /\b(show|see|now|ready|let'?s|go|do it)\b/i.test(lastUser)
+  if (filledRequired >= 3 && userSignalsReady) return true
+
+  // Signal 4: trade-off / comparison language
+  if (/\b(vs\.?|versus|trade.?off|compare|which|or)\b/i.test(lastUser) && lastUser.length > 30) {
+    return true
+  }
+
+  return false
+}
+
 const AGENT_TOOLS = [
   {
     name: 'proposeChipChoice',
@@ -232,15 +276,23 @@ const handleChat = async (req, res) => {
   res.setHeader('connection', 'keep-alive')
   const send = (obj) => res.write(`data: ${JSON.stringify(obj)}\n\n`)
 
+  // Conversation-state heuristic: enable extended thinking only when
+  // the turn actually needs synthesis (user delegating, agent about to
+  // propose, multi-slot blend, trade-off). Routine turns (chips,
+  // confirmations, narrow asks) skip thinking entirely — faster + cheaper.
+  const useThinking = needsThinking(messages, slotState ?? {})
+  const requestParams = {
+    model: MODEL,
+    max_tokens: MAX_TOKENS,
+    system: fullSystemPrompt,
+    tools: AGENT_TOOLS,
+    messages,
+    ...(useThinking ? { thinking: { type: 'enabled', budget_tokens: THINKING_BUDGET } } : {}),
+  }
+  console.log(`[chat:${contextId}] thinking=${useThinking ? 'ON' : 'OFF'}`)
+
   try {
-    const upstream = client.messages.stream({
-      model: MODEL,
-      max_tokens: MAX_TOKENS,
-      thinking: { type: 'enabled', budget_tokens: THINKING_BUDGET },
-      system: fullSystemPrompt,
-      tools: AGENT_TOOLS,
-      messages,
-    })
+    const upstream = client.messages.stream(requestParams)
     // Accumulate the JSON input for each tool_use block as deltas arrive,
     // then emit a single { type: 'tool_use', name, input } event when the
     // block closes. This keeps the client's protocol clean: text streams

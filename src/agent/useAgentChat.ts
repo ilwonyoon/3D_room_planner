@@ -16,6 +16,13 @@ export type ChatMessage = {
   readonly role: 'user' | 'assistant'
   content: string
   /**
+   * If true, this message is the invisible seed used to nudge the agent
+   * into starting a conversation (cold-start welcome, entry-context
+   * priming). The ChatThread skips rendering it but it stays in history
+   * so the agent's next replies still chain off it.
+   */
+  hidden?: boolean
+  /**
    * Extended-thinking trace for assistant messages — the model's internal
    * reasoning before the final answer. Populated by `thinking_delta` events
    * from the SSE stream; rendered in the UI as a collapsible panel above the
@@ -58,10 +65,10 @@ export function useAgentChat(
   onToolUseRef.current = onToolUse
 
   const streamAssistantReply = useCallback(
-    async (baseMessages: readonly ChatMessage[], userText: string) => {
+    async (baseMessages: readonly ChatMessage[], userText: string, hiddenUser = false) => {
       setError(null)
 
-      const newUser: ChatMessage = { role: 'user', content: userText.trim() }
+      const newUser: ChatMessage = { role: 'user', content: userText.trim(), hidden: hiddenUser }
       const newAssistant: ChatMessage = { role: 'assistant', content: '' }
       const next = [...baseMessages, newUser, newAssistant]
       setMessages(next)
@@ -179,11 +186,13 @@ export function useAgentChat(
     setStreaming(false)
   }, [])
 
-  /** Seed the conversation with a pre-built user message (entry context). */
+  /** Seed the conversation with a pre-built user message (entry
+   *  context or cold-start nudge). The seed message is marked hidden
+   *  so the chat thread renders only the agent's reply. */
   const seed = useCallback(
     async (entryUserContent: string) => {
       reset()
-      await streamAssistantReply([], entryUserContent)
+      await streamAssistantReply([], entryUserContent, true /* hidden */)
     },
     [reset, streamAssistantReply],
   )

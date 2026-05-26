@@ -206,28 +206,54 @@ export function retrieve(slotState = {}, contextId = 'lowes-consumer') {
     })
   }
 
-  // 6a. Catalog slice — filtered by budget + scope mode. Without this
-  // the agent literally can't reference any SKU. We narrow by:
-  //   - budget upper bound (per-item ceiling = budget.high / typical
-  //     bundle size, so a $5K bundle budget → ≤$1,200 per item)
-  //   - category relevance to mode (single = anchor category only,
-  //     partial+full = all bath categories)
-  // Cap at ~40 items to keep prompt size sane.
+  // 6a. Catalog slice — guarantees the agent sees the catalog without
+  // ever showing zero in any category. Strategy:
+  //   - Group all SKUs by category
+  //   - Sort within category by price (low → high)
+  //   - For each category, take up to N items, biased toward those that
+  //     fit the user's budget (when set) but ALWAYS keep ≥2 per category
+  //     so the agent never says "we don't have X" when we obviously do.
+  // Cap total at ~50 items to keep prompt size reasonable.
   const budget = slotState?.budget_range?.value
   const budgetHigh = (budget && typeof budget === 'object' && 'high' in budget)
     ? Number(budget.high)
     : null
-  const perItemCeiling = budgetHigh ? Math.max(budgetHigh / 3, 300) : null
-  const catalogSlice = CATALOG
-    .filter((item) => {
-      if (perItemCeiling && item.price_cents > perItemCeiling * 100) return false
-      return true
-    })
-    .slice(0, 40)
+  // Generous per-item ceiling — vanity alone can be $800-$1,200 on a $3K bundle
+  const perItemCeiling = budgetHigh ? Math.max(budgetHigh, 500) : null
+
+  const byCategory = {}
+  for (const item of CATALOG) {
+    const c = item.category || 'Other'
+    if (!byCategory[c]) byCategory[c] = []
+    byCategory[c].push(item)
+  }
+
+  const catalogSlice = []
+  const PER_CATEGORY_MAX = 5
+  const PER_CATEGORY_MIN = 2
+  for (const [cat, items] of Object.entries(byCategory)) {
+    items.sort((a, b) => (a.price_cents || 0) - (b.price_cents || 0))
+    // Items in budget
+    const inBudget = perItemCeiling
+      ? items.filter((i) => (i.price_cents || 0) <= perItemCeiling * 100)
+      : items
+    // Always keep at least PER_CATEGORY_MIN (cheapest), even if over budget,
+    // so the agent never has to refuse a category outright.
+    const picked = inBudget.length >= PER_CATEGORY_MIN
+      ? inBudget.slice(0, PER_CATEGORY_MAX)
+      : items.slice(0, PER_CATEGORY_MIN)
+    for (const p of picked) catalogSlice.push(p)
+  }
+
+  // Cap total to keep prompt size sane; preserve category diversity by
+  // taking round-robin if we're over the cap.
+  const FINAL_CAP = 50
+  const finalSlice = catalogSlice.slice(0, FINAL_CAP)
+
   chunks.push({
     type: 'catalog',
     id: 'slice',
-    content: catalogSlice.map((p) => ({
+    content: finalSlice.map((p) => ({
       id: p.id,
       name: p.name,
       brand: p.brand,
@@ -236,8 +262,8 @@ export function retrieve(slotState = {}, contextId = 'lowes-consumer') {
       image_url: p.image_url,
     })),
     reason: perItemCeiling
-      ? `budget-filtered slice (≤$${Math.round(perItemCeiling)}/item)`
-      : 'top 40 catalog items',
+      ? `category-balanced slice (≥${PER_CATEGORY_MIN}/category, budget hint ≤$${Math.round(perItemCeiling)}/item)`
+      : `category-balanced slice (top ${PER_CATEGORY_MAX} per category)`,
   })
 
   // 6. Trigger-specific bundle hints (e.g. leak_urgent → urgency bundles)

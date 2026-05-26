@@ -55,14 +55,17 @@ export function AgentPage() {
   // persona/trigger from browse history + saved lists + region before
   // the user types anything — the "magical" path.
   const shopperId = params.get('shopper') ?? ''
-  // Initial scenario: ?scenario= URL takes priority, then ?blank=1
-  // legacy alias, otherwise default 'A'. Valid values: A-E + 'blank'.
+  // Initial scenario: ?scenario= URL takes priority. Default is 'blank'
+  // so a plain visit to / opens a clean chat (you can pick a scenario
+  // from the header dropdown to seed entry context). The legacy ?blank=1
+  // alias is now redundant but kept for backward-compatible URLs.
   const initialScenarioId: ScenarioId = (() => {
     const raw = params.get('scenario')
     if (raw && ['A', 'B', 'C', 'D', 'E', 'blank'].includes(raw)) {
       return raw as ScenarioId
     }
-    return blankStart ? 'blank' : 'A'
+    // Use the legacy flag if no scenario was passed
+    return blankStart ? 'blank' : 'blank'
   })()
   const [scenarioId, setScenarioIdState] = useState<ScenarioId>(initialScenarioId)
   // Wrap setScenarioId so changing scenario also updates the URL — keeps
@@ -220,7 +223,15 @@ export function AgentPage() {
     }
     seededFor.current = scenarioId
     if (scenarioId === 'blank') {
-      if (isFirstMount) chat.reset()
+      // Cold start: no entry context, no shopper data — agent still
+      // greets and asks the very first scope question proactively so
+      // the user isn't staring at a blank box. The seed is invisible
+      // to the user; only the agent's reply (with proposeChipChoice
+      // for scope) shows.
+      const coldSeed = shopperId
+        ? `[shopper landed via Lowe's session — pre-filled slots reflect their browse history. Open with the magical greeting per INFERENCE POLICY: name the inferred style or scope aloud, then ask one question to confirm.]`
+        : `[shopper landed with no entry context — cold start. Open with a short Mylow Designer welcome (one sentence) AND immediately call proposeChipChoice asking about scope. Use friendly wording like "What are we working on today?" with options: "Just one piece", "Refresh one zone", "Whole bathroom", "Just exploring". Do NOT call other tools on this turn — scope-first.]`
+      chat.seed(coldSeed)
       return
     }
     const seedText =
@@ -278,6 +289,7 @@ export function AgentPage() {
             onUserPick={(text) => {
               if (!chat.streaming) void chat.send(text)
             }}
+            inspectorMode={showInspector}
           />
           <form
             className="shrink-0 border-t border-[var(--color-border)] bg-[var(--color-surface)] p-3"
@@ -288,40 +300,49 @@ export function AgentPage() {
               setInput('')
             }}
           >
-            {/* Project-settings chip + send row. The chip is the single
-                entry point to the dashboard; red dot announces new agent
-                inferences when sheet is closed.
-                Visibility follows the active appContext.settings.visibility
-                rule. lowes-consumer = 'partial+full' → chip hides when scope
-                is single-SKU mode (the user is in commerce-filter mode and
-                doesn't need a dashboard). */}
-            <div className="flex gap-2">
-              {shouldShowSettingsChip(appContext.settings.visibility, slotState) ? (
-                <ProjectSettingsBar
-                  unreadCount={unreadCount}
-                  label={appContext.settings.label}
-                  onOpen={() => {
-                    setSettingsOpen(true)
-                    setUnreadCount(0)
-                  }}
+            {/* Two-row input area:
+                  Row 1: text input + Send (full chat width, no truncation)
+                  Row 2: settings + future suggestion chips
+                Separating the rows means the input always reads on a single
+                clean line in narrow sidebars, and the chip row can grow with
+                more chips later without squeezing the input. */}
+            <div className="flex flex-col gap-2">
+              {/* Row 1 — input + Send (full width) */}
+              <div className="flex gap-2">
+                <input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  disabled={chat.streaming}
+                  placeholder={chat.streaming ? 'Mylow is thinking…' : 'Type a reply…'}
+                  className="min-w-0 flex-1 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-base disabled:opacity-50"
+                  style={{ minHeight: 48 }}
                 />
+                <button
+                  type="submit"
+                  disabled={!input.trim() || chat.streaming}
+                  className="rounded-[var(--radius-sm)] bg-[var(--color-lowes-blue)] px-5 text-base font-bold text-[var(--color-on-brand)] disabled:opacity-40"
+                  style={{ minHeight: 48 }}
+                >
+                  Send
+                </button>
+              </div>
+              {/* Row 2 — Settings chip (+ future suggestion chips). The
+                  chip is the single entry point to the bathroom-settings
+                  bottom takeover; red dot announces new agent inferences
+                  when sheet is closed. Visibility follows the active
+                  appContext.settings.visibility rule. */}
+              {shouldShowSettingsChip(appContext.settings.visibility, slotState) ? (
+                <div className="flex gap-2">
+                  <ProjectSettingsBar
+                    unreadCount={unreadCount}
+                    label={appContext.settings.label}
+                    onOpen={() => {
+                      setSettingsOpen(true)
+                      setUnreadCount(0)
+                    }}
+                  />
+                </div>
               ) : null}
-              <input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                disabled={chat.streaming}
-                placeholder={chat.streaming ? 'Mylow is thinking…' : 'Type a reply…'}
-                className="min-w-0 flex-1 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 text-base disabled:opacity-50"
-                style={{ minHeight: 48 }}
-              />
-              <button
-                type="submit"
-                disabled={!input.trim() || chat.streaming}
-                className="rounded-[var(--radius-sm)] bg-[var(--color-lowes-blue)] px-5 text-base font-bold text-[var(--color-on-brand)] disabled:opacity-40"
-                style={{ minHeight: 48 }}
-              >
-                Send
-              </button>
             </div>
             {chat.error ? (
               <div className="mt-2 text-caption text-red-600">{chat.error}</div>
@@ -423,10 +444,15 @@ function ChatThread({
   messages,
   streaming,
   onUserPick,
+  inspectorMode = false,
 }: {
   readonly messages: readonly ChatMessage[]
   readonly streaming: boolean
   readonly onUserPick: (text: string) => void
+  /** Power-user toggle (?inspector=1). When true, the assistant block
+   *  exposes the full thinking trace; otherwise only friendly status
+   *  messages appear and fade out. */
+  readonly inspectorMode?: boolean
 }) {
   // Auto-scroll the thread to the bottom as new tokens arrive.
   const endRef = useRef<HTMLDivElement | null>(null)
@@ -445,6 +471,10 @@ function ChatThread({
       ) : null}
       {messages.map((m, i) => {
         const isUser = m.role === 'user'
+        // Hidden seed messages: skip entirely (cold-start welcome nudge,
+        // scenario entry context). They stay in history for the agent's
+        // benefit but never render.
+        if (m.hidden) return null
         const isFirstUser = isUser && i === 0
         // First user message = the entry-context seed; de-emphasize it.
         if (isUser) {
@@ -471,6 +501,7 @@ function ChatThread({
             message={m}
             streaming={isStreamingThis}
             onUserPick={onUserPick}
+            inspectorMode={inspectorMode}
           />
         )
       })}
@@ -483,15 +514,18 @@ function AssistantBlock({
   message,
   streaming,
   onUserPick,
+  inspectorMode,
 }: {
   readonly message: ChatMessage
   readonly streaming: boolean
   readonly onUserPick: (text: string) => void
+  readonly inspectorMode: boolean
 }) {
+  // Inspector mode: keep the raw expand-able thinking trace (power view
+  // for demo-day audiences who want to see RAG working).
+  // Default mode: render a single friendly status line that fades out
+  // when agent's text content starts streaming.
   const [thinkingOpen, setThinkingOpen] = useState(false)
-  // While streaming, default-open the thinking panel so the user sees reasoning
-  // live. After the answer finishes, collapse it (assumes the user wants the
-  // final answer prominent and reasoning is reference-only).
   useEffect(() => {
     if (streaming && message.thinking) setThinkingOpen(true)
     if (!streaming) setThinkingOpen(false)
@@ -502,9 +536,29 @@ function AssistantBlock({
     [message.content],
   )
 
+  // Friendly status — only shows in default (non-inspector) mode after
+  // a short dwell. If the agent's reply lands within ~500ms the status
+  // never appears (no flash for cheap answers). For longer replies it
+  // fades in while we wait, then disappears when text content arrives.
+  const [statusVisible, setStatusVisible] = useState(false)
+  useEffect(() => {
+    if (!streaming || message.content || inspectorMode) {
+      setStatusVisible(false)
+      return
+    }
+    const t = setTimeout(() => setStatusVisible(true), 500)
+    return () => clearTimeout(t)
+  }, [streaming, message.content, inspectorMode])
+  const showFriendlyStatus = statusVisible && !inspectorMode && streaming && !message.content
+  const statusLabel = useMemo(
+    () => deriveFriendlyStatus(message.toolCalls ?? [], message.thinking ?? ''),
+    [message.toolCalls, message.thinking],
+  )
+
   return (
     <div className="flex flex-col gap-2">
-      {message.thinking ? (
+      {/* Inspector view: raw thinking trace */}
+      {inspectorMode && message.thinking ? (
         <details
           open={thinkingOpen}
           onToggle={(e) => setThinkingOpen((e.target as HTMLDetailsElement).open)}
@@ -524,7 +578,21 @@ function AssistantBlock({
           </div>
         </details>
       ) : null}
-      {message.content || streaming ? (
+
+      {/* Default view: single friendly status line, fades when content arrives */}
+      {showFriendlyStatus ? (
+        <div className="flex items-center gap-2 py-1">
+          <span
+            aria-hidden
+            className="inline-block h-2 w-2 animate-pulse rounded-full bg-[var(--color-lowes-blue)]"
+          />
+          <span className="agent-shimmer text-sm font-medium">
+            {statusLabel}
+          </span>
+        </div>
+      ) : null}
+
+      {message.content || (streaming && (inspectorMode || !showFriendlyStatus)) ? (
         <div
           className="agent-prose"
           dangerouslySetInnerHTML={{ __html: html || '<p>…</p>' }}
@@ -738,4 +806,48 @@ function shouldShowSettingsChip(
   // partial+full
   const mode = deriveModeFromScope(slotState)
   return mode !== 'single'
+}
+
+/**
+ * Translate tool emissions + thinking-trace cues into a Lowe's-friendly
+ * status phrase (Korean / English speaker, no LLM jargon). Designed for
+ * users who have never seen a chatbot's reasoning before — they want
+ * to know *what's happening* in plain language, not how the agent is
+ * thinking.
+ *
+ * Priority: most-recent tool emission > thinking-trace keyword scan >
+ * generic fallback.
+ */
+function deriveFriendlyStatus(
+  toolCalls: ReadonlyArray<{ name: string; input: Record<string, unknown> }>,
+  thinking: string,
+): string {
+  // Most-recent tool tells us where in the pipeline we are
+  if (toolCalls.length > 0) {
+    const latest = toolCalls[toolCalls.length - 1]
+    if (latest.name === 'proposeProductGrid') {
+      const bundle = latest.input?.bundle as { name?: string } | undefined
+      return bundle?.name ? `Pulling the ${bundle.name}…` : 'Pulling design options…'
+    }
+    if (latest.name === 'proposeImageChoice') return 'Pulling some looks for you…'
+    if (latest.name === 'proposeChipChoice') return 'Lining up some choices…'
+    if (latest.name === 'updateSceneSlot') return 'Adding to your room…'
+    if (latest.name === 'updateSlotConfidence') return 'Taking notes on your project…'
+  }
+  // Thinking-keyword scan as fallback while tools haven't fired yet
+  const t = thinking.toLowerCase()
+  if (/pre.?filled|browse|saved list|past visit/.test(t)) {
+    return 'Looking at what brought you here…'
+  }
+  if (/bundle|vanity wall|shower zone|tub zone|set/.test(t)) {
+    return 'Matching with our catalog…'
+  }
+  if (/finish|brass|nickel|chrome|black|brushed/.test(t)) {
+    return 'Checking what coordinates…'
+  }
+  if (/budget|price|cost|tier/.test(t)) {
+    return 'Working with your budget…'
+  }
+  // Default — generic but friendly
+  return 'Mylow is thinking…'
 }

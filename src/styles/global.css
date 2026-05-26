@@ -46,6 +46,30 @@
   to   { opacity: 1; transform: scale(1); }
 }
 
+/* Friendly status shimmer — silver-to-blue gradient slides L→R behind
+   the text, signals "agent is working" without LLM jargon. Used in
+   the default (non-inspector) AssistantBlock while content streams. */
+@keyframes agent-shimmer-slide {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.agent-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-muted) 0%,
+    var(--color-muted) 30%,
+    var(--color-lowes-blue) 50%,
+    var(--color-muted) 70%,
+    var(--color-muted) 100%
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: agent-shimmer-slide 2.5s linear infinite;
+}
+
 /* bond-demo: the R3F IsometricScene paints its Canvas with the
    pocketroom dark scene color (color.scene.bg, #1B1B1D). For the agent
    demo we want a light room background, so any descendant <canvas>
