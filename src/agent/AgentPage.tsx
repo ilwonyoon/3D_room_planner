@@ -15,6 +15,7 @@ import { ScenarioPicker, type ScenarioId } from './ScenarioPicker'
 import { getMockShopper, bootstrapSlots } from './inference'
 import { deriveAppContext, getAppContext } from './appContext'
 import { BundleProgressStrip } from './BundleProgressStrip'
+import { WelcomeCard } from './WelcomeCard'
 import catalogJson from '../../data/catalog.json'
 
 type CatalogItem = {
@@ -222,22 +223,21 @@ export function AgentPage() {
       setActiveBundle(null)
     }
     seededFor.current = scenarioId
-    if (scenarioId === 'blank') {
-      // Cold start: no entry context, no shopper data — agent still
-      // greets and asks the very first scope question proactively so
-      // the user isn't staring at a blank box. The seed is invisible
-      // to the user; only the agent's reply (with proposeChipChoice
-      // for scope) shows.
-      const coldSeed = shopperId
-        ? `[shopper landed via Lowe's session — pre-filled slots reflect their browse history. Open with the magical greeting per INFERENCE POLICY: name the inferred style or scope aloud, then ask one question to confirm.]`
-        : `[shopper landed with no entry context — cold start. Open with a short Mylow Designer welcome (one sentence) AND immediately call proposeChipChoice asking about scope. Use friendly wording like "What are we working on today?" with options: "Just one piece", "Refresh one zone", "Whole bathroom", "Just exploring". Do NOT call other tools on this turn — scope-first.]`
-      chat.seed(coldSeed)
-      return
-    }
-    const seedText =
-      `[entry context — system fyi]\n${entryContextString(scenario.entry)}\n\n` +
-      `[shopper has just landed; greet them according to the role's "consult" turn]`
-    chat.seed(seedText)
+    // No more invisible-seed cold open. The WelcomeCard is rendered
+    // client-side from entry context — no LLM call, no "announce intent
+    // then fail to act" loop. The agent waits silently until the user
+    // taps a chip or types something.
+    //
+    // Scenario flows (A-E) still seed the entry context once on first
+    // mount so the agent KNOWS what the user just viewed when they
+    // first send a message — but the AGENT does not speak first.
+    if (scenarioId === 'blank') return
+    // For scenario-based entries (PDP, banner, global_nav), we still
+    // want the agent to have the context. But we don't trigger an LLM
+    // turn — we just stash it on the slot state via existing inference
+    // path. The WelcomeCard surfaces the entry visually instead.
+    // (No chat.seed call — silent priming. The first chat call later
+    // will include this in slotState via RAG.)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scenarioId])
 
@@ -290,6 +290,7 @@ export function AgentPage() {
               if (!chat.streaming) void chat.send(text)
             }}
             inspectorMode={showInspector}
+            welcomeScenario={scenarioId === 'blank' ? null : scenario}
           />
           <form
             className="shrink-0 border-t border-[var(--color-border)] bg-[var(--color-surface)] p-3"
@@ -445,6 +446,7 @@ function ChatThread({
   streaming,
   onUserPick,
   inspectorMode = false,
+  welcomeScenario,
 }: {
   readonly messages: readonly ChatMessage[]
   readonly streaming: boolean
@@ -453,6 +455,11 @@ function ChatThread({
    *  exposes the full thinking trace; otherwise only friendly status
    *  messages appear and fade out. */
   readonly inspectorMode?: boolean
+  /** When provided AND messages are empty, render the entry-aware
+   *  WelcomeCard cold-open instead of a placeholder. Pass `null` for
+   *  cold-start (no scenario) — the card still renders with its
+   *  generic greeting. Omit entirely to hide the card. */
+  readonly welcomeScenario?: import('./scenarios').Scenario | null
 }) {
   // Auto-scroll the thread to the bottom as new tokens arrive.
   const endRef = useRef<HTMLDivElement | null>(null)
@@ -463,11 +470,13 @@ function ChatThread({
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-4 py-6 sm:px-6">
       {messages.length === 0 ? (
-        <div className="m-auto max-w-xs text-center text-caption text-[var(--color-muted)]">
-          Empty chat — say something to start. Try
-          {' '}<em>"I want to redo my bathroom"</em> or
-          {' '}<em>"show me modern vanities"</em>.
-        </div>
+        welcomeScenario !== undefined ? (
+          <WelcomeCard scenario={welcomeScenario} onChipPick={onUserPick} />
+        ) : (
+          <div className="m-auto max-w-xs text-center text-caption text-[var(--color-muted)]">
+            Empty chat — say something to start.
+          </div>
+        )
       ) : null}
       {messages.map((m, i) => {
         const isUser = m.role === 'user'
