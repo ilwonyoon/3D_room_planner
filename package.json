@@ -10,7 +10,8 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview --host",
     "typecheck": "tsc -b --noEmit",
-    "verify:bathroom-glbs": "node scripts/verify-bathroom-glbs.mjs"
+    "verify:bathroom-glbs": "node scripts/verify-bathroom-glbs.mjs",
+    "eval": "node scripts/eval-trajectory.mjs"
   },
   "//": "bond-demo branch: asset-pipeline + blender + render scripts kept in scripts/ on disk but unwired from npm scripts. They live fully on `main` for the original mobile editor; this branch focuses on the demo and only needs dev/api/build.",
   "dependencies": {

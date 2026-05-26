@@ -122,6 +122,51 @@ Agent's voice: warm, confident, designer-like, naming visual effects.
 
 ---
 
+## Bucket 5 — RAG + Architecture (Phase 2 additions, binary)
+
+These three measure whether the *system architecture* (inference layer
++ RAG + bundle protocol + mode-conditional UI) is actually working
+end-to-end. They're system-integration tests dressed as judge criteria.
+
+### `pre_filled_acknowledged` (binary, weight 2)
+- 1 if pre-filled slots (style, scope, persona inferred from Lowe's
+  signals) were ACKNOWLEDGED in the agent's first reply when present.
+  Lookups: agent's opener references the pre-filled style or scope
+  ("I see you've been circling navy vanities", "given you're aging
+  in place"), AND does NOT re-ask what was already inferred at ≥50
+  confidence.
+- 0 if the agent opened with a generic greeting + a question that
+  was already answerable from pre-filled slots ("What style do you
+  like?" when style_direction is filled at 75 confidence is FAIL).
+- N/A when the trajectory has no pre-filled slots (cold start).
+- This is the "magical" beat from the brief. Must hit ≥80% across
+  warm-start trajectories.
+
+### `bundle_emitted_when_due` (binary, weight 2)
+- 1 if, when scope is partial OR full_reno AND style + budget are
+  also filled, the agent emitted at least ONE `proposeProductGrid`
+  tool call with the `bundle` field populated, in 4-6 products,
+  during the trajectory.
+- 0 if the agent talked ABOUT a bundle in text ("let's build a
+  Vanity Wall Refresh") but never emitted the grid tool call —
+  the most-common observed failure mode in Phase 2 testing.
+- N/A when scope is `a_few_items` (single-SKU mode — bundle
+  inappropriate by design) or when scope is never resolved.
+- Tightening this criterion is the next prompt-iteration target.
+
+### `mode_appropriate_ui` (binary, weight 1)
+- 1 if the agent's tool use and voice match the user's scope mode:
+  · single-SKU (a_few_items) → no bundle grids, no full settings
+    asks; commerce-filter feel (alternative SKUs, finish narrowing).
+  · partial/full → at least one bundle grid + scene placements.
+- 0 if the agent proposed a 4-piece bundle to a "I just need a
+  vanity" single-SKU shopper, or proposed isolated 1-SKU grids
+  to a "redo my whole bath" shopper.
+- This guards against the agent collapsing all conversations
+  into a single template.
+
+---
+
 ## Diagnoses
 
 For every binary criterion that scored 0 and every scored criterion ≤ 2,
