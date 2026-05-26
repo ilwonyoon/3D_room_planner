@@ -14,6 +14,7 @@ import { SceneViewToggle } from './SceneViewToggle'
 import { ScenarioPicker, type ScenarioId } from './ScenarioPicker'
 import { getMockShopper, bootstrapSlots } from './inference'
 import { deriveAppContext, getAppContext } from './appContext'
+import { BundleProgressStrip } from './BundleProgressStrip'
 import catalogJson from '../../data/catalog.json'
 
 type CatalogItem = {
@@ -92,6 +93,19 @@ export function AgentPage() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
 
+  // Active bundle (Phase 2 E) — set when the agent emits a
+  // proposeProductGrid call with a `bundle` field. Tracks which of the
+  // bundle's SKUs have actually been placed in the scene (via
+  // updateSceneSlot). Used to render "Vanity Wall Refresh — 2 of 4
+  // placed" progress strip.
+  const [activeBundle, setActiveBundle] = useState<{
+    readonly id: string
+    readonly name: string
+    readonly finishFamily?: string
+    readonly itemIds: readonly string[]   // all SKU ids in the bundle
+    readonly placedIds: readonly string[] // subset already in the scene
+  } | null>(null)
+
   const handleToolUse = ({ name, input }: { name: string; input: Record<string, unknown> }) => {
     if (name === 'updateSlotConfidence') {
       const slot = String(input.slot ?? '')
@@ -127,6 +141,35 @@ export function AgentPage() {
       // passed so the pick is deterministic across reloads for the
       // same agent recommendation.
       placeStandInForSlot(slot, productId)
+      // Bundle progress — if this productId is in the active bundle,
+      // mark it placed.
+      setActiveBundle((b) => {
+        if (!b) return b
+        if (!b.itemIds.includes(productId)) return b
+        if (b.placedIds.includes(productId)) return b
+        return { ...b, placedIds: [...b.placedIds, productId] }
+      })
+    } else if (name === 'proposeProductGrid') {
+      // Bundle-tagged grid? Capture the bundle so the dashboard can
+      // render progress as updateSceneSlot calls land for these SKUs.
+      const bundle = input.bundle as
+        | { id?: string; name?: string; finish_family?: string }
+        | undefined
+      const products = input.products as
+        | ReadonlyArray<{ id?: string }>
+        | undefined
+      if (bundle?.id && bundle.name && products && products.length > 0) {
+        const itemIds = products
+          .map((p) => p.id)
+          .filter((id): id is string => typeof id === 'string')
+        setActiveBundle({
+          id: bundle.id,
+          name: bundle.name,
+          finishFamily: bundle.finish_family,
+          itemIds,
+          placedIds: [],
+        })
+      }
     }
   }
 
@@ -173,6 +216,7 @@ export function AgentPage() {
       const profile = shopperId ? getMockShopper(shopperId) : undefined
       setSlotState(bootstrapSlots(profile))
       setUnreadCount(0)
+      setActiveBundle(null)
     }
     seededFor.current = scenarioId
     if (scenarioId === 'blank') {
@@ -224,6 +268,10 @@ export function AgentPage() {
           style={{ width: 'clamp(360px, 30vw, 420px)' }}
           className="relative flex h-full min-h-0 shrink-0 flex-col border-r border-[var(--color-border)]"
         >
+          {/* Active-bundle progress strip — visible only when the agent
+              is mid-way through proposing or filling a coordinated set.
+              Disappears when no bundle is active. */}
+          <BundleProgressStrip bundle={activeBundle} />
           <ChatThread
             messages={chat.messages}
             streaming={chat.streaming}

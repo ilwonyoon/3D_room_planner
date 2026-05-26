@@ -20,7 +20,7 @@ loadDotenv({ path: '.env.local' })
 
 const PORT = 3001
 const MODEL = 'claude-sonnet-4-6'
-const MAX_TOKENS = 4096
+const MAX_TOKENS = 8192
 // Extended thinking lets the model reason in a separate content block before
 // answering — we surface that in the UI as a collapsible "thinking" panel.
 // budget_tokens must be >= 1024 and < max_tokens.
@@ -74,16 +74,35 @@ const AGENT_TOOLS = [
   },
   {
     name: 'proposeProductGrid',
-    description: "Surface 2-4 concrete catalog products as inline cards.",
+    description: "Surface 2-6 concrete catalog products as inline cards. For partial/full scope, wrap the grid as a coordinated bundle by setting the `bundle` field — items in a bundle should be co-installable as one set with a consistent finish family.",
     input_schema: {
       type: 'object',
       required: ['products'],
       properties: {
         intro: { type: 'string' },
+        bundle: {
+          type: 'object',
+          description: "Marks this grid as a coordinated bundle (4-6 SKUs that work as a set). Set when scope is partial or full. Look up the right bundle from the BUNDLE chunk in DYNAMIC KNOWLEDGE.",
+          required: ['id', 'name'],
+          properties: {
+            id: {
+              type: 'string',
+              description: "Bundle id from the knowledge base (e.g. 'vanity_wall_refresh', 'shower_zone_refresh').",
+            },
+            name: {
+              type: 'string',
+              description: "Human-readable bundle name (e.g. 'Vanity Wall Refresh').",
+            },
+            finish_family: {
+              type: 'string',
+              description: "Locked finish family across all items (e.g. 'brushed_brass', 'matte_black').",
+            },
+          },
+        },
         products: {
           type: 'array',
           minItems: 2,
-          maxItems: 4,
+          maxItems: 6,
           items: {
             type: 'object',
             required: ['id', 'name', 'price_cents'],

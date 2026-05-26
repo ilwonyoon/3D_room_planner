@@ -58,6 +58,13 @@ function getKnowledge(contextId) {
 // Eagerly load the default context so the boot log is informative.
 getKnowledge('lowes-consumer')
 
+// Catalog — separate from context KB (catalog is shared / Lowe's-wide,
+// not knowledge-base-style designer rules). Loaded once at module init.
+const CATALOG = JSON.parse(
+  readFileSync(join(__dirname, '..', 'data', 'catalog.json'), 'utf-8'),
+)
+console.log(`[rag] catalog loaded: ${CATALOG.length} SKUs`)
+
 /**
  * Derive a coarse mode label from the slot state's scope value.
  * Mirrors the client-side deriveModeFromScope in slotModel.ts.
@@ -198,6 +205,40 @@ export function retrieve(slotState = {}, contextId = 'lowes-consumer') {
       reason: `${config} config + mode=${mode}`,
     })
   }
+
+  // 6a. Catalog slice — filtered by budget + scope mode. Without this
+  // the agent literally can't reference any SKU. We narrow by:
+  //   - budget upper bound (per-item ceiling = budget.high / typical
+  //     bundle size, so a $5K bundle budget → ≤$1,200 per item)
+  //   - category relevance to mode (single = anchor category only,
+  //     partial+full = all bath categories)
+  // Cap at ~40 items to keep prompt size sane.
+  const budget = slotState?.budget_range?.value
+  const budgetHigh = (budget && typeof budget === 'object' && 'high' in budget)
+    ? Number(budget.high)
+    : null
+  const perItemCeiling = budgetHigh ? Math.max(budgetHigh / 3, 300) : null
+  const catalogSlice = CATALOG
+    .filter((item) => {
+      if (perItemCeiling && item.price_cents > perItemCeiling * 100) return false
+      return true
+    })
+    .slice(0, 40)
+  chunks.push({
+    type: 'catalog',
+    id: 'slice',
+    content: catalogSlice.map((p) => ({
+      id: p.id,
+      name: p.name,
+      brand: p.brand,
+      category: p.category,
+      price_cents: p.price_cents,
+      image_url: p.image_url,
+    })),
+    reason: perItemCeiling
+      ? `budget-filtered slice (≤$${Math.round(perItemCeiling)}/item)`
+      : 'top 40 catalog items',
+  })
 
   // 6. Trigger-specific bundle hints (e.g. leak_urgent → urgency bundles)
   if (trigger === 'leak_urgent') {

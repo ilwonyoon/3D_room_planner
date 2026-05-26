@@ -69,17 +69,41 @@ export const AGENT_TOOLS = [
   {
     name: 'proposeProductGrid',
     description:
-      "Surface 2-4 concrete catalog products as cards. Pull names + prices verbatim from " +
-      "the catalog. Use when proposing alternatives, pairings, or the final design set.",
+      "Surface 2-6 concrete catalog products as cards. Pull names + prices verbatim from " +
+      "the catalog. Use when proposing alternatives, pairings, or the final design set. " +
+      "For partial/full scope, set the `bundle` field to mark these as a coordinated set " +
+      "(co-installable, single finish family).",
     input_schema: {
       type: 'object',
       required: ['products'],
       properties: {
         intro: { type: 'string', description: 'Optional one-line framing.' },
+        bundle: {
+          type: 'object',
+          description:
+            'Marks this grid as a coordinated bundle. Set when scope is partial or full. ' +
+            'Look up the matching bundle id from the BUNDLE chunk in DYNAMIC KNOWLEDGE.',
+          required: ['id', 'name'],
+          properties: {
+            id: {
+              type: 'string',
+              description:
+                "Bundle id from knowledge base (e.g. 'vanity_wall_refresh').",
+            },
+            name: {
+              type: 'string',
+              description: "Display name (e.g. 'Vanity Wall Refresh').",
+            },
+            finish_family: {
+              type: 'string',
+              description: 'Locked finish family across items (e.g. brushed_brass).',
+            },
+          },
+        },
         products: {
           type: 'array',
           minItems: 2,
-          maxItems: 4,
+          maxItems: 6,
           items: {
             type: 'object',
             required: ['id', 'name', 'price_cents'],
