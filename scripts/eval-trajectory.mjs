@@ -290,10 +290,17 @@ const runAgentTurn = async ({ history, sceneState, slotState, appContextId }) =>
     ? `\n\n[scene-state for fyi: ${JSON.stringify(sceneState)}]`
     : ''
   const messagesForApi = history.map((m, i) => {
+    // v13.3 act-first: tool-only assistant turns produce empty text. The
+    // Anthropic API rejects empty string content, so substitute a minimal
+    // placeholder that preserves turn order without inventing dialog.
+    const safeContent =
+      typeof m.content === 'string' && m.content.trim() === ''
+        ? '[tool call only — no spoken reply]'
+        : m.content
     if (i === history.length - 1 && m.role === 'user') {
-      return { role: 'user', content: m.content + sceneNote }
+      return { role: 'user', content: safeContent + sceneNote }
     }
-    return { role: m.role, content: m.content }
+    return { role: m.role, content: safeContent }
   })
 
   const res = await fetch(API_URL, {
@@ -378,7 +385,13 @@ const runPersonaTurn = async ({ persona, posture, history, sceneState }) => {
     )
     .map((m) => ({
       role: m.role === 'assistant' ? 'user' : 'assistant',
-      content: m.content,
+      // v13.3 act-first: agent may emit a tool-only turn with empty text.
+      // Anthropic API rejects empty user content, so substitute a placeholder
+      // describing what the agent did so the persona can react meaningfully.
+      content:
+        typeof m.content === 'string' && m.content.trim() === ''
+          ? '[the agent performed an action without speaking — likely opening a product grid or updating settings]'
+          : m.content,
     }))
 
   // If the conversation is empty (no agent has spoken yet), give the persona

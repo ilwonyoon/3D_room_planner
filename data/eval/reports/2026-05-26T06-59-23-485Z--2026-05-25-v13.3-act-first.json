@@ -1,0 +1,115 @@
+{
+  "prompt_version": "2026-05-25-v13.3-act-first",
+  "ran_at": "2026-05-26T06:59:23.486Z",
+  "duration_seconds": 105,
+  "model_under_test": "claude-sonnet-4-6",
+  "model_persona": "claude-haiku-4-5-20251001",
+  "model_judge": "claude-sonnet-4-6",
+  "max_turns": 6,
+  "case_count": 7,
+  "summary": {
+    "cases_count": 7,
+    "cases_passed": 0,
+    "cases_passed_pct": 0,
+    "discovery_overall_avg": 0,
+    "context_recognition_speed_avg": null,
+    "customer_type_calibration_avg": null,
+    "scope_capture_efficiency_avg": null,
+    "budget_handling_avg": null,
+    "interrogation_load_avg": null,
+    "propose_readiness_accuracy_avg": null,
+    "respects_user_input_priority_rate": null,
+    "task_success_rate": null,
+    "cart_within_range_rate": null,
+    "close_quality_avg": null,
+    "no_invented_facts_rate": null,
+    "respected_constraints_rate": null,
+    "voice_overall_avg": 0,
+    "designer_quality_avg": null,
+    "listening_avg": null,
+    "pre_filled_acknowledged_rate": null,
+    "bundle_emitted_when_due_rate": null,
+    "mode_appropriate_ui_rate": null,
+    "failed": [
+      {
+        "id": "A.on_target.cold",
+        "reason": "judge_parse_error"
+      },
+      {
+        "id": "A.on_target.hot",
+        "reason": "judge_parse_error"
+      },
+      {
+        "id": "D.on_target.hot",
+        "reason": "judge_parse_error"
+      },
+      {
+        "id": "G.on_target.hot",
+        "reason": "judge_parse_error"
+      },
+      {
+        "id": "F.unrealistic_low.warm",
+        "reason": "judge_parse_error"
+      },
+      {
+        "id": "C.on_target.single_hot",
+        "reason": "judge_parse_error"
+      },
+      {
+        "id": "B.on_target.full_hot",
+        "reason": "judge_parse_error"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "A.on_target.cold",
+      "persona_id": "A",
+      "persona_title": "30s newlywed, design-curious",
+      "posture": "on_target",
+      "error": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"messages.2: user messages must have non-empty content\"},\"request_id\":\"req_011CbQkDCPGvvef1JBtpv1SB\"}"
+    },
+    {
+      "id": "A.on_target.hot",
+      "persona_id": "A",
+      "persona_title": "30s newlywed, design-curious",
+      "posture": "on_target",
+      "error": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"messages.2: user messages must have non-empty content\"},\"request_id\":\"req_011CbQkF8LzeBShA3QP3k6Wo\"}"
+    },
+    {
+      "id": "D.on_target.hot",
+      "persona_id": "D",
+      "persona_title": "60s downsizer, selling next spring",
+      "posture": "on_target",
+      "error": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"messages.2: user messages must have non-empty content\"},\"request_id\":\"req_011CbQkGSTCdYjLKmK4WyYbP\"}"
+    },
+    {
+      "id": "G.on_target.hot",
+      "persona_id": "G",
+      "persona_title": "\"I know exactly what I want\"",
+      "posture": "on_target",
+      "error": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"messages.2: user messages must have non-empty content\"},\"request_id\":\"req_011CbQkGn5epYesGjByzPVWs\"}"
+    },
+    {
+      "id": "F.unrealistic_low.warm",
+      "persona_id": "F",
+      "persona_title": "\"I don't know, just show me something\"",
+      "posture": "unrealistic_low",
+      "error": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"messages.2: user messages must have non-empty content\"},\"request_id\":\"req_011CbQkHbiqNuAYWnnR8AnD3\"}"
+    },
+    {
+      "id": "C.on_target.single_hot",
+      "persona_id": "C",
+      "persona_title": "50s single, leak emergency",
+      "posture": "on_target",
+      "error": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"messages.4: user messages must have non-empty content\"},\"request_id\":\"req_011CbQkJa9rhjKGFU588y8ck\"}"
+    },
+    {
+      "id": "B.on_target.full_hot",
+      "persona_id": "B",
+      "persona_title": "40s family with kids, value-aware",
+      "posture": "on_target",
+      "error": "400 {\"type\":\"error\",\"error\":{\"type\":\"invalid_request_error\",\"message\":\"messages.2: user messages must have non-empty content\"},\"request_id\":\"req_011CbQkKphF8g7ePL6N6gFkX\"}"
+    }
+  ]
+}
