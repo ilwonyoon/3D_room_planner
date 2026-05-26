@@ -4,7 +4,7 @@ import { DEFAULT_SYSTEM_PROMPT } from './systemPrompt'
 import { SCENARIOS, entryContextString } from './scenarios'
 import { useAgentChat, type ChatMessage } from './useAgentChat'
 import type { SlotState } from './slotModel'
-import { setSlot } from './slotModel'
+import { setSlot, deriveModeFromScope } from './slotModel'
 import { RoomScenePanel, type SceneState } from './RoomScenePanel'
 import { placeStandInForSlot, clearAgentPlacements } from './sceneBridge'
 import { IsometricScene } from '@/scene/IsometricScene'
@@ -242,16 +242,22 @@ export function AgentPage() {
           >
             {/* Project-settings chip + send row. The chip is the single
                 entry point to the dashboard; red dot announces new agent
-                inferences when sheet is closed. */}
+                inferences when sheet is closed.
+                Visibility follows the active appContext.settings.visibility
+                rule. lowes-consumer = 'partial+full' → chip hides when scope
+                is single-SKU mode (the user is in commerce-filter mode and
+                doesn't need a dashboard). */}
             <div className="flex gap-2">
-              <ProjectSettingsBar
-                unreadCount={unreadCount}
-                label={appContext.settings.label}
-                onOpen={() => {
-                  setSettingsOpen(true)
-                  setUnreadCount(0)
-                }}
-              />
+              {shouldShowSettingsChip(appContext.settings.visibility, slotState) ? (
+                <ProjectSettingsBar
+                  unreadCount={unreadCount}
+                  label={appContext.settings.label}
+                  onOpen={() => {
+                    setSettingsOpen(true)
+                    setUnreadCount(0)
+                  }}
+                />
+              ) : null}
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
@@ -662,4 +668,26 @@ function Inspector({
       </div>
     </aside>
   )
+}
+
+/**
+ * Decide whether to show the Bathroom-settings chip given the active
+ * appContext's visibility rule + the current scope-derived mode.
+ *
+ *   'always'         → always shown
+ *   'never'          → never shown
+ *   'partial+full'   → shown when scope is partial or full, OR scope is
+ *                      still unknown (so the user can use the chip to
+ *                      set scope itself). Hidden only in single-SKU mode
+ *                      where commerce-filter chat is the right surface.
+ */
+function shouldShowSettingsChip(
+  visibility: 'always' | 'partial+full' | 'never',
+  slotState: SlotState,
+): boolean {
+  if (visibility === 'always') return true
+  if (visibility === 'never') return false
+  // partial+full
+  const mode = deriveModeFromScope(slotState)
+  return mode !== 'single'
 }

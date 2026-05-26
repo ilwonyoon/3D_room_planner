@@ -95,6 +95,29 @@ export function retrieve(slotState = {}, contextId = 'lowes-consumer') {
   const personaTraits = slotState?.persona_traits?.value
   const trigger = slotState?.trigger?.value
 
+  // 0. PRE-FILLED SLOTS — surface the slot state itself so the agent
+  // sees exactly what's already inferred (and at what confidence)
+  // *before* the static style/bundle chunks. Without this the agent
+  // gets the style guide but can't tell whether the slot was set
+  // from inference vs. left empty.
+  const filledSlots = Object.entries(slotState || {})
+    .filter(([, v]) => v && v.value !== undefined && v.value !== null)
+    .map(([id, v]) => ({
+      slot: id,
+      value: v.value,
+      confidence: v.confidence,
+      source: v.source,
+      evidence: v.evidence,
+    }))
+  if (filledSlots.length > 0) {
+    chunks.push({
+      type: 'pre_filled_slots',
+      id: 'state',
+      content: filledSlots,
+      reason: 'slot state at turn boundary',
+    })
+  }
+
   // 1. Style guide — the active style archetype, if committed
   if (style && STYLE_GUIDE.styles[style]) {
     chunks.push({
@@ -199,24 +222,64 @@ export function assembleContext(chunks) {
   if (chunks.length === 0) {
     return ''
   }
-  const sections = []
-  for (const c of chunks) {
-    sections.push(`--- ${c.type.toUpperCase()} (${c.id}) ---`)
-    if (typeof c.content === 'string') {
-      sections.push(c.content)
-    } else {
-      sections.push(JSON.stringify(c.content, null, 2))
-    }
-    sections.push('')
+  // Split the pre-filled-slots chunk out from the rest — slot state
+  // is structurally different from knowledge chunks and the agent
+  // needs to see it FIRST and named clearly.
+  const slotChunk = chunks.find((c) => c.type === 'pre_filled_slots')
+  const otherChunks = chunks.filter((c) => c.type !== 'pre_filled_slots')
+
+  let slotBlock = ''
+  if (slotChunk && Array.isArray(slotChunk.content) && slotChunk.content.length > 0) {
+    const lines = slotChunk.content.map((s) => {
+      const evidencePart = s.evidence ? ` — evidence: "${s.evidence}"` : ''
+      return `  - ${s.slot} = ${JSON.stringify(s.value)} (confidence ${s.confidence}, source: ${s.source}${evidencePart})`
+    })
+    slotBlock = `
+==== PRE-FILLED SLOTS (from Lowe's session inference — TREAT AS WORKING TRUTH) ====
+The following slots have ALREADY been filled before this conversation opened, inferred
+from Lowe's browse/search/profile signals. Confidence is 30-85 (never 95 — that's
+reserved for explicit user input).
+
+${lines.join('\n')}
+
+WHEN YOU REPLY:
+- Acknowledge these in the opening line. Sound like you've already done your homework.
+  Example: "Saw you've been circling navy vanities — let's build the wall around that."
+- Do NOT re-ask what's pre-filled at confidence ≥ 50. Trust the signal, use it.
+- If the user contradicts a pre-filled value, override at confidence 90, source 'user',
+  and apologize briefly ("got it, scrapping navy — let's try something else").
+- Cite current-session evidence aloud ("the Beckett you were looking at"). Use
+  longer-tail data (saved lists, past purchases, regional palette) SILENTLY to
+  bias defaults — don't surface it as "I see you bought X two years ago."
+
+==== END PRE-FILLED SLOTS ====
+`
   }
-  return `
+
+  const knowledgeSections = []
+  for (const c of otherChunks) {
+    knowledgeSections.push(`--- ${c.type.toUpperCase()} (${c.id}) ---`)
+    if (typeof c.content === 'string') {
+      knowledgeSections.push(c.content)
+    } else {
+      knowledgeSections.push(JSON.stringify(c.content, null, 2))
+    }
+    knowledgeSections.push('')
+  }
+
+  let knowledgeBlock = ''
+  if (knowledgeSections.length > 0) {
+    knowledgeBlock = `
 ==== DYNAMIC KNOWLEDGE (retrieved from Bond knowledge base based on current slot state) ====
 Use these chunks to ground your design recommendations. Quote the designer_voice cues
 when natural; cite finish_compatibility when a finish is constrained; lead with
 matching bundles when scope is partial or full. Do NOT echo the JSON to the user —
 distill it into designer-voice prose.
 
-${sections.join('\n')}
+${knowledgeSections.join('\n')}
 ==== END DYNAMIC KNOWLEDGE ====
 `
+  }
+
+  return slotBlock + knowledgeBlock
 }
