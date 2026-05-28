@@ -56,11 +56,21 @@ export interface RoomPlan {
   updatedAt: string
 }
 
+// Powder/three-quarter bathroom proportions — front-elevation framing
+// (per docs/bond-demo/19): wide enough for vanity+toilet on the back wall,
+// tub on the right, narrow enough that the camera sees the full back wall
+// without panning. 2.4m × 1.6m × 2.4m matches common Lowe's tear-out remod
+// reference floorplans.
+// Powder/three-quarter bathroom proportions — front-elevation framing
+// (per docs/bond-demo/19): wide enough for vanity + toilet + tub on a
+// back-left-right arrangement, depth shallow so the camera sees the full
+// back wall in one frame. 3.6m × 1.8m × 2.4m matches Lowe's standard
+// "three-quarter bath" reference floor plans.
 export const DEFAULT_ROOM: Room = {
   id: 'default',
-  widthM: 5.4,
-  depthM: 5.8,
-  heightM: 2.72,
-  floor: { material: 'wood', colorHex: '#DCCDBA' },
-  wall: { colorHex: '#FAF7F2' },
+  widthM: 3.6,
+  depthM: 1.8,
+  heightM: 2.4,
+  floor: { material: 'wood', colorHex: '#8a8580' },
+  wall: { colorHex: '#ede8df' },
 }

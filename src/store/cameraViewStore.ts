@@ -1,8 +1,8 @@
 import { create } from 'zustand'
 
-export type CameraViewMode = 'isometric' | 'bird' | 'pov'
+export type CameraViewMode = 'isometric' | 'bird'
 
-const cameraViewModes: CameraViewMode[] = ['isometric', 'bird', 'pov']
+const cameraViewModes: CameraViewMode[] = ['isometric', 'bird']
 
 interface CameraViewState {
   mode: CameraViewMode

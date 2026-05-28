@@ -36,13 +36,17 @@ export const SCENARIOS: readonly Scenario[] = [
     note: '30s newlywed, design-curious, building a coordinated set.',
     entry: {
       source: 'pdp',
+      // Real catalog SKU (live image, verified by build-bond3d-catalog.mjs).
+      // Replaces the old synth- placeholder so the WelcomeCard's anchor name
+      // matches what proposeProductGrid will actually surface as candidates.
       product: {
-        id: 'synth-beckett-navy-24',
-        name: 'Beckett 24-in Navy Blue Single Sink Vanity',
+        id: '1b15849d-6f94-46cd-af1c-c6f09fd5f09a',
+        name: 'Avery 48-in Dark Blue Freestanding Vanity with Natural Marble Top and Brushed Gold Hardware',
         category: 'Vanities',
-        price_cents: 54900,
-        brand: 'allen + roth',
+        price_cents: 132930,
+        brand: 'Wyndham Collection',
         style_tags: ['modern', 'transitional', 'navy', 'brass'],
+        image_url: 'https://cdn.usedemo.io/images/products/1b15849d-6f94-46cd-af1c-c6f09fd5f09a/1.jpg',
       },
       persona_hint: 'first-home, design-curious couple',
       trigger_hint: 'aging fixtures',
@@ -69,12 +73,13 @@ export const SCENARIOS: readonly Scenario[] = [
     entry: {
       source: 'pdp',
       product: {
-        id: 'synth-alcove-tub',
-        name: 'Project Source 60-in Alcove Bathtub',
-        category: 'Bathtubs',
-        price_cents: 27900,
-        brand: 'Project Source',
-        style_tags: ['traditional', 'white', 'value'],
+        id: 'c4328403-aac4-4786-864c-a93ae356f14b',
+        name: 'Caspian 60-in x 32-in White Freestanding Tub with Center Drain by DreamLine',
+        category: 'Tubs',
+        price_cents: 197999,
+        brand: 'DreamLine',
+        style_tags: ['traditional', 'white', 'modern'],
+        image_url: 'https://cdn.usedemo.io/images/products/c4328403-aac4-4786-864c-a93ae356f14b/13.png',
       },
       persona_hint: '50s single homeowner, DIY-adjacent',
       trigger_hint: 'leak / urgent',

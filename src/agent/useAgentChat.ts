@@ -65,7 +65,12 @@ export function useAgentChat(
   onToolUseRef.current = onToolUse
 
   const streamAssistantReply = useCallback(
-    async (baseMessages: readonly ChatMessage[], userText: string, hiddenUser = false) => {
+    async (
+      baseMessages: readonly ChatMessage[],
+      userText: string,
+      hiddenUser = false,
+      forceTool?: string,
+    ) => {
       setError(null)
 
       const newUser: ChatMessage = { role: 'user', content: userText.trim(), hidden: hiddenUser }
@@ -90,6 +95,11 @@ export function useAgentChat(
             slotState: slotStateRef?.current ?? undefined,
             // AppContext for namespaced KB lookup (Axis 1).
             appContextId,
+            // When the user clicked a chip with a deterministic intent
+            // (e.g. "Show me styles" → image picker), force Claude to call
+            // that specific tool via tool_choice. Free-form typing leaves
+            // this undefined and the model picks.
+            forceTool,
           }),
           signal: ac.signal,
         })
@@ -172,9 +182,9 @@ export function useAgentChat(
   )
 
   const send = useCallback(
-    async (userText: string) => {
+    async (userText: string, opts?: { readonly forceTool?: string }) => {
       if (!userText.trim() || streaming) return
-      await streamAssistantReply(messages, userText.trim())
+      await streamAssistantReply(messages, userText.trim(), false, opts?.forceTool)
     },
     [messages, streaming, streamAssistantReply],
   )
@@ -197,5 +207,16 @@ export function useAgentChat(
     [reset, streamAssistantReply],
   )
 
-  return { messages, streaming, error, send, reset, seed }
+  /**
+   * Append a client-side assistant ack (no LLM call) ahead of a forced-
+   * tool request. Used so the user sees the agent acknowledged their
+   * chip click before the tool result lands ~1-2s later. The ack is a
+   * standalone assistant message — the next streaming reply will be
+   * appended after it, not into it.
+   */
+  const appendAssistantAck = useCallback((ackText: string) => {
+    setMessages((prev) => [...prev, { role: 'assistant', content: ackText }])
+  }, [])
+
+  return { messages, streaming, error, send, reset, seed, appendAssistantAck }
 }

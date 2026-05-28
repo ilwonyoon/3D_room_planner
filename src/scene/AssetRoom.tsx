@@ -2068,7 +2068,9 @@ export function AssetRoom({
   return (
     <group onPointerDown={handleBackgroundPointerDown}>
       <RoomModelPreloader objects={objects} />
-      <RoomShell materials={materials} />
+      {/* RoomShell disabled — bathroom shell is now provided by PremiumRoom
+          in IsometricScene. Keeping AssetRoom for object mounting + interaction. */}
+      {/* <RoomShell materials={materials} /> */}
       {objects.map((object) => (
         object.renderKind && object.renderKind !== 'model' ? (
           <ProceduralObject

@@ -14,7 +14,6 @@ import { useCameraViewStore } from '@/store/cameraViewStore'
 import type { CameraViewMode } from '@/store/cameraViewStore'
 
 const MODES: ReadonlyArray<{ id: CameraViewMode; label: string }> = [
-  { id: 'pov', label: 'In room' },
   { id: 'isometric', label: 'Isometric' },
   { id: 'bird', label: 'Floor plan' },
 ]

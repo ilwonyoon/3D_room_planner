@@ -6,12 +6,13 @@ import {
   PerspectiveCamera,
 } from '@react-three/drei'
 import type { CameraControls as CameraControlsImpl } from '@react-three/drei'
-import { useEffect, useLayoutEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import * as THREE from 'three'
 
 import { EffectComposer, N8AO, SMAA } from '@react-three/postprocessing'
 
 import { AssetRoom } from './AssetRoom'
+import { PremiumRoom } from './PremiumRoom'
 import { Lighting } from './Lighting'
 import { SelectionGizmos } from './SelectionGizmos'
 import { PlacementHandlers } from '@/ui/PlacementHandlers'
@@ -125,8 +126,11 @@ function WebglLifecycleGuard() {
 const SCENE_GRID_SIZE = 18
 const SCENE_GRID_INNER_FADE_RADIUS = 2.6
 const SCENE_GRID_OUTER_FADE_RADIUS = 5.8
-const ISOMETRIC_CAMERA_POSITION = new THREE.Vector3(6.8, 5.9, 6.8)
-const ISOMETRIC_CAMERA_TARGET = new THREE.Vector3(0, 0.15, 0)
+// Front-elevation 3D-axon view (per docs/bond-demo/19). Target is the room's
+// geometric center; the camera shift in the isometric useEffect handles
+// any viewport-centering offset analytically.
+const ISOMETRIC_CAMERA_POSITION = new THREE.Vector3(0, 2.4, 3.4)
+const ISOMETRIC_CAMERA_TARGET = new THREE.Vector3(0, 1.2, 0.0)
 const BIRD_CAMERA_POSITION = new THREE.Vector3(0, 9.4, 0.01)
 const BIRD_CAMERA_TARGET = new THREE.Vector3(0, 0, 0)
 const ROOM_FRAME_MARGIN_M = 0.06
@@ -442,155 +446,112 @@ function CameraRig({
   const room = useRoomStore((state) => state.room)
   const controlsRef = useRef<CameraControlsImpl | null>(null)
   const orthographicRef = useRef<THREE.OrthographicCamera | null>(null)
-  const perspectiveRef = useRef<THREE.PerspectiveCamera | null>(null)
 
+  // ─────────────────────────────────────────────────────────────────────
+  // Camera design contract
+  // ─────────────────────────────────────────────────────────────────────
+  // Source of truth: CameraControls. Nothing else mutates camera position,
+  // target, or zoom outside the initial fit below. The fit runs:
+  //   - on first mount (after CameraControls' ref is populated), and
+  //   - whenever mode or room dimensions change.
+  // It does NOT run on canvas resize or any other reactive trigger, so the
+  // user can drag/orbit/zoom freely without the camera snapping back.
+  // ─────────────────────────────────────────────────────────────────────
+  const initialFitDoneRef = useRef(false)
+
+  const fitView = useCallback(() => {
+    const controls = controlsRef.current
+    if (!controls) return false
+
+    const isBird = mode === 'bird'
+    const basePosition = isBird ? BIRD_CAMERA_POSITION : ISOMETRIC_CAMERA_POSITION
+    const baseTarget = isBird ? BIRD_CAMERA_TARGET : ISOMETRIC_CAMERA_TARGET
+    const up = isBird ? new THREE.Vector3(0, 0, -1) : new THREE.Vector3(0, 1, 0)
+    const maxZoom = isBird ? 76 : 240
+
+    // Project the room corners into the camera's projection plane so we
+    // can (a) fit zoom to the canvas and (b) shift the target so the
+    // projected room center lands at the viewport center.
+    const zAxis = basePosition.clone().sub(baseTarget).normalize()
+    const xAxis = up.clone().cross(zAxis).normalize()
+    const yAxis = zAxis.clone().cross(xAxis).normalize()
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity
+    for (const p of roomFramePoints(room)) {
+      const rel = p.clone().sub(baseTarget)
+      const px = rel.dot(xAxis)
+      const py = rel.dot(yAxis)
+      if (px < minX) minX = px
+      if (px > maxX) maxX = px
+      if (py < minY) minY = py
+      if (py > maxY) maxY = py
+    }
+    const frameWidth = Math.max(maxX - minX, 0.001)
+    const frameHeight = Math.max(maxY - minY, 0.001)
+    const usableWidth = Math.max(1, size.width - ROOM_FRAME_MARGIN_PX * 2)
+    const usableHeight = Math.max(1, size.height - ROOM_FRAME_MARGIN_PX * 2)
+    const zoom = Math.min(maxZoom, usableWidth / frameWidth, usableHeight / frameHeight)
+    const cx = (minX + maxX) / 2
+    const cy = (minY + maxY) / 2
+    const offset = xAxis.clone().multiplyScalar(cx).add(yAxis.clone().multiplyScalar(cy))
+    const target = baseTarget.clone().add(offset)
+    const position = basePosition.clone().add(offset)
+
+    // CameraControls doesn't track up vector — sync the camera ref's up
+    // before any orbit math so polar angles are consistent.
+    const cam = orthographicRef.current
+    if (cam) cam.up.copy(up)
+
+    void controls
+      .setLookAt(position.x, position.y, position.z, target.x, target.y, target.z, false)
+      .then(() => controls.zoomTo(zoom, false))
+      .then(() => invalidate())
+      .catch(() => {})
+    return true
+  }, [invalidate, mode, room, size.width, size.height])
+
+  // Initial fit — runs once per mode/room change. Polls via rAF until
+  // CameraControls' ref is populated (it mounts after this component's
+  // refs commit), then stops.
   useEffect(() => {
-    if (mode === 'pov') {
-      if (perspectiveRef.current) {
-        perspectiveRef.current.position.set(0, POV_EYE_HEIGHT_M, 1.7)
-        perspectiveRef.current.lookAt(0, 1.28, -1.4)
-        perspectiveRef.current.updateProjectionMatrix()
-      }
-
-      invalidate()
-      return
-    }
-
-    const camera = orthographicRef.current
-    if (!camera) {
-      return
-    }
-
-    if (mode === 'bird') {
-      const position = BIRD_CAMERA_POSITION
-      const up = new THREE.Vector3(0, 0, -1)
-      const frame = calculateOrthographicRoomFrame({
-        position,
-        baseTarget: BIRD_CAMERA_TARGET,
-        up,
-        room,
-        canvasWidth: size.width,
-        canvasHeight: size.height,
-        maxZoom: 76,
-      })
-
-      camera.up.copy(up)
-      camera.position.copy(position)
-      camera.zoom = frame.zoom
-      camera.lookAt(frame.target)
-      camera.updateProjectionMatrix()
-      camera.updateMatrixWorld()
-
-      const controls = controlsRef.current
-      if (!controls) {
-        invalidate()
+    initialFitDoneRef.current = false
+    let raf = 0
+    const tryFit = () => {
+      if (fitView()) {
+        initialFitDoneRef.current = true
         return
       }
-
-      void controls.setLookAt(
-        position.x,
-        position.y,
-        position.z,
-        frame.target.x,
-        frame.target.y,
-        frame.target.z,
-        false,
-      ).then(() => invalidate())
-      return
+      raf = requestAnimationFrame(tryFit)
     }
-
-    const position = ISOMETRIC_CAMERA_POSITION
-    const up = new THREE.Vector3(0, 1, 0)
-    const frame = calculateOrthographicRoomFrame({
-      position,
-      baseTarget: ISOMETRIC_CAMERA_TARGET,
-      up,
-      room,
-      canvasWidth: size.width,
-      canvasHeight: size.height,
-      maxZoom: 54,
-    })
-
-    camera.up.copy(up)
-    camera.position.copy(position)
-    camera.zoom = frame.zoom
-    camera.lookAt(frame.target)
-    camera.updateProjectionMatrix()
-    camera.updateMatrixWorld()
-
-    const controls = controlsRef.current
-    if (!controls) {
-      invalidate()
-      return
+    tryFit()
+    return () => {
+      if (raf) cancelAnimationFrame(raf)
     }
-
-    void controls.setLookAt(
-      position.x,
-      position.y,
-      position.z,
-      frame.target.x,
-      frame.target.y,
-      frame.target.z,
-      false,
-    ).then(() => invalidate())
-  }, [invalidate, mode, room, size.height, size.width])
-
-  useEffect(() => {
-    const controls = controlsRef.current
-
-    if (!controls || mode === 'pov') {
-      return
-    }
-
-    const targetMarginX = mode === 'bird' ? room.widthM * 0.38 : room.widthM * 0.42
-    const targetMarginZ = mode === 'bird' ? room.depthM * 0.38 : room.depthM * 0.42
-    controls.boundaryFriction = 0
-    controls.setBoundary(
-      new THREE.Box3(
-        new THREE.Vector3(-targetMarginX, -0.12, -targetMarginZ),
-        new THREE.Vector3(targetMarginX, 0.82, targetMarginZ),
-      ),
-    )
-    invalidate()
-  }, [invalidate, mode, room.depthM, room.widthM])
+  }, [fitView])
 
   return (
     <>
       <OrthographicCamera
         ref={orthographicRef}
-        makeDefault={mode !== 'pov'}
-        position={[6.8, 5.9, 6.8]}
-        zoom={54}
+        makeDefault
         near={0.05}
         far={100}
       />
-      <PerspectiveCamera
-        ref={perspectiveRef}
-        makeDefault={mode === 'pov'}
-        position={[0, POV_EYE_HEIGHT_M, 1.7]}
-        fov={68}
-        near={0.03}
-        far={80}
+      <CameraControls
+        ref={controlsRef}
+        makeDefault
+        enabled={cameraEnabled}
+        minPolarAngle={mode === 'bird' ? 0 : Math.PI / 8}
+        maxPolarAngle={mode === 'bird' ? 0.02 : Math.PI / 2.22}
+        minZoom={mode === 'bird' ? 34 : 18}
+        maxZoom={mode === 'bird' ? 180 : 320}
+        minDistance={0.7}
+        maxDistance={14}
+        draggingSmoothTime={0.08}
+        azimuthRotateSpeed={mode === 'bird' ? 0 : 0.72}
+        polarRotateSpeed={mode === 'bird' ? 0 : 0.72}
+        truckSpeed={mode === 'bird' ? 1.15 : 0.72}
+        dollySpeed={1.25}
       />
-      {mode !== 'pov' ? (
-        <CameraControls
-          key={mode}
-          ref={controlsRef}
-          makeDefault
-          enabled={cameraEnabled}
-          minPolarAngle={mode === 'bird' ? 0 : Math.PI / 8}
-          maxPolarAngle={mode === 'bird' ? 0.02 : Math.PI / 2.22}
-          minZoom={mode === 'bird' ? 34 : 18}
-          maxZoom={mode === 'bird' ? 180 : 180}
-          minDistance={0.7}
-          maxDistance={14}
-          draggingSmoothTime={0.08}
-          azimuthRotateSpeed={mode === 'bird' ? 0 : 0.72}
-          polarRotateSpeed={mode === 'bird' ? 0 : 0.72}
-          truckSpeed={mode === 'bird' ? 1.15 : 0.72}
-          dollySpeed={1.25}
-        />
-      ) : null}
     </>
   )
 }
@@ -825,12 +786,20 @@ export function IsometricScene({ className, theme = 'dark' }: Props) {
         <WebglLifecycleGuard />
         <RendererStatsBridge quality={quality} />
         <EditorInteractionLayers />
-        {viewMode !== 'pov' ? <SceneGrid active={gridActive} onClearSelection={clearSelection} /> : null}
+        {/* SceneGrid disabled for bathroom MVP — the floor-extending grid
+            was overflowing the canvas and making the room look biased
+            toward the top of the viewport. Background is a flat surface
+            color from the Canvas style. */}
+        {/* {viewMode !== 'pov' ? <SceneGrid active={gridActive} onClearSelection={clearSelection} /> : null} */}
         <CameraRig mode={viewMode} cameraEnabled={cameraEnabled} />
         <PovMovementController enabled={viewMode === 'pov'} />
 
         <Lighting quality={quality} />
 
+        {/* Bathroom shell (walls + floor + textures). AssetRoom owns
+            object mounting + interaction, but its old living-room shell
+            is disabled (see AssetRoom.tsx). */}
+        <PremiumRoom />
         <AssetRoom
           interactionEnabled
           onClearSelection={clearSelection}

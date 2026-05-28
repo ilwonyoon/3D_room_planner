@@ -19,13 +19,13 @@ import { retrieve, assembleContext } from './rag.mjs'
 loadDotenv({ path: '.env.local' })
 
 const PORT = 3001
-// Two-model routing: synthesis turns (bundle propose, multi-slot blend,
-// trade-off reasoning) get Sonnet 4.6 + extended thinking; discovery
-// turns (chip narrow, confirms, single-slot updates) get Haiku 4.5 for
-// ~30% cost + 1/3 latency. Routing key is needsThinking() — same
-// heuristic, just extended to model selection.
-const MODEL_HEAVY = 'claude-sonnet-4-6'
-const MODEL_LIGHT = 'claude-haiku-4-5-20251001'
+// Single-model setup: Sonnet 4.6 on every turn. The Haiku discovery
+// branch (see commit c1dbafc and docs/bond-demo/18-V13.3-ROUTING-REGRESSION.md)
+// regressed voice (-1.34) and interrogation_load (-1.40) even on turns
+// it was supposed to help, so we dropped the routing. needsThinking()
+// is kept and now only decides whether extended thinking is enabled
+// for the same Sonnet call.
+const MODEL = 'claude-sonnet-4-6'
 const MAX_TOKENS = 8192
 // Extended thinking lets the model reason in a separate content block before
 // answering — we surface that in the UI as a collapsible "thinking" panel.
@@ -253,7 +253,7 @@ const handleChat = async (req, res) => {
     res.end('Invalid JSON')
     return
   }
-  const { systemPrompt, messages, slotState, appContextId } = body
+  const { systemPrompt, messages, slotState, appContextId, forceTool } = body
   if (!systemPrompt || !Array.isArray(messages)) {
     res.statusCode = 400
     res.end('Missing systemPrompt or messages')
@@ -286,19 +286,29 @@ const handleChat = async (req, res) => {
   // the turn actually needs synthesis (user delegating, agent about to
   // propose, multi-slot blend, trade-off). Routine turns (chips,
   // confirmations, narrow asks) skip thinking entirely — faster + cheaper.
-  // Same heuristic also picks the model: heavy turns → Sonnet 4.6,
-  // light turns → Haiku 4.5 (~30% cost, ~1/3 latency).
+  // Model is always Sonnet 4.6; Haiku discovery routing was reverted.
   const useThinking = needsThinking(messages, slotState ?? {})
-  const model = useThinking ? MODEL_HEAVY : MODEL_LIGHT
+  // tool_choice: when the client supplies forceTool (a chip click with a
+  // deterministic intent), pin Claude to that exact tool — model can't
+  // wander off into a clarifying question. extended thinking and tool_choice
+  // forcing a specific tool are incompatible per Anthropic docs, so when
+  // forceTool is set, thinking is disabled regardless of needsThinking().
+  const knownTools = new Set(AGENT_TOOLS.map((t) => t.name))
+  const useForcedTool = typeof forceTool === 'string' && knownTools.has(forceTool)
+  const useThinkingFinal = useForcedTool ? false : useThinking
   const requestParams = {
-    model,
+    model: MODEL,
     max_tokens: MAX_TOKENS,
     system: fullSystemPrompt,
     tools: AGENT_TOOLS,
     messages,
-    ...(useThinking ? { thinking: { type: 'enabled', budget_tokens: THINKING_BUDGET } } : {}),
+    ...(useThinkingFinal ? { thinking: { type: 'enabled', budget_tokens: THINKING_BUDGET } } : {}),
+    ...(useForcedTool ? { tool_choice: { type: 'tool', name: forceTool } } : {}),
   }
-  console.log(`[chat:${contextId}] model=${useThinking ? 'sonnet' : 'haiku'} thinking=${useThinking ? 'ON' : 'OFF'}`)
+  console.log(
+    `[chat:${contextId}] model=sonnet thinking=${useThinkingFinal ? 'ON' : 'OFF'}` +
+      (useForcedTool ? ` force_tool=${forceTool}` : ''),
+  )
 
   try {
     const upstream = client.messages.stream(requestParams)

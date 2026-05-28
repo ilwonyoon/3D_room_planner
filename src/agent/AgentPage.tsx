@@ -286,8 +286,15 @@ export function AgentPage() {
           <ChatThread
             messages={chat.messages}
             streaming={chat.streaming}
-            onUserPick={(text) => {
-              if (!chat.streaming) void chat.send(text)
+            onUserPick={(text, opts) => {
+              if (chat.streaming) return
+              // For forced-tool chips, the LLM returns ONLY a tool_use
+              // block (no prose) — sub-second but visually abrupt. Slip
+              // a short ack message ahead of the request so the user sees
+              // the agent acknowledged the click before the tool lands.
+              const ack = opts?.forceTool ? ackForTool(opts.forceTool) : null
+              if (ack) chat.appendAssistantAck(ack)
+              void chat.send(text, opts)
             }}
             inspectorMode={showInspector}
             welcomeScenario={scenarioId === 'blank' ? null : scenario}
@@ -450,7 +457,7 @@ function ChatThread({
 }: {
   readonly messages: readonly ChatMessage[]
   readonly streaming: boolean
-  readonly onUserPick: (text: string) => void
+  readonly onUserPick: (text: string, opts?: { readonly forceTool?: string }) => void
   /** Power-user toggle (?inspector=1). When true, the assistant block
    *  exposes the full thinking trace; otherwise only friendly status
    *  messages appear and fade out. */
@@ -467,35 +474,44 @@ function ChatThread({
     endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' })
   }, [messages])
 
+  // Visible user messages = anything not hidden. Used below to (a) decide
+  // whether the welcome message is still the "current" thing on screen
+  // (and chips should be live), and (b) whether to skip rendering the
+  // empty-state placeholder.
+  const visibleUserCount = messages.filter((m) => m.role === 'user' && !m.hidden).length
+
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-4 py-6 sm:px-6">
-      {messages.length === 0 ? (
-        welcomeScenario !== undefined ? (
-          <WelcomeCard scenario={welcomeScenario} onChipPick={onUserPick} />
-        ) : (
-          <div className="m-auto max-w-xs text-center text-caption text-[var(--color-muted)]">
-            Empty chat — say something to start.
-          </div>
-        )
+      {/* Welcome message is now PERSISTENT — it stays at the top of the
+          thread as the agent's first turn, the way a real chat history
+          remembers the opener. Chips remain interactive until the user
+          has sent at least one visible message, then dim (still clickable
+          but visually receded). */}
+      {welcomeScenario !== undefined ? (
+        <WelcomeCard
+          scenario={welcomeScenario}
+          onChipPick={onUserPick}
+          dimmed={visibleUserCount > 0}
+        />
+      ) : messages.length === 0 ? (
+        <div className="m-auto max-w-xs text-center text-caption text-[var(--color-muted)]">
+          Empty chat — say something to start.
+        </div>
       ) : null}
       {messages.map((m, i) => {
         const isUser = m.role === 'user'
-        // Hidden seed messages: skip entirely (cold-start welcome nudge,
-        // scenario entry context). They stay in history for the agent's
-        // benefit but never render.
+        // Hidden seed messages: skip entirely (entry-context seed for the
+        // agent's RAG, never shown to the user).
         if (m.hidden) return null
-        const isFirstUser = isUser && i === 0
-        // First user message = the entry-context seed; de-emphasize it.
+        // All visible user messages render as normal right-aligned bubbles
+        // — there's no special "first user message" form anymore, since
+        // the entry context is hidden and the WelcomeCard handles entry framing.
         if (isUser) {
           return (
             <div
               key={i}
               style={{ overflowWrap: 'anywhere', wordBreak: 'break-word' }}
-              className={
-                isFirstUser
-                  ? 'self-stretch whitespace-pre-wrap rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-muted)_8%,transparent)] px-3 py-2 font-mono text-[11px] text-[var(--color-muted)]'
-                  : 'self-end max-w-[85%] whitespace-pre-wrap rounded-[var(--radius-sm)] bg-[var(--color-lowes-blue)] px-4 py-2.5 text-small text-[var(--color-on-brand)]'
-              }
+              className="self-end max-w-[85%] whitespace-pre-wrap rounded-[var(--radius-sm)] bg-[var(--color-lowes-blue)] px-4 py-2.5 text-small text-[var(--color-on-brand)]"
             >
               {m.content}
             </div>
@@ -527,7 +543,7 @@ function AssistantBlock({
 }: {
   readonly message: ChatMessage
   readonly streaming: boolean
-  readonly onUserPick: (text: string) => void
+  readonly onUserPick: (text: string, opts?: { readonly forceTool?: string }) => void
   readonly inspectorMode: boolean
 }) {
   // Inspector mode: keep the raw expand-able thinking trace (power view
@@ -619,21 +635,26 @@ function RichComponent({
   onUserPick,
 }: {
   readonly call: { readonly name: string; readonly input: Record<string, unknown> }
-  readonly onUserPick: (text: string) => void
+  readonly onUserPick: (text: string, opts?: { readonly forceTool?: string }) => void
 }) {
   if (call.name === 'proposeChipChoice') {
     const question = (call.input.question as string) ?? ''
     const options = (call.input.options as string[]) ?? []
+    // Match the WelcomeCard chip pattern: no wrapper container, grey
+    // label above, large pill buttons. Visual consistency between the
+    // cold-open chips and every later chip-style proposal.
     return (
-      <div className="rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-lowes-blue)_4%,transparent)] px-3 py-2.5">
-        {question ? <p className="mb-2 text-small text-[var(--color-ink)]">{question}</p> : null}
-        <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-col gap-2 self-stretch">
+        {question ? (
+          <div className="text-[12px] font-semibold text-[var(--color-muted)]">{question}</div>
+        ) : null}
+        <div className="flex flex-wrap gap-2">
           {options.map((opt) => (
             <button
               key={opt}
               type="button"
               onClick={() => onUserPick(opt)}
-              className="rounded-full border border-[var(--color-lowes-blue)] bg-[var(--color-surface)] px-3 py-1 text-small font-medium text-[var(--color-lowes-blue)] hover:bg-[var(--color-lowes-blue)] hover:text-[var(--color-on-brand)]"
+              className="min-h-[36px] rounded-full border border-[var(--color-lowes-blue)] bg-[var(--color-surface)] px-4 text-sm font-semibold text-[var(--color-lowes-blue)] hover:bg-[color-mix(in_srgb,var(--color-lowes-blue)_8%,var(--color-surface))]"
             >
               {opt}
             </button>
@@ -684,40 +705,64 @@ function RichComponent({
   if (call.name === 'proposeProductGrid') {
     const intro = (call.input.intro as string) ?? ''
     const products = (call.input.products as Array<{
-      id: string; name: string; brand?: string; price_cents: number; image_url?: string; reason?: string
+      id: string
+      name: string
+      brand?: string
+      price_cents: number
+      sale_price_cents?: number
+      image_url?: string
+      reason?: string
     }>) ?? []
+    // 2-column vertical card grid, no wrapping container — same pattern as
+    // the proto2 PdpGallery / RoomList "In this room" cards. Card is a soft
+    // white surface with a hairline ring, image floats large on top, brand
+    // + name + price stacked below. Strikethrough sale price when the SKU
+    // has both a list price and a sale price.
     return (
-      <div className="rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-lowes-blue)_4%,transparent)] px-3 py-2.5">
-        {intro ? <p className="mb-2 text-small text-[var(--color-ink)]">{intro}</p> : null}
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {products.map((p) => (
-            <div
-              key={p.id}
-              className="flex gap-2 rounded-[var(--radius-sm)] border border-[var(--color-border)] bg-[var(--color-surface)] p-2"
-            >
-              {p.image_url ? (
-                <img
-                  src={p.image_url}
-                  alt={p.name}
-                  className="h-14 w-14 shrink-0 rounded object-cover"
-                />
-              ) : (
-                <div className="h-14 w-14 shrink-0 rounded bg-[color-mix(in_srgb,var(--color-ink)_6%,transparent)]" />
-              )}
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-[11px] text-[var(--color-muted)]">{p.brand ?? ''}</p>
-                <p className="truncate text-small font-bold text-[var(--color-ink)]">
-                  {p.name}
-                </p>
-                <p className="text-small text-[var(--color-ink)]">${(p.price_cents / 100).toFixed(2)}</p>
-                {p.reason ? (
-                  <p className="mt-0.5 text-[11px] italic text-[var(--color-muted)]">
-                    {p.reason}
-                  </p>
+      <div className="flex flex-col gap-3 self-stretch">
+        {intro ? <p className="text-[14px] leading-snug text-[var(--color-ink)]">{intro}</p> : null}
+        <div className="grid grid-cols-2 content-start gap-4">
+          {products.map((p) => {
+            const hasSale = p.sale_price_cents && p.sale_price_cents < p.price_cents
+            const displayCents = hasSale ? (p.sale_price_cents as number) : p.price_cents
+            return (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => onUserPick(p.name)}
+                className="flex min-w-0 flex-col text-left"
+              >
+                <span className="relative mb-2 block">
+                  {p.image_url ? (
+                    <img
+                      src={p.image_url}
+                      alt={p.name}
+                      className="aspect-square w-full rounded-[var(--radius-md)] bg-[var(--color-surface)] object-contain p-4 ring-1 ring-inset ring-[var(--color-border)] transition-[box-shadow] hover:shadow-md"
+                    />
+                  ) : (
+                    <div className="aspect-square w-full rounded-[var(--radius-md)] bg-[color-mix(in_srgb,var(--color-ink)_5%,transparent)] ring-1 ring-inset ring-[var(--color-border)]" />
+                  )}
+                </span>
+                {p.brand ? (
+                  <span className="truncate text-[13px] font-bold text-[var(--color-ink)]">{p.brand}</span>
                 ) : null}
-              </div>
-            </div>
-          ))}
+                <span className="line-clamp-2 text-[12px] text-[var(--color-muted)]">{p.name}</span>
+                <span className="mt-1 flex items-baseline gap-1.5">
+                  <span className="text-[14px] font-bold text-[var(--color-ink)]">
+                    ${(displayCents / 100).toFixed(0)}
+                  </span>
+                  {hasSale ? (
+                    <span className="text-[11px] text-[var(--color-muted)] line-through">
+                      ${(p.price_cents / 100).toFixed(0)}
+                    </span>
+                  ) : null}
+                </span>
+                {p.reason ? (
+                  <span className="mt-1 text-[11px] italic text-[var(--color-muted)]">{p.reason}</span>
+                ) : null}
+              </button>
+            )
+          })}
         </div>
       </div>
     )
@@ -806,6 +851,21 @@ function Inspector({
  *                      set scope itself). Hidden only in single-SKU mode
  *                      where commerce-filter chat is the right surface.
  */
+/**
+ * One-line acknowledgement message inserted into the chat thread the
+ * instant a user clicks a chip whose tool is being forced. The LLM
+ * follow-up (which returns only a tool_use block) lands within ~1-2s
+ * but feels abrupt without this. Keep these short and in the agent's
+ * designer voice.
+ */
+function ackForTool(toolName: string): string | null {
+  if (toolName === 'proposeImageChoice') return 'Pulling some looks for you…'
+  if (toolName === 'proposeProductGrid') return 'Pulling design options…'
+  if (toolName === 'proposeChipChoice') return 'Lining up some choices…'
+  if (toolName === 'updateSceneSlot') return 'Placing it in your room…'
+  return null
+}
+
 function shouldShowSettingsChip(
   visibility: 'always' | 'partial+full' | 'never',
   slotState: SlotState,

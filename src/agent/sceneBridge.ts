@@ -34,9 +34,29 @@ import {
 import type { Vec2 } from '@/domain/types'
 
 /**
+ * Bathroom slot → real bathroom GLB (when present). Filled per-slot as
+ * bathroom assets get dropped into `public/assets/models/bathroom/`
+ * (see `docs/bond-demo/13-BATHROOM-ASSETS.md`). When a slot has an
+ * entry here, `pickStandIn` short-circuits to it and skips the
+ * furniture-catalog stand-in path below. Slots not in this map fall
+ * through to `SLOT_TO_CATEGORIES`, so partial drops are graceful.
+ */
+const SLOT_TO_BATHROOM_FILE: Record<string, string> = {
+  vanity: '/assets/models/bathroom/vanity_36in_modern_white.glb',
+  mirror: '/assets/models/bathroom/mirror_rect_blackframe.glb',
+  lighting: '/assets/models/bathroom/sconce_brass_opal.glb',
+  bathtub: '/assets/models/bathroom/tub_freestanding_oval_white.glb',
+  toilet: '/assets/models/bathroom/toilet_wallmount_white.glb',
+  faucet: '/assets/models/bathroom/faucet_widespread_matteblack.glb',
+  shower: '/assets/models/bathroom/shower_walkin_enclosure.glb',
+  accessory: '/assets/models/bathroom/towelbar_brushed_nickel.glb',
+}
+
+/**
  * Bathroom slot → Bond-3d furniture category. Picked for visual size
  * match (e.g. bathtub is large + low → sofa shape). Fall back to a
  * second-choice category if the first has no model-bearing items.
+ * Only consulted for slots NOT in SLOT_TO_BATHROOM_FILE above.
  */
 const SLOT_TO_CATEGORIES: Record<string, ProductCategory[]> = {
   vanity: ['storage', 'table'],
@@ -70,20 +90,21 @@ const SLOT_TARGET_DIMENSIONS_CM: Record<string, readonly [number, number, number
 
 /**
  * Approximate floor position per slot, in meters from room origin
- * (room is 5.4 × 5.8 m via DEFAULT_ROOM). Hand-tuned so a fully-loaded
+ * (room is 3.6 × 4.4 m via DEFAULT_ROOM). Hand-tuned so a fully-loaded
  * bathroom scene doesn't end up with everything stacked at (0, 0)
  * — see `verifyNoSlotOverlap` for the test that enforces ≥30cm
- * pairwise separation.
+ * pairwise separation. Right wall holds vanity + mirror + sconce;
+ * left wall holds the tub; front-center holds the toilet.
  */
 const SLOT_POSITION: Record<string, Vec2> = {
-  vanity: { x: 1.7, z: -1.6 },
-  mirror: { x: 1.7, z: -2.2 },
-  faucet: { x: 1.7, z: -1.0 },
-  lighting: { x: 0, z: -2.4 },
-  bathtub: { x: -1.8, z: 0.5 },
-  shower: { x: -1.8, z: -1.4 },
-  toilet: { x: 0.5, z: 1.5 },
-  accessory: { x: 1.2, z: 1.5 },
+  vanity: { x: 1.4, z: -1.6 },
+  mirror: { x: 1.72, z: -1.6 },
+  faucet: { x: 1.4, z: -1.6 },
+  lighting: { x: 1.72, z: -1.6 },
+  bathtub: { x: -1.0, z: 0 },
+  shower: { x: -1.4, z: -1.4 },
+  toilet: { x: 0, z: 1.6 },
+  accessory: { x: 0.8, z: 1.6 },
 }
 
 /**
@@ -124,6 +145,25 @@ function dimDistance(
  * seed to break ties deterministically across reloads.
  */
 export function pickStandIn(slot: string, productId: string): ProductCatalogItem | null {
+  // Real bathroom GLB exists for this slot — synthesize a catalog item
+  // pointing at it and skip the furniture-stand-in fallback entirely.
+  const bathroomFile = SLOT_TO_BATHROOM_FILE[slot]
+  if (bathroomFile) {
+    const dims = SLOT_TARGET_DIMENSIONS_CM[slot] ?? [50, 50, 50]
+    return {
+      id: `bathroom-${slot}`,
+      name: slot,
+      brand: 'Bond',
+      category: 'storage',
+      source: 'manual',
+      renderCost: 'standard',
+      modelUrl: bathroomFile,
+      sourceModelUrl: bathroomFile,
+      thumbnailUrl: '',
+      dimensionsCm: dims,
+    } as ProductCatalogItem
+  }
+
   const categories = SLOT_TO_CATEGORIES[slot] ?? []
   const target = SLOT_TARGET_DIMENSIONS_CM[slot]
 
@@ -250,6 +290,7 @@ export function verifyNoSlotOverlap(minSeparationM = 0.3): {
 
 // Helpful for debugging the demo narrative
 export const SCENE_BRIDGE_DEBUG = {
+  SLOT_TO_BATHROOM_FILE,
   SLOT_TO_CATEGORIES,
   SLOT_TARGET_DIMENSIONS_CM,
   SLOT_POSITION,
