@@ -1,0 +1,108 @@
+{
+  "_comment": "Hard design rules — finish compatibility, NKBA clearances, plumbing rough-in matching. These are constraints, not preferences. The agent cites them when they limit a choice ('matte black faucet, since you committed matte black hardware throughout' or 'we'd need 16in clearance from the toilet centerline — this vanity is too wide').",
+  "version": "2026-05-25-v1",
+  "finish_compatibility": {
+    "matte_black": {
+      "temperature": "neutral",
+      "tone": "matte",
+      "pairs_with_all": true,
+      "conflicts_with": [],
+      "voice_note": "matte black is the universal neutral — pairs with anything, never clashes"
+    },
+    "polished_chrome": {
+      "temperature": "cool",
+      "tone": "polished",
+      "pairs_with_all": false,
+      "conflicts_with": ["brushed_nickel", "polished_nickel"],
+      "voice_note": "polished chrome wants warm partners — brass or aged bronze — never another cool polished metal in the same room"
+    },
+    "brushed_nickel": {
+      "temperature": "cool",
+      "tone": "brushed",
+      "pairs_with_all": false,
+      "conflicts_with": ["polished_chrome", "polished_nickel"],
+      "voice_note": "brushed nickel reads softer than chrome — pair with warm brushed brass, not its polished cousin"
+    },
+    "polished_nickel": {
+      "temperature": "cool",
+      "tone": "polished",
+      "pairs_with_all": false,
+      "conflicts_with": ["polished_chrome", "brushed_nickel"],
+      "voice_note": "polished nickel is the upmarket alternative to chrome — same temperature, slightly warmer. Same rule: don't mix with chrome."
+    },
+    "brushed_brass": {
+      "temperature": "warm",
+      "tone": "brushed",
+      "pairs_with_all": false,
+      "conflicts_with": ["polished_brass"],
+      "voice_note": "brushed brass goes with everything cool (chrome, brushed nickel) AND with matte black"
+    },
+    "polished_brass": {
+      "temperature": "warm",
+      "tone": "polished",
+      "pairs_with_all": false,
+      "conflicts_with": ["brushed_brass", "aged_brass"],
+      "voice_note": "polished brass is the boldest finish — works as a single accent against polished nickel or chrome, but never with its own family"
+    },
+    "aged_bronze": {
+      "temperature": "warm",
+      "tone": "matte",
+      "pairs_with_all": false,
+      "conflicts_with": [],
+      "voice_note": "oil-rubbed bronze / aged bronze pairs warmly with brushed brass; can sit alongside matte black"
+    },
+    "matte_gold": {
+      "temperature": "warm",
+      "tone": "matte",
+      "pairs_with_all": false,
+      "conflicts_with": ["polished_brass"],
+      "voice_note": "matte gold reads as a softer brass — modern. Mixes well with matte black, polished chrome, or as a single accent"
+    }
+  },
+  "finish_family_principles": {
+    "dominant_ratio": "60-70%",
+    "max_total_metals_per_room": 2,
+    "same_color_polished_brushed": "never",
+    "matte_neutral": "matte_black, aged_bronze, matte_gold",
+    "rules": [
+      "Pick one metal as the dominant (60-70% of metal mass) — usually the faucet + showerhead family.",
+      "Add at most ONE accent metal — typically the mirror frame, vanity light, or hardware pulls.",
+      "Never mix two finishes of the same color family — polished + brushed nickel reads as a design mistake.",
+      "Mix temperature (one warm + one cool) is the safest two-metal pairing.",
+      "Matte black is a neutral — it pairs with all other finishes."
+    ]
+  },
+  "nkba_clearances_cm": {
+    "_comment": "From NKBA Bath Planning Guidelines (2014/2019). Used by the agent to validate placements against the user's bathroom_configuration.",
+    "toilet_centerline_to_obstruction": 41,
+    "toilet_clear_floor_in_front": [122, 122],
+    "lavatory_clear_floor": [76, 122],
+    "lavatory_centerline_to_side_wall": 38,
+    "double_lavatory_centerline_spacing": 76,
+    "shower_min_interior": [86, 86],
+    "shower_entrance_min": 81,
+    "tub_clear_floor_parallel": [152, 76],
+    "tub_clear_floor_perpendicular": [152, 122],
+    "ceiling_min": 203,
+    "door_clear_opening": 81,
+    "walkway_min": 91,
+    "toilet_paper_holder_height": 66,
+    "shower_control_height": [97, 122],
+    "grab_bar_diameter": 3.2,
+    "grab_bar_height": [84, 91]
+  },
+  "plumbing_rough_in": {
+    "_comment": "Mechanical compatibility — never a preference. Faucet hole count must match sink, toilet rough-in must match floor. The agent enforces this as a hard constraint.",
+    "faucet_hole_count": {
+      "single_hole": "1-hole sink, single-handle faucet",
+      "centerset_4in": "3-hole sink, 4-inch spread faucet",
+      "widespread_8in": "3-hole sink, 8-inch spread faucet",
+      "wall_mount": "no sink holes; wall plumbing required"
+    },
+    "toilet_rough_in": {
+      "10in": "older homes, rare",
+      "12in": "default new construction",
+      "14in": "occasional, requires matching toilet"
+    }
+  }
+}

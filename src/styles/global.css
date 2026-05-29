@@ -1,4 +1,35 @@
+/* bond-demo: Tailwind v4 + Bond_studio design tokens for the agent UI.
+   Original pocketroom tokens are kept below (--color-brand, --color-base-*,
+   --color-scene-bg) because the existing R3F editor + AssetRoom use them. */
+@import "tailwindcss";
+
+@theme {
+  /* Lowe's brand + agent UI tokens — pasted verbatim from Bond_studio. */
+  --color-lowes-blue: #004990;
+  --color-lowes-blue-600: #003a73;
+  --color-lowes-blue-50: #eaf1f8;
+  --color-ink: #16181d;
+  --color-muted: #6b7280;
+  --color-on-brand: #ffffff;
+  --color-surface: #ffffff;
+  --color-surface-sunken: #f3f4f6;
+  --color-border: #e5e7eb;
+
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
+  --radius-full: 9999px;
+
+  --text-callout: 1rem;
+  --text-callout--line-height: 1.45;
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.4;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1.35;
+}
+
 :root {
+  /* pocketroom tokens — kept for the R3F editor that lives in main */
   --color-brand: #6391E6;
   --color-base-1: #2F3438;
   --color-base-2: #828C94;
@@ -7,6 +38,47 @@
   --color-base-5: #F7F9FA;
   --color-base-6: #FFFFFF;
   --color-scene-bg: #1B1B1D;
+}
+
+/* Fade-in animation for the Bathroom-settings fullscreen takeover. */
+@keyframes settings-fade-in {
+  from { opacity: 0; transform: scale(0.99); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Friendly status shimmer — silver-to-blue gradient slides L→R behind
+   the text, signals "agent is working" without LLM jargon. Used in
+   the default (non-inspector) AssistantBlock while content streams. */
+@keyframes agent-shimmer-slide {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.agent-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-muted) 0%,
+    var(--color-muted) 30%,
+    var(--color-lowes-blue) 50%,
+    var(--color-muted) 70%,
+    var(--color-muted) 100%
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: agent-shimmer-slide 2.5s linear infinite;
+}
+
+/* bond-demo: the R3F IsometricScene paints its Canvas with the
+   pocketroom dark scene color (color.scene.bg, #1B1B1D). For the agent
+   demo we want a light room background, so any descendant <canvas>
+   inside the [data-agent-scene] wrapper gets a light bg. R3F's own
+   `scene.background` + fog still use the dark hex internally — that's
+   only the rendered viewport color when the WebGL surface is empty,
+   and once the room mesh draws it's covered anyway. */
+[data-agent-scene] canvas {
+  background: #f5f5f5 !important;
 }
 
 html, body, #root {
@@ -34,13 +106,13 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* bond-demo: removed pocketroom's global `button { background:none; border:none;
+   padding:0 }` reset. It overrode Tailwind utility classes (border, bg-*, px-*)
+   on chip buttons because it loaded after @import "tailwindcss". Tailwind's
+   own preflight handles button base styling consistently. */
 button {
-  background: none;
-  border: none;
-  padding: 0;
   cursor: pointer;
   font-family: inherit;
-  color: inherit;
 }
 
 ul { list-style: none; padding: 0; margin: 0; }
@@ -102,12 +174,9 @@ ul { list-style: none; padding: 0; margin: 0; }
     inset 0 -5px 8px rgba(255, 255, 255, 0.06);
 }
 
-@media (pointer: fine) {
-  body,
-  body * {
-    cursor: none !important;
-  }
-}
+/* bond-demo: the original pocketroom rule `cursor: none` was paired with
+   LiquidGlassCursor which we don't mount in this branch. Restoring the
+   native cursor so the agent UI is interactive. */
 
 /* Hide scrollbars but keep scroll */
 .no-scrollbar::-webkit-scrollbar { display: none; }

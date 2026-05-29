@@ -1,0 +1,97 @@
+{
+  "_comment": "Six bathroom style archetypes — picked from Houzz 2024 top-share categories + Lowe's category vocabulary. Each entry defines what materials/finishes/palette/cues belong, what to avoid, and one-sentence designer voice samples the agent can ground its recommendations in. The agent retrieves the active style guide based on style_direction slot value.",
+  "version": "2026-05-25-v1",
+  "styles": {
+    "modern": {
+      "keywords": ["clean lines", "minimalist", "geometric", "high contrast", "uncluttered"],
+      "materials": ["polished porcelain", "matte concrete", "white quartz", "honed marble", "smoked glass"],
+      "finish_family_primary": ["matte_black", "polished_chrome"],
+      "finish_family_accent": ["aged_brass"],
+      "palette": ["white", "ink black", "warm wood accent", "cool gray"],
+      "fixture_forms": ["flat-panel vanity", "wall-mounted toilet (concealed cistern)", "rectangular mirror with thin frame", "floating shelves"],
+      "avoid": ["ornate trim", "rustic textures", "antique forms", "ornate handles"],
+      "designer_voice_cues": [
+        "the contrast carries the room",
+        "let the materials do the talking",
+        "negative space is the design",
+        "one strong line, repeated"
+      ],
+      "lighting_tone": "cool to neutral, 3000K-4000K, no warm yellow"
+    },
+    "transitional": {
+      "keywords": ["timeless", "balanced", "soft modern", "approachable", "magazine-ready"],
+      "materials": ["white marble (carrara)", "ceramic subway tile", "white shaker vanity", "polished nickel hardware"],
+      "finish_family_primary": ["polished_nickel", "polished_chrome"],
+      "finish_family_accent": ["polished_brass"],
+      "palette": ["soft white", "warm gray", "navy or muted blue accent", "natural wood"],
+      "fixture_forms": ["shaker vanity", "framed rectangular mirror", "classic cross-handle faucet", "soaking tub (alcove or freestanding)"],
+      "avoid": ["pure stark white-on-white", "industrial concrete", "highly ornate Victorian"],
+      "designer_voice_cues": [
+        "the classic move done with restraint",
+        "it should feel like it could be five years old or five years new",
+        "warmth without nostalgia"
+      ],
+      "lighting_tone": "warm-neutral, 2700K-3000K"
+    },
+    "spa": {
+      "keywords": ["calm", "warm", "natural", "tactile", "wellness"],
+      "materials": ["teak wood", "honed natural stone", "pebble tile", "linen-textured porcelain", "river rock"],
+      "finish_family_primary": ["brushed_brass", "aged_bronze"],
+      "finish_family_accent": ["matte_black"],
+      "palette": ["warm cream", "stone gray", "soft sage", "deep walnut"],
+      "fixture_forms": ["freestanding oval tub", "walk-in shower with rainfall head", "wood-look slatted accent", "vessel sink"],
+      "avoid": ["polished chrome", "stark white grout", "ornate antique forms", "cool overhead lighting"],
+      "designer_voice_cues": [
+        "spa is a temperature, not a checklist",
+        "everything should soften over time",
+        "warm metals, warm light, warm textures"
+      ],
+      "lighting_tone": "warm, 2400K-2700K, dimmable"
+    },
+    "farmhouse": {
+      "keywords": ["rustic warmth", "country-modern", "shiplap", "vintage-inspired", "lived-in"],
+      "materials": ["shiplap board", "barn wood", "matte ceramic", "subway tile with dark grout", "honed soapstone"],
+      "finish_family_primary": ["aged_brass", "oil_rubbed_bronze"],
+      "finish_family_accent": ["matte_black"],
+      "palette": ["soft white", "warm cream", "barn-red or muted sage accent", "weathered wood"],
+      "fixture_forms": ["apron-front farmhouse sink (rare in bath, common in kitchen)", "freestanding clawfoot or apron tub", "vintage-style cross-handle taps", "framed mirror with wide rustic frame"],
+      "avoid": ["polished chrome", "smoked glass", "stark modern lines", "industrial concrete"],
+      "designer_voice_cues": [
+        "warm and weathered, not faded",
+        "every metal should look like it's earned its patina",
+        "modern function in vintage clothing"
+      ],
+      "lighting_tone": "warm, 2400K-2700K, exposed-bulb fixtures OK"
+    },
+    "traditional": {
+      "keywords": ["formal", "classic", "ornate", "symmetrical", "polished"],
+      "materials": ["marble (calacatta, carrara)", "raised-panel vanity", "ornate molding", "porcelain hex tile"],
+      "finish_family_primary": ["polished_brass", "polished_nickel"],
+      "finish_family_accent": ["polished_chrome"],
+      "palette": ["white-on-white", "soft gold accent", "navy or hunter green deep accent", "warm taupe"],
+      "fixture_forms": ["raised-panel vanity with bun feet", "framed oval or arched mirror", "cross-handle widespread faucet", "freestanding clawfoot tub", "pedestal sink"],
+      "avoid": ["matte black", "concrete", "minimalist flat panels", "industrial accents"],
+      "designer_voice_cues": [
+        "the room should feel like it's always been there",
+        "symmetry over surprise",
+        "ornament with discipline"
+      ],
+      "lighting_tone": "warm, 2700K, brass sconces or chandelier"
+    },
+    "contemporary": {
+      "keywords": ["bold", "current", "high-contrast", "sculptural", "design-forward"],
+      "materials": ["large-format porcelain slab", "polished concrete", "smoked glass", "honed black granite"],
+      "finish_family_primary": ["matte_black", "matte_gold"],
+      "finish_family_accent": ["polished_chrome"],
+      "palette": ["dark moody (ink, charcoal, deep green)", "warm wood plank", "high-contrast white accent"],
+      "fixture_forms": ["sculptural freestanding vessel sink", "matte black tap with single lever", "wall-mounted faucet over basin", "geometric pendant or sconce", "frameless walk-in glass shower"],
+      "avoid": ["raised-panel ornate", "polished brass + chrome mix", "carved trim"],
+      "designer_voice_cues": [
+        "one big move, executed all the way",
+        "the room should photograph",
+        "dark is the new color"
+      ],
+      "lighting_tone": "neutral, 3000K, statement fixtures"
+    }
+  }
+}
